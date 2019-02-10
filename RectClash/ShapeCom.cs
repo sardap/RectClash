@@ -11,21 +11,24 @@ using VelcroPhysics.Factories;
 
 namespace RectClash
 {
-	class RectangeShapeCom : ICom, IRenderableCom, IHaveStart
+	class RectangeShapeCom : ICom, IRenderableCom, IHaveStart, IHaveDestructor
 	{
 		public long ID { get; set; }
 
 		public IEntity Owner { get; set; }
 
-		public Vector2f StartingPostion { get; set; }
-
 		public Body Body { get; set; }
+
+		public World World { get; set; }
+
+		public Vector2 StartingPostion { get; set; }
 
 		public Color FillColor { get; set; }
 
-		public Vector2f Size { get; set; }
+		public float Width { get; set; }
 
-		public World World { get; set; }
+		public float Height { get; set; }
+
 
 		public float Restitution { get; set; }
 
@@ -35,7 +38,7 @@ namespace RectClash
 		{
 			get
 			{
-				return new RectangleShape() { Position = Utiliy.ToSFMLVec(Body.Position), Size = Size, FillColor = FillColor }; 
+				return new RectangleShape() { Position = Utiliy.ToSFMLVec(Body.Position), Size = new Vector2f(Width, Height), FillColor = FillColor }; 
 			}
 		}
 
@@ -64,11 +67,16 @@ namespace RectClash
 
 		public void Start()
 		{
-			Body = BodyFactory.CreateRectangle(World, Size.X, Size.Y, 1, new Vector2(StartingPostion.X, StartingPostion.Y));
+			Body = BodyFactory.CreateRectangle(World, Width, Height, 1, new Vector2(StartingPostion.X, StartingPostion.Y));
 			Body.BodyType = BodyType.Dynamic;
 			Body.Mass = Mass;
 			Body.Restitution = Restitution;
 			Body.Friction = 0.5f;
+		}
+
+		public void OnKill()
+		{
+			World.RemoveBody(Body);
 		}
 	}
 }

@@ -4,6 +4,7 @@ using PaulECS.SFMLComs;
 using SFML.Graphics;
 using SFML.System;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using VelcroPhysics.Dynamics;
 
@@ -17,104 +18,72 @@ namespace RectClash
 
 			var world = new World(new Vector2(0, 0));
 
-			var window = ecs.EntityCreator.CreateEntity(ecs.EntitesHolder);
+			var entityFactory = new EntityFactory()
+			{
+				ECS = ecs,
+				World = world
+			};
 
-			window.AddCom(new RenderWindowCom());
-			window.AddCom(new InputCom());
+			var window = entityFactory.CreateWindow();
 
-			var redSqaure = ecs.EntityCreator.CreateEntity(window);
-
-			redSqaure.AddCom(
-				new RenderCom()
+			var redSqaure = entityFactory.CreateFootSoldier
+			(
+				new EntityFactory.FootSoliderBluePrint()
 				{
-					Window = window
-				}
+					WorldPostion = new Vector2(200, 400),
+					Team = "Red",
+					Mass = 10f,
+					Volicty = new Vector2(0, -0.05f),
+					FillColor = Color.Red
+				}, 
+				window
 			);
 
-			redSqaure.AddCom(
-				new RectangeShapeCom()
+			var blueSqaure = entityFactory.CreateFootSoldier
+			(
+				new EntityFactory.FootSoliderBluePrint()
 				{
-					StartingPostion = new Vector2f(400, 500),
-					Size = new Vector2f(100, 100),
-					FillColor = Color.Red,
-					World = world,
-					Restitution = 0.3f,
-					Mass = 0.5f
-				}
-			);
-
-
-			redSqaure.AddCom(
-				new MovementCom()
-				{
-					Volicty = new Vector2f(0, -0.017f)
-				}
-			);
-
-			redSqaure.AddCom(
-				new ColisionResponseCom()
-				{
-					MaxAttack = 5
-				}
-			);
-
-			redSqaure.AddCom(
-				new TeamCom()
-				{
-					Team = "red"
-				}
-			);
-
-			var blueSqaure = ecs.EntityCreator.CreateEntity(window);
-
-			blueSqaure.AddCom(
-				new RenderCom()
-				{
-					Window = window
-				}
-			);
-
-			blueSqaure.AddCom(
-				new RectangeShapeCom()
-				{
-					StartingPostion = new Vector2f(400, 0),
-					Size = new Vector2f(100, 100),
+					WorldPostion = new Vector2(200, 0),
+					Team = "Blue",
+					Mass = 5f,
+					Volicty = new Vector2(0, 0.1f),
 					FillColor = Color.Blue,
-					World = world,
-					Restitution = 0.3f,
-					Mass = 0.1f 
-				}
+					Agility = 2f,
+					CurrentHealth = 150f
+				}, 
+				window
 			);
 
-			blueSqaure.AddCom(
-				new MovementCom()
+			blueSqaure.GetCom<RectangleDataCom>().DamageResponses = new List<IDamageResponse>
+			{
+				new LowerValueDamageResponse<IMovementDataCom, Vector2>()
 				{
-					Volicty = new Vector2f(0, 0.01f)
-				}
-			);
-
-			blueSqaure.AddCom(
-				new ColisionResponseCom()
+					TotalMinusPercent = 0.1f,
+					PropToGet = typeof(IMovementDataCom).GetProperty("Volicty")
+				},
+				new LowerValueDamageResponse<IAgilityDataCom, float>()
 				{
-					MaxAttack = 10
+					TotalMinusPercent = 1f,
+					PropToGet = typeof(IAgilityDataCom).GetProperty("Agility")
 				}
-			);
+			};
 
-			blueSqaure.AddCom(
-				new TeamCom()
+
+			redSqaure.GetCom<RectangleDataCom>().DamageResponses = new List<IDamageResponse>
+			{
+				new LowerValueDamageResponse<IMovementDataCom, Vector2>()
 				{
-					Team = "blue"
+					TotalMinusPercent = 0.1f,
+					PropToGet = typeof(IMovementDataCom).GetProperty("Volicty")
+				},
+				new LowerValueDamageResponse<IAgilityDataCom, float>()
+				{
+					TotalMinusPercent = 1f,
+					PropToGet = typeof(IAgilityDataCom).GetProperty("Agility")
 				}
-			);
+			};
 
 
-
-
-
-			var colisionDetector = new CollsionDetector();
-
-			colisionDetector.ColisionResponseComs.Add(redSqaure.GetCom<RectangeShapeCom>());
-			colisionDetector.ColisionResponseComs.Add(blueSqaure.GetCom<RectangeShapeCom>());
 
 			var renderWindowCom = window.GetCom<RenderWindowCom>();
 
@@ -127,6 +96,7 @@ namespace RectClash
 			{
 				ecs.Step();
 				world.Step((float)timer.Elapsed.TotalMilliseconds * 0.001f);
+				CombatResovlver.Instance.Step();
 			}
 		}
 	}

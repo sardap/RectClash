@@ -16,17 +16,24 @@ namespace RectClash
 
 		public IEntity Owner { get; set; }
 
-		public Vector2f Volicty { get; set; }
+		public bool Moving
+		{
+			get
+			{
+				return _shapeCom.Body.LinearVelocity != new Vector2(0, 0);
+			}
+		}
 
 		public void Start()
 		{
 			_shapeCom = Owner.GetCom<RectangeShapeCom>();
-			_shapeCom.Body.ApplyLinearImpulse(ToXNAVec(Volicty));
 		}
 
-		private Vector2 ToXNAVec(Vector2f a)
+		public void ApplyVolicty()
 		{
-			return new Vector2(a.X, a.Y);
+			_shapeCom.Body.ApplyLinearImpulse(Owner.GetCom<IMovementDataCom>().Volicty);
+
+			//_shapeCom.Body.LinearVelocity = Owner.GetCom<IMovementDataCom>().Volicty;
 		}
 	}
 }
