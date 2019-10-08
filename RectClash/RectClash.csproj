@@ -1,19 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.1</TargetFramework>
   </PropertyGroup>
-
   <ItemGroup>
-    <PackageReference Include="Box2D" Version="2.3.0" />
+    <PackageReference Include="Box2D" Version="2.3.0"/>
+    <PackageReference Include="SFML.Net" Version="2.5.0"/>
   </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\..\PaulECS\PaulECS\PaulECS.csproj" />
-    <ProjectReference Include="..\..\PaulECS\SFMLComs\SFMLComs.csproj" />
-  </ItemGroup>
-
   <ItemGroup>
     <Reference Include="sfmlnet-audio-2">
       <HintPath>..\..\..\..\..\Desktop\SFML.Net-2.2\lib\sfmlnet-audio-2.dll</HintPath>
@@ -31,5 +24,4 @@
       <HintPath>VelcroPhysics.dll</HintPath>
     </Reference>
   </ItemGroup>
-
 </Project>

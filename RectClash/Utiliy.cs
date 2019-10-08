@@ -1,12 +1,11 @@
 ﻿using Microsoft.Xna.Framework;
-using SFML.System;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace RectClash
 {
-	public static class Utiliy
+	public static class Utility
 	{
 		private static Random _random = new Random();
 
@@ -22,16 +21,6 @@ namespace RectClash
 		{
 			Random random = new Random();
 			return (float)(random.NextDouble() * (maximum - minimum) + minimum);
-		}
-
-		public static Vector2f ToSFMLVec(Vector2 vec)
-		{
-			return new Vector2f(vec.X, vec.Y);
-		}
-
-		public static Vector2 ToXNAVec(Vector2f vec)
-		{
-			return new Vector2(vec.X, vec.Y);
 		}
 
 		public static T RandomElement<T>(IList<T> collection)

@@ -1,94 +1,71 @@
-﻿using Microsoft.Xna.Framework;
-using PaulECS;
-using PaulECS.SFMLComs;
-using SFML.Graphics;
-using SFML.System;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using VelcroPhysics.Dynamics;
+﻿using RectClash.ECS;
+using RectClash.ECS.Input;
 
 namespace RectClash
 {
+	class SimpleWindow
+    {
+        public void Run()
+        {
+            var mode = new SFML.Window.VideoMode(800, 600);
+            var window = new SFML.Graphics.RenderWindow(mode, "SFML works!");
+            window.KeyPressed += Window_KeyPressed;
+
+            var circle = new SFML.Graphics.CircleShape(100f)
+            {
+                FillColor = SFML.Graphics.Color.Blue
+            };
+
+            // Start the game loop
+            while (window.IsOpen)
+            {
+                // Process events
+                window.DispatchEvents();
+                window.Draw(circle);
+
+                // Finally, display the rendered frame on screen
+                window.Display();
+            }
+        }
+
+        /// <summary>
+        /// Function called when a key is pressed
+        /// </summary>
+        private void Window_KeyPressed(object sender, SFML.Window.KeyEventArgs e)
+        {
+            var window = (SFML.Window.Window)sender;
+            if (e.Code == SFML.Window.Keyboard.Key.Escape)
+            {
+                window.Close();
+            }
+        }
+    }
+	
 	class Program
 	{
 		static void Main(string[] args)
 		{
-			var ecs = new ECS();
+			Keyboard.Initialise(new SFMLComs.SFMLKeyboardInput());	
 
-			var world = new World(new Vector2(0, 0));
-
-			var entityFactory = new EntityFactory()
+			IWindowCom windowCom = new SFMLComs.SFMLWindowCom()
 			{
-				ECS = ecs,
-				World = world
+				Size = new misc.Vector2<int>(800, 600)
 			};
 
-			var window = entityFactory.CreateWindow();
+			windowCom.OnStart();
 
-			var redTeam = new TeamInfo(world) { FillColour = Color.Red, Name = "Red", HomeArea = new RectangleShape(new Vector2f(1000, 1000) { Y = 500 }) };
-			var blueTeam = new TeamInfo(world) { FillColour = Color.Blue, Name = "Blue", HomeArea = new RectangleShape(new Vector2f(1000, 1000) { Y = 0 }) };
-
-			var redSqaure = entityFactory.CreateFootSoldier
-			(
-				new EntityFactory.FootSoliderBluePrint()
-				{
-					WorldPostion = new Vector2(200, 400),
-					Mass = 1f,
-					Team = redTeam,
-					MovementLogic = new MoveStraightLogic() { Volcity = new Vector2(0, -0.1f) },
-					Speed = 5f,
-					CurrentHealth = 200,
-					MaxHealth = 200
-				}, 
-				window
-			);
-
-			var blueSqaure = entityFactory.CreateFootSoldier
-			(
-				new EntityFactory.FootSoliderBluePrint()
-				{
-					WorldPostion = new Vector2(200, 0),
-					Mass = 1f,
-					Agility = 2f,
-					Team = blueTeam,
-					MovementLogic = new MoveStraightLogic() { Volcity = new Vector2(0, 0.1f) },
-					Speed = 5f
-				}, 
-				window
-			);
-
-			redSqaure.GetCom<RectangleDataCom>().DamageResponses = new List<IDamageResponse>
+			var done = false;
+			while(!done)
 			{
-				new LowerValueDamageResponse<IMovementDataCom, float>()
+				windowCom.Update();
+
+				if(Keyboard.Instance.IsKeyPressed(Keys.Escape))
 				{
-					TotalMinusPercent = 0.3f,
-					PropToGet = typeof(IMovementDataCom).GetProperty("Speed")
-				},
-			};
-
-			blueSqaure.GetCom<RectangleDataCom>().DamageResponses = new List<IDamageResponse>
-			{
-				new LowerValueDamageResponse<IMovementDataCom, float>()
-				{
-					TotalMinusPercent = 0.5f,
-					PropToGet = typeof(IMovementDataCom).GetProperty("Speed")
-				},
-			};
-
-			var renderWindowCom = window.GetCom<RenderWindowCom>();
-
-			renderWindowCom.GenrateWindow(800, 600, "ExampleProgram", Color.White);
-
-			var timer = new Stopwatch();
-
-			timer.Start();
-			while (renderWindowCom.RenderWindow.IsOpen)
-			{
-				ecs.Step();
-				world.Step((float)timer.Elapsed.TotalMilliseconds * 0.001f);
-				CombatResovlver.Instance.Step();
+					windowCom.Exit();
+					done = true;
+				}
 			}
+
 		}
 	}
 }
