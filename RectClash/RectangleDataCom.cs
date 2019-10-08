@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using PaulECS;
+using PaulECS.SFMLComs;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -17,12 +18,20 @@ namespace RectClash
 		public IEntity Owner { get; set; }
 
 		public IList<IDamageResponse> DamageResponses { get; set; }
-
-		public Vector2 Volicty { get; set; }
-
-		public string Team { get; set; }
+		
+		public float Speed { get; set; }
 
 		public float Agility { get; set; }
+
+		public TeamInfo TeamInfo { get; set; }
+
+		public Vector2 Postion
+		{
+			get
+			{
+				return Owner.GetCom<RectangeShapeCom>().Body.Position;
+			}
+		}
 
 		public void DealDamage(float amount)
 		{

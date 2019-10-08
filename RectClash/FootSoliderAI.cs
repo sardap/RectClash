@@ -19,31 +19,29 @@ namespace RectClash
 		{
 			Advance,
 			ClashingWithEnemy,
-			JustBroken,
-			Broken
+			Broken,
+			None
 		}
-
-		private static Dictionary<Body, IEntity> _bodyToEntryTable = new Dictionary<Body, IEntity>();
 
 		private static Random _random = new Random();
 
 		private RectangeShapeCom _shapeCom;
 
-		private int _health = 10;
-
 		private States _state;
 
 		private Contact _contact;
-
-		private IAttackCom _currentAttack;
 
 		private const double BROKEN_COOLDOWN = 500f;
 
 		private double _brokenCooldown;
 
+		private Vector2? _retreatTarget = null;
+
 		public long ID { get; set; }
 
 		public IEntity Owner { get; set; } 
+
+		public IMovementLogic MovementLogic { get; set; }
 
 		public void Start()
 		{
@@ -51,9 +49,7 @@ namespace RectClash
 			_shapeCom.Body.OnCollision += OnCollisionHandler;
 			_shapeCom.Body.OnSeparation += OnSeparationHandler;
 
-			_bodyToEntryTable.Add(_shapeCom.Body, Owner);
-
-			_state = States.Advance;
+			ChangeState(States.Advance);
 		}
 
 		public void Update(double deltaTime)
@@ -68,10 +64,6 @@ namespace RectClash
 					HandleClashWithEnemy();
 					break;
 
-				case States.JustBroken:
-					RunFromEnemy();
-					break;
-
 				case States.Broken:
 					StepBroken(deltaTime);
 					break;
@@ -80,14 +72,14 @@ namespace RectClash
 
 		private IEntity GetOther(Fixture a, Fixture b)
 		{
-			return a.Body == _shapeCom.Body ? _bodyToEntryTable[b.Body] : _bodyToEntryTable[a.Body];
+			return a.Body == _shapeCom.Body ? (IEntity)b.Body.UserData : (IEntity)a.Body.UserData;
 		}
 
 		private void OnSeparationHandler(Fixture a, Fixture b, Contact contact)
 		{
-			if(_state != States.JustBroken || _state != States.Broken)
+			if(_state != States.Broken)
 			{
-				_state = States.Advance;
+				ChangeState(States.None);
 				_contact = null;
 
 				var other = GetOther(a, b);
@@ -98,17 +90,23 @@ namespace RectClash
 
 		private void OnCollisionHandler(Fixture a, Fixture b, Contact contact)
 		{
+			Owner.GetCom<MovementCom>().Stop();
+
 			var other = GetOther(a, b);
 
 			var otherTeamCom = other.GetCom<ITeamData>();
 			var thisTeamCom = Owner.GetCom<ITeamData>();
 
 
-			if (otherTeamCom != null && otherTeamCom.Team != thisTeamCom.Team)
+			if (otherTeamCom != null && otherTeamCom.TeamInfo != thisTeamCom.TeamInfo)
 			{
-				Debug.WriteLine(RectClashDebug.GenIDPart(Owner) + " CLASHING ", DebugCatagroys.AI_STATE_MACHINE);
+				if(_state == States.Broken)
+				{
+					Owner.KillMe();
+					return;
+				}
 
-				_state = States.ClashingWithEnemy;
+				ChangeState(States.ClashingWithEnemy);
 
 				_contact = contact;
 			}
@@ -116,56 +114,102 @@ namespace RectClash
 
 		private void StepBroken(double deltaTime)
 		{
+			RunFromEnemy();
+
 			_brokenCooldown -= deltaTime;
-			Owner.GetCom<MovementCom>().ApplyVolicty();
 
 			if (_brokenCooldown <= 0 && !Owner.GetCom<MovementCom>().Moving)
 			{
 				Debug.WriteLine(RectClashDebug.GenIDPart(Owner) + " KILLING NOT MOVING AND COOLDOWN ", DebugCatagroys.AI_STATE_MACHINE);
-				Owner.KillMe();
+				//Owner.KillMe();
 			}
 		}
 
 		private void Advance()
 		{
-			if (!Owner.GetCom<MovementCom>().Moving)
-			{
-				Debug.WriteLineIf(Owner.GetCom<IMovementDataCom>().Volicty.X == 0f && Owner.GetCom<IMovementDataCom>().Volicty.Y == 0f, "ID:" + Owner.ID + " Advanceing ", DebugCatagroys.AI_STATE_MACHINE);
-				Owner.GetCom<MovementCom>().ApplyVolicty();
-			}
+			MovementLogic.Step(Owner);
 		}
 
 		private void HandleClashWithEnemy()
 		{
-
 			if (Owner.GetCom<IHealthCom>().CurrentHealth < Owner.GetCom<IHealthCom>().MaxHealth * 0.3)
 			{
-				_state = States.JustBroken;
+				ChangeState(States.Broken);
+				_brokenCooldown = 5000f;
 			}
 
-			if(_currentAttack == null || _currentAttack.State == AttackStates.None)
-			{
-				var other = _bodyToEntryTable[_contact.FixtureA.Body] != _shapeCom.Body ? _bodyToEntryTable[_contact.FixtureB.Body] : _bodyToEntryTable[_contact.FixtureA.Body];
+			var other = GetOther(_contact.FixtureA, _contact.FixtureB);
 
-				var otherTeamCom = other.GetCom<ITeamData>();
-				var thisTeamCom = Owner.GetCom<ITeamData>();
+			var otherTeamCom = other.GetCom<ITeamData>();
+			var thisTeamCom = Owner.GetCom<ITeamData>();
 				
-				if (otherTeamCom.Team != thisTeamCom.Team)
-				{
-					CombatResovlver.Instance.AddCombat(Owner, other);
-				}
+			if (otherTeamCom.TeamInfo != thisTeamCom.TeamInfo)
+			{
+				CombatResovlver.Instance.AddCombat(Owner, other);
 			}
 		}
 
 		private void RunFromEnemy()
 		{
-			Owner.GetCom<IMovementDataCom>().Volicty = (Owner.GetCom<IMovementDataCom>().Volicty * -1);
+			if (_retreatTarget == null)
+			{
+				var postion = Owner.GetCom<IMovementDataCom>().Postion;
 
-			Debug.WriteLine("ID:" + Owner.ID + " Broken ", DebugCatagroys.AI_STATE_MACHINE);
+				var home = Owner.GetCom<ITeamData>().TeamInfo.HomeArea;
 
-			_brokenCooldown = BROKEN_COOLDOWN;
+				var a = home.Position.Y - home.Position.Y + home.Size.Y;
+				var b = (home.Position.X + home.Size.X) - home.Position.X;
+				var c = (home.Position.X * (home.Position.Y + home.Size.Y)) - ((home.Position.X + home.Size.X) * home.Position.Y);
 
-			_state = States.Broken;
+				var p = postion;
+
+				var xc = (Math.Pow(b, 2) * p.X - a * (b * p.Y) + c) / (Math.Pow(a, 2) + Math.Pow(b, 2));
+				var yc = (Math.Pow(a, 2) * p.Y - b * (b * p.X) + c) / (Math.Pow(a, 2) + Math.Pow(b, 2));
+
+				_retreatTarget = new Vector2((float)xc, (float)yc);
+
+				var dest = (Vector2)_retreatTarget;
+
+				var deltaPos = dest - p;
+
+				var angle = Math.Atan2(deltaPos.Y, deltaPos.X);
+
+				var speed = Owner.GetCom<IMovementDataCom>().Speed;
+				var magnitude = speed;
+
+				var velX = (float)(Math.Cos(angle) * magnitude);
+				var velY = (float)(Math.Sin(angle) * magnitude);
+
+
+				var direction = dest - postion;
+
+				direction.Normalize();
+
+				var body = Owner.GetCom<RectangeShapeCom>().Body;
+
+				var dist = dest - postion;
+
+				var time = 10f;
+
+				var vol = dist * (1 / time);
+
+				var forceDirection = Vector2.UnitY;
+				var test = Matrix.CreateFromAxisAngle(new Vector3(0, 0, 1), body.Rotation);
+				forceDirection = Vector2.Transform(facing, test);
+
+
+				Owner.GetCom<MovementCom>().ApplyVolicty(vol);
+
+
+				var xVelocity = (float)(speed * Math.Cos(angle));
+				var yVelocity = (float)(speed * Math.Sin(angle));
+			}
+		}
+
+		private void ChangeState(States state)
+		{
+			Debug.WriteLine("ID:" + Owner.ID + " NEW STATE : " + Enum.GetName(typeof(States), state), DebugCatagroys.AI_STATE_MACHINE);
+			_state = state;
 		}
 	}
 }

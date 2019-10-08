@@ -9,5 +9,7 @@ namespace RectClash
 		public const string COMBAT = "Combat";
 		public const string AI_STATE_MACHINE = "AISM";
 		public const string ATTACK = "Attack";
+		public const string LOWER_VALUE = "LowerVal";
+		public const string MOVEMENT = "Move";
 	}
 }

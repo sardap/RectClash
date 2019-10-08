@@ -26,15 +26,20 @@ namespace RectClash
 
 			var window = entityFactory.CreateWindow();
 
+			var redTeam = new TeamInfo(world) { FillColour = Color.Red, Name = "Red", HomeArea = new RectangleShape(new Vector2f(1000, 1000) { Y = 500 }) };
+			var blueTeam = new TeamInfo(world) { FillColour = Color.Blue, Name = "Blue", HomeArea = new RectangleShape(new Vector2f(1000, 1000) { Y = 0 }) };
+
 			var redSqaure = entityFactory.CreateFootSoldier
 			(
 				new EntityFactory.FootSoliderBluePrint()
 				{
 					WorldPostion = new Vector2(200, 400),
-					Team = "Red",
-					Mass = 10f,
-					Volicty = new Vector2(0, -0.05f),
-					FillColor = Color.Red
+					Mass = 1f,
+					Team = redTeam,
+					MovementLogic = new MoveStraightLogic() { Volcity = new Vector2(0, -0.1f) },
+					Speed = 5f,
+					CurrentHealth = 200,
+					MaxHealth = 200
 				}, 
 				window
 			);
@@ -44,46 +49,32 @@ namespace RectClash
 				new EntityFactory.FootSoliderBluePrint()
 				{
 					WorldPostion = new Vector2(200, 0),
-					Team = "Blue",
-					Mass = 5f,
-					Volicty = new Vector2(0, 0.1f),
-					FillColor = Color.Blue,
+					Mass = 1f,
 					Agility = 2f,
-					CurrentHealth = 150f
+					Team = blueTeam,
+					MovementLogic = new MoveStraightLogic() { Volcity = new Vector2(0, 0.1f) },
+					Speed = 5f
 				}, 
 				window
 			);
 
-			blueSqaure.GetCom<RectangleDataCom>().DamageResponses = new List<IDamageResponse>
-			{
-				new LowerValueDamageResponse<IMovementDataCom, Vector2>()
-				{
-					TotalMinusPercent = 0.1f,
-					PropToGet = typeof(IMovementDataCom).GetProperty("Volicty")
-				},
-				new LowerValueDamageResponse<IAgilityDataCom, float>()
-				{
-					TotalMinusPercent = 1f,
-					PropToGet = typeof(IAgilityDataCom).GetProperty("Agility")
-				}
-			};
-
-
 			redSqaure.GetCom<RectangleDataCom>().DamageResponses = new List<IDamageResponse>
 			{
-				new LowerValueDamageResponse<IMovementDataCom, Vector2>()
+				new LowerValueDamageResponse<IMovementDataCom, float>()
 				{
-					TotalMinusPercent = 0.1f,
-					PropToGet = typeof(IMovementDataCom).GetProperty("Volicty")
+					TotalMinusPercent = 0.3f,
+					PropToGet = typeof(IMovementDataCom).GetProperty("Speed")
 				},
-				new LowerValueDamageResponse<IAgilityDataCom, float>()
-				{
-					TotalMinusPercent = 1f,
-					PropToGet = typeof(IAgilityDataCom).GetProperty("Agility")
-				}
 			};
 
-
+			blueSqaure.GetCom<RectangleDataCom>().DamageResponses = new List<IDamageResponse>
+			{
+				new LowerValueDamageResponse<IMovementDataCom, float>()
+				{
+					TotalMinusPercent = 0.5f,
+					PropToGet = typeof(IMovementDataCom).GetProperty("Speed")
+				},
+			};
 
 			var renderWindowCom = window.GetCom<RenderWindowCom>();
 

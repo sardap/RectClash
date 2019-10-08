@@ -8,6 +8,8 @@ namespace RectClash
 {
 	interface IMovementDataCom: ICom
 	{
-		Vector2 Volicty { get; set; }
+		float Speed { get; set; }
+
+		Vector2 Postion { get; }
 	}
 }

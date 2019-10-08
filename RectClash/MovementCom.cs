@@ -4,13 +4,16 @@ using PaulECS.SFMLComs;
 using SFML.System;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 
 namespace RectClash
 {
-	class MovementCom : ICom, IHaveStart
+	class MovementCom : ICom, IHaveStart, IHaveUpdate
 	{
 		private RectangeShapeCom _shapeCom;
+		private Vector2 _lastPostion;
+		private bool _moving;
 
 		public long ID { get; set; }
 
@@ -20,7 +23,7 @@ namespace RectClash
 		{
 			get
 			{
-				return _shapeCom.Body.LinearVelocity != new Vector2(0, 0);
+				return _moving;
 			}
 		}
 
@@ -29,11 +32,24 @@ namespace RectClash
 			_shapeCom = Owner.GetCom<RectangeShapeCom>();
 		}
 
-		public void ApplyVolicty()
+		public void Stop()
 		{
-			_shapeCom.Body.ApplyLinearImpulse(Owner.GetCom<IMovementDataCom>().Volicty);
+			_shapeCom.Body.LinearVelocity = new Vector2();
+		}
 
-			//_shapeCom.Body.LinearVelocity = Owner.GetCom<IMovementDataCom>().Volicty;
+		public void ApplyVolicty(Vector2 volicty)
+		{
+			_shapeCom.Body.LinearVelocity = new Vector2(); 
+			_shapeCom.Body.ApplyLinearImpulse(volicty);
+
+			Debug.WriteLine(RectClashDebug.GenIDPart(Owner) + " " + volicty, DebugCatagroys.MOVEMENT);
+		}
+
+		public void Update(double deltaTime)
+		{
+			_moving = _lastPostion != Owner.GetCom<RectangeShapeCom>().Body.Position;
+
+			_lastPostion = Owner.GetCom<RectangeShapeCom>().Body.Position;
 		}
 	}
 }

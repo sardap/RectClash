@@ -16,26 +16,25 @@ namespace RectClash
 		public class FootSoliderBluePrint
 		{
 			public float Mass { get; set; }
-			public Color FillColor { get; set; }
 			public float Width { get; set; }
 			public float Height { get; set; }
 			public Vector2 WorldPostion { get; set; }
-			public string Team { get; set; }
+			public TeamInfo Team { get; set; }
 			public float MaxHealth { get; set; }
 			public float CurrentHealth { get; set; }
-			public Vector2 Volicty { get; set; }
 			public float Agility { get; set; }
+			public float Speed { get; set; }
+			public IMovementLogic MovementLogic { get; set; }
 
 			public FootSoliderBluePrint()
 			{
 				Mass = 1f;
-				FillColor = Color.Black;
 				Width = 15f;
 				Height = 15f;
-				Team = "Red";
 				MaxHealth = 100;
 				CurrentHealth = 100;
 				Agility = 1f;
+				MovementLogic = new MoveStraightLogic() { Volcity = new Vector2(0, 0.1f) };
 			}
 		}
 
@@ -55,6 +54,8 @@ namespace RectClash
 
 		public IEntity CreateFootSoldier(FootSoliderBluePrint footSoliderBluePrint, IEntity window)
 		{
+			Debug.Assert(footSoliderBluePrint.Team != null);
+
 			Debug.Assert(window != null);
 
 			var redSqaure = ECS.EntityCreator.CreateEntity(window);
@@ -72,7 +73,7 @@ namespace RectClash
 					StartingPostion = footSoliderBluePrint.WorldPostion,
 					Width = footSoliderBluePrint.Width,
 					Height = footSoliderBluePrint.Height,
-					FillColor = footSoliderBluePrint.FillColor,
+					FillColor = footSoliderBluePrint.Team.FillColour,
 					World = World,
 					Restitution = 0.3f,
 					Mass = footSoliderBluePrint.Mass
@@ -88,6 +89,7 @@ namespace RectClash
 			redSqaure.AddCom(
 				new FootSoliderAI()
 				{
+					MovementLogic = footSoliderBluePrint.MovementLogic
 				}
 			);
 
@@ -96,9 +98,9 @@ namespace RectClash
 				{
 					CurrentHealth = footSoliderBluePrint.CurrentHealth,
 					MaxHealth = footSoliderBluePrint.MaxHealth,
-					Team = footSoliderBluePrint.Team,
-					Volicty = footSoliderBluePrint.Volicty,
-					Agility = footSoliderBluePrint.Agility
+					TeamInfo = footSoliderBluePrint.Team,
+					Agility = footSoliderBluePrint.Agility,
+					Speed = footSoliderBluePrint.Speed
 				}
 			);
 

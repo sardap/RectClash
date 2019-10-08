@@ -7,6 +7,6 @@ namespace RectClash
 {
 	interface ITeamData: ICom
 	{
-		string Team { get; set; }
+		TeamInfo TeamInfo { get; set; }
 	}
 }

@@ -72,6 +72,7 @@ namespace RectClash
 			Body.Mass = Mass;
 			Body.Restitution = Restitution;
 			Body.Friction = 0.5f;
+			Body.UserData = Owner;
 		}
 
 		public void OnKill()

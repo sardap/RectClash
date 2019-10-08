@@ -1,6 +1,7 @@
 ﻿using PaulECS;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Reflection;
 using System.Text;
 
@@ -21,13 +22,18 @@ namespace RectClash
 				_orginal = (VT)PropToGet.GetValue(entity.GetCom<ComT>());
 			}
 
+			if (currentHealth > maxHealth)
+				return;
+
 			var healthPercent = currentHealth / maxHealth;
 
-			var percent = (healthPercent) * TotalMinusPercent;
+			var percent = ((healthPercent) *  (1 - TotalMinusPercent));
 
 			dynamic dOrg = _orginal;
 
 			PropToGet.SetValue(entity.GetCom<ComT>(), dOrg * percent);
+
+			Debug.WriteLine(RectClashDebug.GenIDPart(entity) + " " + percent + " " + PropToGet.Name, DebugCatagroys.LOWER_VALUE);
 		}
 	}
 }
