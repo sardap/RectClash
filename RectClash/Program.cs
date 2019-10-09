@@ -40,30 +40,26 @@ namespace RectClash
             }
         }
     }
-	
+
 	class Program
 	{
 		static void Main(string[] args)
 		{
-			Keyboard.Initialise(new SFMLComs.SFMLKeyboardInput());	
 
-			IWindowCom windowCom = new SFMLComs.SFMLWindowCom()
+			IWindow windowCom = new SFMLComs.SFMLWindowCom()
 			{
 				Size = new misc.Vector2<int>(800, 600)
 			};
 
+			Engine.Initialise(new SFMLComs.SFMLKeyboardInput(), windowCom);
+
 			windowCom.OnStart();
 
-			var done = false;
-			while(!done)
+			while(Engine.Instance.Window.IsOpen)
 			{
-				windowCom.Update();
+				Engine.Instance.Step();
 
-				if(Keyboard.Instance.IsKeyPressed(Keys.Escape))
-				{
-					windowCom.Exit();
-					done = true;
-				}
+				Engine.Instance.UpdateWindow();
 			}
 
 		}

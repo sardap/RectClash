@@ -7,7 +7,7 @@ using RectClash.misc;
 
 namespace RectClash.ECS
 {
-    public interface IWindowCom : ICom
+    public interface IWindow
     {
         bool IsOpen { get; }
         
@@ -20,5 +20,9 @@ namespace RectClash.ECS
         void Refresh();
 
         void Exit();
+
+        void Update();
+
+        void OnStart();
     }
 }

@@ -2,7 +2,7 @@ using RectClash.misc;
 
 namespace RectClash.ECS
 {
-    public abstract class WindowCom : Com, IWindowCom
+    public abstract class WindowCom : Com, IWindow
     {
         public abstract bool IsOpen 
         { 
