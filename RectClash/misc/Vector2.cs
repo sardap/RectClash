@@ -1,4 +1,4 @@
-namespace RectClash.misc
+namespace RectClash.Misc
 {
     public class Vector2<T>
     {

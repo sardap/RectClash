@@ -1,20 +1,25 @@
 using System.Collections.Generic;
+using RectClash.ECS.Graphics;
 
 namespace RectClash.ECS
 {
     public interface IEnt
     {
-        IEnumerable<ICom> Coms { get; }
-
         IEnt Parent { get; set; }
 
+        IEnumerable<ICom> Coms { get; }
+
         IEnumerable<IEnt> Children { get; }
+
+        IEnumerable<IDrawableCom> DrawableComs { get; }
+
+        PostionCom PostionCom { get; }
 
         void AddChild(IEnt ent);
 
         T GetCom<T>() where T : ICom;
 
-        void AddCom(ICom com);
+        T AddCom<T>(T com) where T : ICom;
 
         void AddComs(IEnumerable<ICom> com);
 

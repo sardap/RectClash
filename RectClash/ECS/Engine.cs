@@ -1,12 +1,13 @@
 using System;
 using System.Collections.Generic;
 using RectClash.ECS.Input;
+using RectClash.ECS.Performance;
 
 namespace RectClash.ECS
 {
     public class Engine
     {
-        private const long MAX_UPDATE_TIME = 500;
+        private const long MAX_UPDATE_TIME = 500 * 1000000;
 
         private static volatile Engine _instance;
 
@@ -28,15 +29,29 @@ namespace RectClash.ECS
             _instance._root = new Ent(null);
             _instance._time = new Time();
             _instance._window = window;
+            _instance._toBeUpdated = new Stack<IEnt>();
+            _instance._perfMessure = new PerfMessure();
+            _instance._toDraw = new HashSet<IEnt>();
+
+            _instance._window.OnStart();
+
+            _instance._time.Start();
         }
 
         private volatile IEnt _root;
-        private Stack<IEnt> _toBeUpdated;
+        private volatile Stack<IEnt> _toBeUpdated;
+        public volatile HashSet<IEnt> _toDraw;
         private Time _time;
         private long _max_loop_time;
+        private long _timeDrawLoopTook;
         private IWindow _window;
+        private PerfMessure _perfMessure;
 
         public IWindow Window { get { return _window; } }
+
+        public Time Time { get { return _time; } }
+
+        public PerfMessure PerfMessure { get { return _perfMessure; } }
 
         public IEnt CreateEnt(IEnt parent)
         {
@@ -49,43 +64,50 @@ namespace RectClash.ECS
         {
             return CreateEnt(_root);
         }
-       
-        public void Step()
+      
+        public void  Step()
         {
-            _max_loop_time = MAX_UPDATE_TIME;
-            
-            if(_toBeUpdated == null)
+            _max_loop_time = _time.ElapsedTime + (MAX_UPDATE_TIME - _timeDrawLoopTook);
+
+            if(_toBeUpdated.Count == 0)
             {
-                _toBeUpdated = GetEntsToUpdate();
                 _time.StartOfLoop();
+                _toBeUpdated = GetEntsToUpdate();
             }
-            
+
             while(_toBeUpdated.Count > 0)
             {
                 var current = _toBeUpdated.Pop();
 
                 current.Update();
+                Window.Draw(current.DrawableComs);
 
-                _max_loop_time -= _time.DeltaTime;
-
-                if(_max_loop_time < 0 && _toBeUpdated.Count > 0)
+                /*
+                if(_time.ElapsedTime > _max_loop_time)
                 {
-                    Console.WriteLine("ECS: Ran out of time in Step LEFT: " + _toBeUpdated.Count);
+                    _timeDrawLoopTook = _time.ElapsedTime;
+                    foreach(var i in _toBeUpdated)
+                    {
+                        Window.Draw(i.DrawableComs);
+                    }
+
+                    _timeDrawLoopTook = _time.ElapsedTime - _timeDrawLoopTook;
+                    Console.WriteLine("RAN OUT OF TIME LEFT : {0}", _toBeUpdated.Count);
                     return;
                 }
+                */
             }
-
-            _toBeUpdated = null;
         }
 
         public void UpdateWindow()
         {
             _window.Update();
-        }   
+            PerfMessure.Step();
+        }
 
         private Stack<IEnt> GetEntsToUpdate()
         {
-            return GetEntsToUpdate(_root, new Stack<IEnt>());
+            return GetEntsToUpdate(_root, _toBeUpdated);
         }
 
         private Stack<IEnt> GetEntsToUpdate(IEnt ent, Stack<IEnt> result)

@@ -1,59 +1,98 @@
-﻿using RectClash.ECS;
+﻿using System;
+using RectClash.ECS;
+using RectClash.ECS.Graphics;
 using RectClash.ECS.Input;
+using RectClash.ECS.Performance;
+using RectClash.game;
+using RectClash.Game;
 
 namespace RectClash
 {
-	class SimpleWindow
-    {
-        public void Run()
-        {
-            var mode = new SFML.Window.VideoMode(800, 600);
-            var window = new SFML.Graphics.RenderWindow(mode, "SFML works!");
-            window.KeyPressed += Window_KeyPressed;
-
-            var circle = new SFML.Graphics.CircleShape(100f)
-            {
-                FillColor = SFML.Graphics.Color.Blue
-            };
-
-            // Start the game loop
-            while (window.IsOpen)
-            {
-                // Process events
-                window.DispatchEvents();
-                window.Draw(circle);
-
-                // Finally, display the rendered frame on screen
-                window.Display();
-            }
-        }
-
-        /// <summary>
-        /// Function called when a key is pressed
-        /// </summary>
-        private void Window_KeyPressed(object sender, SFML.Window.KeyEventArgs e)
-        {
-            var window = (SFML.Window.Window)sender;
-            if (e.Code == SFML.Window.Keyboard.Key.Escape)
-            {
-                window.Close();
-            }
-        }
-    }
-
 	class Program
 	{
+		private static Random rand = new Random();
+
 		static void Main(string[] args)
 		{
+			int windowWidth = 1280;
+			int windowHeight = 720;
 
-			IWindow windowCom = new SFMLComs.SFMLWindowCom()
+			Engine.Initialise
+			(
+				new SFMLComs.SFMLKeyboardInput(), 
+				new SFMLComs.SFMLWindow()
+				{
+					Size = new Misc.Vector2<int>(windowWidth, windowHeight)
+				}
+			);
+
+			var font = new Font()
 			{
-				Size = new misc.Vector2<int>(800, 600)
+				FileLocation = "calibri.ttf"
 			};
 
-			Engine.Initialise(new SFMLComs.SFMLKeyboardInput(), windowCom);
+			var debug = Engine.Instance.CreateEnt();
+			debug.PostionCom.X = 10;
+			debug.PostionCom.Y = 10;
+			debug.AddCom
+			(
+				new RenderTextCom()
+				{
+					Font = font,
+					Colour = new Colour(byte.MaxValue, byte.MaxValue, 0, 0),
+					Floating = true
+				}
+			);
+			debug.AddCom(new UpdateDebugInfoCom());
 
-			windowCom.OnStart();
+			EntFactory entFactory = new EntFactory();
+
+			var worldEnt = entFactory.CreateWorld();
+			var worldCom = worldEnt.GetCom<WorldCom>();
+			
+			/*
+			for(int i = 0; i < 100; i++)
+			{
+				byte[] colour = new byte[3];
+				rand.NextBytes(colour);
+
+				var circle = Engine.Instance.CreateEnt(worldEnt);
+				var postion = circle.AddCom
+				(
+					new PostionCom()
+					{
+						Postion = new Misc.Vector2<double>(rand.Next(windowWidth), rand.Next(windowHeight))
+					}
+				);
+				var drawCom = circle.AddCom
+				(
+					new DrawCircleCom()
+					{ 
+						Radius = rand.Next(50),
+						Colour = new Colour(byte.MaxValue, colour[0], colour[1], colour[2]),
+						PostionCom = postion
+					}
+				);
+				circle.AddCom
+				(
+					new CircleMove()
+					{
+						Speed = 0.1,
+						DrawCircle = (DrawCircleCom)drawCom
+					}
+				);
+				var unitInfoCom = circle.AddCom
+				(
+					new UnitInfoCom()
+					{
+						Postion = (PostionCom)postion
+					}
+				);
+				worldCom.Units.Add(unitInfoCom);
+			}
+			*/
+
+			Engine.Instance.CreateEnt().AddCom(new PlayerInputCom());
 
 			while(Engine.Instance.Window.IsOpen)
 			{
@@ -61,7 +100,6 @@ namespace RectClash
 
 				Engine.Instance.UpdateWindow();
 			}
-
 		}
 	}
 }

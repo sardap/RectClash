@@ -4,6 +4,8 @@ namespace RectClash.ECS
     {
         IEnt Owner { get; set; }
 
+        bool StartRan { get; }
+
         void Update();
 
         void OnStart();

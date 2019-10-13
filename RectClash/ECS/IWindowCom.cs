@@ -3,7 +3,8 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using VelcroPhysics.Dynamics;
-using RectClash.misc;
+using RectClash.Misc;
+using RectClash.ECS.Graphics;
 
 namespace RectClash.ECS
 {
@@ -13,7 +14,11 @@ namespace RectClash.ECS
         
         Vector2<int> Size { get; set; }
 
-        void Draw(IDrawable toDraw);
+        Camera Camera { get; set; }
+
+        void Draw(IDrawableCom toDraw);
+
+        void Draw(IEnumerable<IDrawableCom> toDraw);
 
         void ProcessEvents();
 
