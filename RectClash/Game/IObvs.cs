@@ -2,7 +2,7 @@ using RectClash.ECS;
 
 namespace RectClash.Game
 {
-    public interface IObv
+    public interface IGameObv
     {
         void OnNotify(IEnt ent, GameEvent evt);
     }

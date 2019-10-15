@@ -9,11 +9,11 @@ namespace RectClash.Game
 {
     public class CellInputCom: Com
     {
-        private CellInfoCom _cell;
+        private Subject _subject = new Subject();
 
         protected override void InternalStart()
         {
-            _cell = Owner.GetCom<CellInfoCom>();
+            _subject.AddObvs(Owner.GetCom<CellInfoCom>());
         }
 
         public override void Update()
@@ -27,27 +27,12 @@ namespace RectClash.Game
 
             if(mouse.IsButtonPressed(SFML.Window.Mouse.Button.Left) && InsideRect())
             {
-                switch(_cell.CurrentState)
-                {
-                    case CellInfoCom.State.UnSelected:
-                        if(_cell.Inside.Count > 0 )
-                        {
-                            _cell.ChangeState(CellInfoCom.State.Selected);
-                        }
-                        else
-                        {
-                            _cell.Create();
-                        }
-                        break;
-                    case CellInfoCom.State.InMovementRange:
-                        _cell.ChangeState(CellInfoCom.State.Selected);
-                        break;
-                }
+                _subject.Notify(Owner, GameEvent.GRID_CELL_SELECTED);
             }
 
             if(mouse.IsButtonPressed(SFML.Window.Mouse.Button.Right) && InsideRect())
             {
-				_cell.ClearSelection();
+                _subject.Notify(Owner, GameEvent.GRID_CLEAR_SELECTION);
             }
         }
     }

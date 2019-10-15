@@ -15,7 +15,7 @@ namespace RectClash.game
 
         public static EntFactory Instance { get { return _instance; } }
 
-        public IEnt WorldCom { get; set; }
+        public IEnt WorldEnt { get; set; }
 
         public IEnt CreateDebugInfo()
         {
@@ -33,7 +33,8 @@ namespace RectClash.game
 				{
 					Font = font,
 					Color = new Color(byte.MaxValue, 0, 0),
-					Floating = true
+					Floating = true,
+                    Priority = int.MaxValue
 				}
 			);
 			debugEnt.AddCom(new UpdateDebugInfoCom());
@@ -48,9 +49,11 @@ namespace RectClash.game
 			(
 				new WorldCom()
 				{
-					WorldSize = new Misc.Vector2<int>(1500, 500)
+					WorldSize = new Misc.Vector2<int>(1000, 1000)
 				}
 			);
+
+            WorldEnt =  worldEnt;
 
 			var gridEnt = Engine.Instance.CreateEnt(worldEnt);
             gridEnt.PostionCom.X += 10;
@@ -74,9 +77,23 @@ namespace RectClash.game
             return worldEnt;
         }
 
-        public IEnt CreateFootSolider(IEnt worldEnt, GridCom grid, int i, int j)
+        public IEnt CreatePlayerInput()
         {
-            var ent = Engine.Instance.CreateEnt(worldEnt);
+            var result = Engine.Instance.CreateEnt();
+            result.AddCom
+			(
+				new PlayerInputCom()
+				{
+					Subject = new Subject(WorldEnt.GetCom<WorldCom>().Grid)
+				}
+			);
+
+            return result;
+        }
+
+        public IEnt CreateFootSolider(GridCom grid, int i, int j)
+        {
+            var ent = Engine.Instance.CreateEnt(WorldEnt);
             grid.AddEnt(ent, i, j);
             ent.AddCom
             (

@@ -6,16 +6,30 @@ namespace RectClash.Game
 {
     public class Subject
     {
-    	private ICollection<IObv> _obvs = new List<IObv>();
+    	private ICollection<IGameObv> _obvs = new List<IGameObv>();
 
-        public void AddObvs(IObv obv)
+        public Subject()
+        {
+        }
+
+        public Subject(IGameObv obv)
+        {
+            AddObvs(obv);
+        }
+
+        public void AddObvs(IGameObv obv)
         {
             _obvs.Add(obv);
         }
 
-        public void RemoveObvs(IObv obv)
+        public void RemoveObvs(IGameObv obv)
         {
             _obvs.Remove(obv);
+        }
+
+        public void Notify(ICom com, GameEvent gameEvent)
+        {
+            Notify(com.Owner, gameEvent);
         }
 
         public void Notify(IEnt ent, GameEvent gameEvent)

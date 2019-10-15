@@ -5,6 +5,7 @@ using System.Linq;
 using Priority_Queue;
 using RectClash.ECS;
 using RectClash.ECS.Graphics;
+using RectClash.game;
 using RectClash.Misc;
 using SFML.Graphics;
 using SFML.System;
@@ -18,7 +19,6 @@ namespace RectClash.Game
             NothingSelected,
             StartCellSelected,
             TargetCellSelected,
-            TargetCellConf,
             ClearSelection
         }
 
@@ -46,12 +46,8 @@ namespace RectClash.Game
         {
         }
 
-        public void ChangeState(State newState)
+        private void ChangeState(State newState)
         {
-            // Check State Trans
-            if(newState == State.TargetCellConf && _state != State.TargetCellSelected)
-                return;
-
             _state = newState;
 
             switch(newState)
@@ -65,13 +61,6 @@ namespace RectClash.Game
                     {
                         i.ChangeState(CellInfoCom.State.InMovementRange);
                     }
-                    break;
-                case State.TargetCellConf:
-                    var curCell = Get(_startCell);
-                    var current = curCell.Inside.First();
-                    curCell.Inside.Remove(current);
-                    Move(current, _targetCell.X, _targetCell.Y);
-                    ChangeState(State.ClearSelection);
                     break;
                 case State.ClearSelection:
                     ClearPath();
@@ -87,11 +76,6 @@ namespace RectClash.Game
             }
         }
 
-        public void ClearSelection()
-        {
-            ChangeState(State.ClearSelection);
-        }
-
 		private ICollection<Vector2i> GetAdjacentSquaresInRange(int i, int j, int range)
 		{
 			var result = GetAdjacentSquaresInRange(i, j, range, new HashSet<Vector2i>());
@@ -100,14 +84,14 @@ namespace RectClash.Game
 
         private ICollection<Vector2i> GetAdjacentSquaresInRange(int i, int j, int range, ICollection<Vector2i> result)
         {
-			if(range <= 0)
+			if(range < 0)
 				return result;
 
+            result.Add(new Vector2i(i, j));
 
 			foreach(var cell in GetAdjacentSquares(i, j))
 			{
-				GetAdjacentSquaresInRange(cell.X, cell.Y, range - 1, result);
-				result.Add(cell);
+				GetAdjacentSquaresInRange(cell.X, cell.Y, range - _cells[i, j].MovementCost, result);
 			}
 
 			return result;
@@ -145,17 +129,12 @@ namespace RectClash.Game
             return _cells[index.X, index.Y];
         }
 
-        public Vector2f GetGridPostion(int x, int y)
+        private Vector2f GetGridPostion(int x, int y)
         {
             return new Vector2f(y * CellHeight, x * CellHeight);
         }
 
-        public void AddEnt(IEnt ent, int x, int y)
-        {
-            Move(ent, x, y);
-        }
-
-        public void Move(IEnt ent, int x, int y)
+        private void Move(IEnt ent, int x, int y)
         {
             ent.PostionCom.Postion = GetGridPostion(x, y);
             ent.PostionCom.X += CellWidth * 0.1f;
@@ -165,11 +144,20 @@ namespace RectClash.Game
             _cells[x,y].Inside.Add(ent);
         }
 
-        private bool CellSelected(Vector2i index)
+        private bool CellSelected(CellInfoCom cell)
         {
+            Vector2i index = cell.Cords;
+
             switch(_state)
             {
                 case State.NothingSelected:
+                    if( 
+                        !(cell.CurrentState == CellInfoCom.State.UnSelected && cell.Inside.Count > 0) &&
+                        !(cell.CurrentState == CellInfoCom.State.InMovementRange)
+                    )
+                    {
+                        EntFactory.Instance.CreateFootSolider(this, index.X, index.Y);
+                    }
                     _startCell = index;
                     ChangeState(State.StartCellSelected);
                     return true;
@@ -177,9 +165,11 @@ namespace RectClash.Game
                     ClearPath();
                     goto case State.StartCellSelected;
                 case State.StartCellSelected:
+                    if(cell.CurrentState != CellInfoCom.State.InMovementRange)
+                        break;
                     _targetCell = index;
                     if(_targetCell != InvalidIndex && !Get(_targetCell).SpaceAvailable)
-                        return false;
+                        break;
                     _pathCells = AStar(_startCell, _targetCell).ToList();
                     foreach(var i in _pathCells.Select(i => Get(i)))
                     {
@@ -205,59 +195,19 @@ namespace RectClash.Game
                 Get(node).ChangeState(CellInfoCom.State.UnSelected);
             }
             _cellsInRange.Clear();
-        }
+        }    
 
-        public void GenrateGrid(int gridWidth, int gridHeight, float cellWidth, float cellHeight)
-        {
-            CellHeight = cellHeight;
-            CellWidth = cellWidth;
-            _cells = new CellInfoCom[gridWidth, gridHeight];
-
-            for(int i = 0; i < _cells.GetLength(0); i++)
-            {
-                for(int j = 0; j < _cells.GetLength(1); j++)
-                {
-                    var newCell = Engine.Instance.CreateEnt(Owner);
-                    _cells[i, j] = newCell.AddCom
-                    (
-                        new CellInfoCom()
-                        {
-                            Cords = new Vector2i(i, j)
-                        }
-                    );
-                    newCell.PostionCom.X = j * cellWidth;
-                    newCell.PostionCom.Y = i * cellHeight;
-                    newCell.PostionCom.SizeX = cellWidth;
-                    newCell.PostionCom.SizeY = cellHeight;
-
-                    newCell.AddCom
-                    (
-                        new DrawRectCom()
-                        {
-                            OutlineColor = new Color(byte.MaxValue, byte.MaxValue, byte.MaxValue),
-                            FillColor = Color.Black,
-                            LineThickness = 1
-                        }
-                    );
-
-                    newCell.AddCom
-                    (
-                        new CellInputCom()
-                    );
-                }
-            }
-        }
-
-        private int GetHeuristic(Vector2i a, Vector2i b)
+        private double GetHeuristic(Vector2i aPos, Vector2i bPos)
 		{
-			int result = System.Math.Abs(a.X - b.X) + System.Math.Abs(a.Y - b.Y);
-
-			return result;
+			return System.Math.Sqrt(System.Math.Pow(bPos.X - aPos.X, 2) + System.Math.Pow(bPos.Y - aPos.Y, 2));
 		}
 
 		private double DistanceBetween(Vector2i aPos, Vector2i bPos)
 		{
-			return System.Math.Sqrt(System.Math.Pow(bPos.X - aPos.X, 2) + System.Math.Pow(bPos.Y - aPos.Y, 2));
+            var dx = System.Math.Abs(aPos.X - bPos.X);
+            var dy = System.Math.Abs(aPos.Y - bPos.Y);
+
+			return Get(aPos).MovementCost * (dx + dy);
 		}
 
 
@@ -349,12 +299,125 @@ namespace RectClash.Game
 			return ConsturctPath(start, meta);
 		}
 
+        private void ApplyMove()
+        {
+            // Check State Trans
+            if(_state != State.TargetCellSelected)
+                return;
+
+            var curCell = Get(_startCell);
+            var current = curCell.Inside.First();
+            curCell.Inside.Remove(current);
+            Move(current, _targetCell.X, _targetCell.Y);
+            ChangeState(State.ClearSelection);
+        }
+
+        public void AddEnt(IEnt ent, int x, int y)
+        {
+            Move(ent, x, y);
+        }
+
+        public void GenrateGrid(int gridWidth, int gridHeight, float cellWidth, float cellHeight)
+        {
+            CellHeight = cellHeight;
+            CellWidth = cellWidth;
+            _cells = new CellInfoCom[gridWidth, gridHeight];
+
+            for(int i = 0; i < _cells.GetLength(0); i++)
+            {
+                for(int j = 0; j < _cells.GetLength(1); j++)
+                {
+                    var newCell = Engine.Instance.CreateEnt(Owner);
+
+                    var cellType = CellInfoCom.CellType.Dirt;
+                    var selectorNum = Utility.Random.Next(100);
+                    if(selectorNum > 30)
+                    {
+                        cellType = CellInfoCom.CellType.Dirt;
+                    }
+                    else if (selectorNum > 10)
+                    {
+                        cellType = CellInfoCom.CellType.Mud;
+                    }
+                    else
+                    {
+                        cellType = CellInfoCom.CellType.Water;
+                    }
+
+                    _cells[i, j] = newCell.AddCom
+                    (
+                        new CellInfoCom()
+                        {
+                            Cords = new Vector2i(i, j),
+                            Subject = new Subject(this),
+                            Type = cellType
+                        }
+                    );
+                    newCell.PostionCom.X = j * cellWidth;
+                    newCell.PostionCom.Y = i * cellHeight;
+                    newCell.PostionCom.SizeX = cellWidth;
+                    newCell.PostionCom.SizeY = cellHeight;
+
+                    newCell.AddCom
+                    (
+                        new DrawRectCom()
+                        {
+                            OutlineColor = new Color(byte.MaxValue, byte.MaxValue, byte.MaxValue),
+                            LineThickness = 2,
+                            Priority = 3
+                        }
+                    );
+                    
+                    newCell.AddCom
+                    (
+                        new CellInputCom()
+                    );
+
+                    var cellBackgroundEnt = Engine.Instance.CreateEnt(newCell);
+                    var background = cellBackgroundEnt.AddCom
+                    (
+                        new DrawRectCom()
+                        {
+                            OutlineColor = new Color(byte.MaxValue, byte.MaxValue, byte.MaxValue, 0),
+                            Priority = 2
+                        }
+                    );
+                    cellBackgroundEnt.PostionCom.X = j * cellWidth;
+                    cellBackgroundEnt.PostionCom.Y = i * cellHeight;
+                    cellBackgroundEnt.PostionCom.SizeX = cellWidth;
+                    cellBackgroundEnt.PostionCom.SizeY = cellHeight;
+
+                    _cells[i, j].Background = background;
+                }
+            }
+        }
+
         public void OnNotify(IEnt ent, GameEvent evt)
         {
             switch(evt)
             {
-                case GameEvent.CELL_SELECTED:
-                    CellSelected(ent.GetCom<CellInfoCom>().Cords);
+                case GameEvent.GRID_CELL_SELECTED:
+                    var cell = ent.GetCom<CellInfoCom>();
+                    if(!CellSelected(cell))
+                    {
+                        cell.ChangeState(CellInfoCom.State.UnSelected);
+                    }
+                    else
+                    {
+                        cell.ChangeState(CellInfoCom.State.Selected);
+                    }
+                    break;
+                case GameEvent.CREATE_FOOTSOLIDER:
+                    if(CurrentState != State.NothingSelected)
+                        break;
+                    var cords = ent.GetCom<CellInfoCom>().Cords;
+                    EntFactory.Instance.CreateFootSolider(this, cords.X, cords.Y);
+                    break;
+                case GameEvent.GRID_MOVE_CONF:
+                    ApplyMove();
+                    break;
+                case GameEvent.GRID_CLEAR_SELECTION:
+                    ChangeState(State.ClearSelection);
                     break;
                 default:
                     throw new System.NotImplementedException();

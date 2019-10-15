@@ -8,8 +8,6 @@ namespace RectClash.SFMLComs
 {
     public class SFMLMouseInput : IMouseInput
     {
-        private Transform transform;
-
         private RenderWindow Window
         {
             get => ((SFMLWindow)Engine.Instance.Window).Window;

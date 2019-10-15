@@ -7,7 +7,7 @@ namespace RectClash.Game
     {
         private const float CAM_SPEED = 500.0f;
 
-        public WorldCom World { get; set; }
+        public Subject Subject { get; set; }
 
         public override void Update()
         {
@@ -20,7 +20,7 @@ namespace RectClash.Game
 
             if(keyboard.IsKeyPressed(Keys.Space))
             {
-                World.Grid.ChangeState(GridCom.State.TargetCellConf);
+                Subject.Notify(Owner, GameEvent.GRID_MOVE_CONF);
             }
 
             var deltaTime = Engine.Instance.Time.DeltaTimePercentOfSec;

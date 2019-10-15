@@ -28,36 +28,11 @@ namespace RectClash
 				new SFMLComs.SFMLMouseInput()
 			);
 
-			EntFactory.CreateDebugInfo();
+			EntFactory.Instance.CreateDebugInfo();
 
-			var worldEnt = EntFactory.CreateWorld();
-			var worldCom = worldEnt.GetCom<WorldCom>();
+			var worldEnt = EntFactory.Instance.CreateWorld();
+			EntFactory.Instance.CreatePlayerInput();
 			
-			Engine.Instance.CreateEnt().AddCom
-			(
-				new PlayerInputCom()
-				{
-					World = worldCom
-				}
-			);
-
-			/*
-			for(int i = 0; i < 0; i++)
-			{
-				byte[] colour = new byte[3];
-				rand.NextBytes(colour);
-				var circle = Engine.Instance.CreateEnt(worldEnt);
-				circle.PostionCom.Postion = new SFML.System.Vector2f(rand.Next(windowWidth), rand.Next(windowHeight));
-				var drawCom = circle.AddCom
-				(
-					new DrawCircleCom()
-					{ 
-						Radius = rand.Next(50),
-						Color = Color.White
-					}
-				);
-			}
-			*/
 
 			while(Engine.Instance.Window.IsOpen)
 			{
