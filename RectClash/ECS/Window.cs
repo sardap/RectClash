@@ -1,19 +1,21 @@
 using System.Collections.Generic;
+using Priority_Queue;
 using RectClash.ECS.Graphics;
 using RectClash.Misc;
+using SFML.System;
 
 namespace RectClash.ECS
 {
     public abstract class Window : IWindow
     {
-        private volatile Queue<IDrawableCom> _drawQueue = new Queue<IDrawableCom>();
+        private volatile SimplePriorityQueue<IDrawableCom> _drawQueue = new SimplePriorityQueue<IDrawableCom>();
 
         public abstract bool IsOpen 
         { 
             get;
         }
         
-        public Vector2<int> Size 
+        public Vector2f Size 
         {
             get; 
             set;
@@ -31,11 +33,16 @@ namespace RectClash.ECS
 
         public abstract void OnStart();
 
-        public abstract void DrawDrawQueue(Queue<IDrawableCom> drawQueue);
+        public abstract void DrawDrawQueue(SimplePriorityQueue<IDrawableCom> drawQueue);
 
         public void Draw(IDrawableCom toDraw)
         {
-            _drawQueue.Enqueue(toDraw);
+            _drawQueue.Enqueue(toDraw, 0);
+        }
+
+        public void Draw(IDrawableCom toDraw, int priority)
+        {
+            _drawQueue.Enqueue(toDraw, priority);            
         }
 
         public void Update()
@@ -50,7 +57,7 @@ namespace RectClash.ECS
         {
             foreach(var i in toDraw)
             {
-                Draw(i);
+                Draw(i, i.Priority);
             }
         }
     }

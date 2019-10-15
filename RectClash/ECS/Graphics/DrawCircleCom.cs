@@ -1,4 +1,5 @@
 using RectClash.Misc;
+using SFML.Graphics;
 
 namespace RectClash.ECS.Graphics
 {
@@ -7,7 +8,7 @@ namespace RectClash.ECS.Graphics
         public PostionCom PostionCom;
 
         public double Radius { get; set; }
-        public Colour Colour { get; set; }
+        public Color Color { get; set; }
 
         protected override void InternalStart()
         {

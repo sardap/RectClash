@@ -5,6 +5,6 @@ namespace RectClash.Game
 {
     public class UnitInfoCom : Com
     {
-        public PostionCom Postion { get; set; }
+        public int Range { get; set; }
     }
 }

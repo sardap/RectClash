@@ -4,16 +4,24 @@ namespace RectClash.ECS.Performance
 {
     public class UpdateDebugInfoCom: Com
     {
-        public RenderTextCom _text;
+        public RenderTextCom Text { get; set; }
 
         protected override void InternalStart()
         {
-            _text = Owner.GetCom<RenderTextCom>();
+            Text = Owner.GetCom<RenderTextCom>();
         }
 
         public override void Update()
         {
-            _text.Text = Engine.Instance.PerfMessure.AvgTick.ToString();
+            string DoubleToString(double val)
+            {
+                return val.ToString("0.##");
+            }
+
+            var engine = Engine.Instance;
+            Text.Text = "Ticks: " + DoubleToString(engine.PerfMessure.AvgTick) + 
+                "\nLocalMouse(" + DoubleToString(engine.Mouse.CamMouseX) + "," + DoubleToString(engine.Mouse.CamMouseY) + ")" +
+                "\nWorldMouse(" + DoubleToString(engine.Mouse.WorldMouseX) + "," + DoubleToString(engine.Mouse.WorldMouseY) + ")";
         }
     }
 }

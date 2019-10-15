@@ -30,7 +30,17 @@ namespace RectClash.ECS
 
         public IEnumerable<IEnt> Children { get { return _children; } }
 
-        public IEnumerable<IDrawableCom> DrawableComs { get { return _drawables; } }
+        public IEnumerable<IDrawableCom> DrawableComs { get => _drawables; }
+
+        private ICollection<IDrawableCom> GetDrawableComs(List<IDrawableCom> result)
+        {
+            foreach(var child in _children)
+            {
+                result.AddRange(((Ent)child).GetDrawableComs(result));
+            }
+
+            return _drawables;
+        }
 
         public T AddCom<T>(T com) where T : ICom
         {

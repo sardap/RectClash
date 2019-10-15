@@ -17,14 +17,14 @@ namespace RectClash.ECS
         {
         }
 
-        public static void Initialise(IKeyboardInput input, IWindow window)
+        public static void Initialise(IKeyboardInput keyboardInput, IWindow window, IMouseInput mouseInput)
         {
             if(_instance != null)
             {
                 throw new System.InvalidOperationException("Already Created");
             }
 
-            Keyboard.Initialise(input);
+            Keyboard.Initialise(keyboardInput);
             _instance = new Engine();
             _instance._root = new Ent(null);
             _instance._time = new Time();
@@ -32,9 +32,9 @@ namespace RectClash.ECS
             _instance._toBeUpdated = new Stack<IEnt>();
             _instance._perfMessure = new PerfMessure();
             _instance._toDraw = new HashSet<IEnt>();
+            _instance._mouse = mouseInput;
 
             _instance._window.OnStart();
-
             _instance._time.Start();
         }
 
@@ -45,9 +45,12 @@ namespace RectClash.ECS
         private long _max_loop_time;
         private long _timeDrawLoopTook;
         private IWindow _window;
+        public IMouseInput _mouse;
         private PerfMessure _perfMessure;
 
         public IWindow Window { get { return _window; } }
+
+        public IMouseInput Mouse { get { return _mouse; } }
 
         public Time Time { get { return _time; } }
 

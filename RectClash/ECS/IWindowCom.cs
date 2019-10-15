@@ -5,6 +5,7 @@ using System.Diagnostics;
 using VelcroPhysics.Dynamics;
 using RectClash.Misc;
 using RectClash.ECS.Graphics;
+using SFML.System;
 
 namespace RectClash.ECS
 {
@@ -12,11 +13,13 @@ namespace RectClash.ECS
     {
         bool IsOpen { get; }
         
-        Vector2<int> Size { get; set; }
+        Vector2f Size { get; set; }
 
         Camera Camera { get; set; }
 
         void Draw(IDrawableCom toDraw);
+
+        void Draw(IDrawableCom toDraw, int priority);
 
         void Draw(IEnumerable<IDrawableCom> toDraw);
 

@@ -7,6 +7,8 @@ namespace RectClash.Game
 {
     public class WorldCom: Com
     {
+        public static WorldCom Instance { get; set; }
+
         public GridCom Grid { get; set; }
 
         public Vector2<int> WorldSize { get; set; }
@@ -21,6 +23,7 @@ namespace RectClash.Game
         protected override void InternalStart()
         {
             Units = new List<UnitInfoCom>();
+            Instance = this;
         }
 
         public override void Update()

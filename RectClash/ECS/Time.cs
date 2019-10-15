@@ -18,11 +18,11 @@ namespace RectClash.ECS
             }
         }
 
-        public double DeltaTimePercentOfSec
+        public float DeltaTimePercentOfSec
         {
             get
             {
-                return _deltaTime / 1000.0;
+                return _deltaTime / 1000.0f;
             }
         }
 

@@ -1,8 +1,10 @@
 using System.Collections.Generic;
+using Priority_Queue;
 using RectClash.ECS;
 using RectClash.ECS.Graphics;
 using RectClash.Misc;
 using SFML.Graphics;
+using SFML.System;
 
 namespace RectClash.SFMLComs
 {
@@ -22,13 +24,18 @@ namespace RectClash.SFMLComs
             }
         }
 
+        public RenderWindow Window
+        {
+            get => _window;
+        }
+
         public override void OnStart()
         {
             _window = new SFML.Graphics.RenderWindow(new SFML.Window.VideoMode((uint)Size.X, (uint)Size.Y), "SFML works!");
             _workingDIR = System.Environment.GetEnvironmentVariable("RES_DIR");
             Camera = new Camera()
             {
-                Postion = new Vector2<double>(Size.X / 2, Size.Y / 2)
+                Postion = new Vector2f(0, 0)
             };
         }
 
@@ -57,11 +64,9 @@ namespace RectClash.SFMLComs
 
         private RectangleShape _sfmlRect = new RectangleShape();
 
-        private SFML.System.Vector2f _sfmlPostion = new SFML.System.Vector2f();
-
         private RenderStates _states = RenderStates.Default;
 
-        public override void DrawDrawQueue(Queue<IDrawableCom> drawQueue)
+        public override void DrawDrawQueue(SimplePriorityQueue<IDrawableCom> drawQueue)
         {
             while(drawQueue.Count > 0)
             {
@@ -71,18 +76,18 @@ namespace RectClash.SFMLComs
                 if(top is DrawCircleCom)
                 {
                     var cirlce = (DrawCircleCom)top;
+                    _sfmlCircle.Position = top.Owner.PostionCom.Postion;
                     _sfmlCircle.Radius = (float)cirlce.Radius;
-                    _sfmlCircle.Position = ConvertToSFMLVector(cirlce.Owner.PostionCom);
-                    _sfmlCircle.FillColor = ConvertToSFMLColour(cirlce.Colour);
+                    _sfmlCircle.FillColor = cirlce.Color;
 
                     toDraw = _sfmlCircle;
                 }
                 else if(top is RenderTextCom)
                 {
                     var text = (RenderTextCom)top;
+                    _sfmlText.Position = top.Owner.PostionCom.Postion;
                     _sfmlText.Font = LoadFont(text.Font.FileLocation);
-                    _sfmlText.Position = ConvertToSFMLVector(text.Owner.PostionCom);
-                    _sfmlText.FillColor = ConvertToSFMLColour(text.Colour);
+                    _sfmlText.FillColor = ConvertToSFMLColor(text.Color);
                     _sfmlText.DisplayedString = text.Text;
                     
                     toDraw = _sfmlText;
@@ -90,14 +95,11 @@ namespace RectClash.SFMLComs
                 else if(top is DrawRectCom)
                 {
                     var rect = (DrawRectCom)top;
-                    _sfmlRect.Position = ConvertToSFMLVector(rect.Owner.PostionCom);
-                    
-                    _sfmlPostion.X = (float)rect.Width;
-                    _sfmlPostion.Y = (float)rect.Height;
-                    _sfmlRect.Size = _sfmlPostion;
+                    _sfmlRect.Position = rect.PostionCom.Postion;
+                    _sfmlRect.Size = rect.PostionCom.Size;
 
-                    _sfmlRect.FillColor = new SFML.Graphics.Color(0, 0, 0, 0);
-                    _sfmlRect.OutlineColor = ConvertToSFMLColour(rect.OutlineColour);
+                    _sfmlRect.FillColor = rect.FillColor;
+                    _sfmlRect.OutlineColor = rect.OutlineColor;
                     _sfmlRect.OutlineThickness = (float)rect.LineThickness;
 
                     toDraw = _sfmlRect;
@@ -107,44 +109,24 @@ namespace RectClash.SFMLComs
                     continue;
                 }
 
-                if(!top.Floating)
+                _states.Transform = top.Owner.PostionCom.Transform;
+
+                if(top.Floating)
                 {
-                    Transform t = Transform.Identity;
-                    //t.TransformPoint((float)Camera.Postion.X, (float)Camera.Postion.Y);
-                    t.TransformPoint((float)Camera.Postion.X, (float)Camera.Postion.Y);
-                    t.Translate((float)Camera.Postion.X, (float)Camera.Postion.Y);
-                    _states.Transform = t;    
+                    _window.SetView(_window.DefaultView);
                 }
                 else
                 {
-                    _states.Transform = Transform.Identity;
+                    _window.SetView(Camera.View);
                 }
 
                 _window.Draw(toDraw, _states);
             }
         }
 
-        private Color ConvertToSFMLColour(Colour col)
+        private Color ConvertToSFMLColor(Color col)
         {
             return new Color(col.R, col.G, col.B);
-        }
-
-        private SFML.System.Vector2f ConvertToSFMLVector(PostionCom com)
-        {
-            var comsSFMLVec = new SFML.System.Vector2f()
-            {
-                X = (float)com.X,
-                Y = (float)com.Y
-            };
-
-            if(com.Owner.Parent != null)
-            {
-                var offset = ConvertToSFMLVector(com.Owner.Parent.PostionCom);
-
-                comsSFMLVec += offset;
-            }
-
-            return comsSFMLVec;
         }
 
         private SFML.Graphics.Font LoadFont(string fileLocation)
