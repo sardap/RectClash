@@ -1,6 +1,8 @@
-namespace RectClash.ECS.Performance
+using RectClash.ECS;
+
+namespace RectClash.Game.Perf
 {
-    public class PerfMessure
+    public class PerfMessureCom : Com
     {
         private const long MAXSAMPLES = 100;
         private long tickindex = 0;
@@ -11,9 +13,12 @@ namespace RectClash.ECS.Performance
 
         public double AvgTick { get { return _avgTick; } }
 
-        public void Step()
+        public Subject<string, PerfEvents> Subject { get; set; }
+
+        public override void Update()
         {
             _avgTick = CalcAverageTick(Engine.Instance.Time.DeltaTime);
+            Subject.Notify("Ticks: " + _avgTick.ToString("0.##"), PerfEvents.TICK_UPDATE);
         }
 
         /* need to zero out the ticklist array before starting */

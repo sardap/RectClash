@@ -8,5 +8,6 @@ namespace RectClash.SFMLComs
         {
             return SFML.Window.Keyboard.IsKeyPressed((SFML.Window.Keyboard.Key)key);
         }
+
     }
 }

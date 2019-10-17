@@ -20,9 +20,20 @@ namespace RectClash.ECS
 
         public PostionCom PostionCom { get { return _postionCom; }}
 
-        public Ent(IEnt parent) 
+        public readonly string Name;
+
+        public Ent(IEnt parent, string name = "") 
         {
-            this.Parent = parent;
+            Name = name;
+
+            if(Parent == null)
+            {
+                Parent = parent;
+            }
+            else
+            {
+               ChangeParent(parent);
+            }
             _postionCom = AddCom(new PostionCom());
         }
         
@@ -98,6 +109,15 @@ namespace RectClash.ECS
         public void AddChild(IEnt ent)
         {
             _children.Add(ent);
+        }
+
+        public void ChangeParent(IEnt ent)
+        {
+            if(Parent != null)
+                ((Ent)Parent)._children.Remove(this);
+            Parent = ent;
+            ent.AddChild(this);
+            PostionCom.ParentChanged();
         }
     }
 }

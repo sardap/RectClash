@@ -10,7 +10,7 @@ namespace RectClash.SFMLComs
     {
         private RenderWindow Window
         {
-            get => ((SFMLWindow)Engine.Instance.Window).Window;
+            get => ((SFMLWindow)Engine.Instance.Window).RenderWindow;
         }
 
         public Vector2i MousePostion

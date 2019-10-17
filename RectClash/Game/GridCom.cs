@@ -5,7 +5,8 @@ using System.Linq;
 using Priority_Queue;
 using RectClash.ECS;
 using RectClash.ECS.Graphics;
-using RectClash.game;
+using RectClash.Game.Unit;
+using RectClash.Game;
 using RectClash.Misc;
 using SFML.Graphics;
 using SFML.System;
@@ -129,21 +130,6 @@ namespace RectClash.Game
             return _cells[index.X, index.Y];
         }
 
-        private Vector2f GetGridPostion(int x, int y)
-        {
-            return new Vector2f(y * CellHeight, x * CellHeight);
-        }
-
-        private void Move(IEnt ent, int x, int y)
-        {
-            ent.PostionCom.Postion = GetGridPostion(x, y);
-            ent.PostionCom.X += CellWidth * 0.1f;
-            ent.PostionCom.Y += CellHeight * 0.1f;
-            ent.PostionCom.SizeX = CellWidth * 0.8f;
-            ent.PostionCom.SizeY = CellHeight * 0.8f;
-            _cells[x,y].Inside.Add(ent);
-        }
-
         private bool CellSelected(CellInfoCom cell)
         {
             Vector2i index = cell.Cords;
@@ -199,15 +185,15 @@ namespace RectClash.Game
 
         private double GetHeuristic(Vector2i aPos, Vector2i bPos)
 		{
-			return System.Math.Sqrt(System.Math.Pow(bPos.X - aPos.X, 2) + System.Math.Pow(bPos.Y - aPos.Y, 2));
-		}
-
-		private double DistanceBetween(Vector2i aPos, Vector2i bPos)
-		{
             var dx = System.Math.Abs(aPos.X - bPos.X);
             var dy = System.Math.Abs(aPos.Y - bPos.Y);
 
 			return Get(aPos).MovementCost * (dx + dy);
+		}
+
+		private double DistanceBetween(Vector2i aPos, Vector2i bPos)
+		{
+			return System.Math.Sqrt(System.Math.Pow(bPos.X - aPos.X, 2) + System.Math.Pow(bPos.Y - aPos.Y, 2));
 		}
 
 
@@ -317,6 +303,12 @@ namespace RectClash.Game
             Move(ent, x, y);
         }
 
+        private void Move(IEnt ent, int x, int y)
+        {
+            ent.ChangeParent(_cells[x,y].Owner);
+            _cells[x,y].Inside.Add(ent);
+        }
+
         public void GenrateGrid(int gridWidth, int gridHeight, float cellWidth, float cellHeight)
         {
             CellHeight = cellHeight;
@@ -327,69 +319,11 @@ namespace RectClash.Game
             {
                 for(int j = 0; j < _cells.GetLength(1); j++)
                 {
-                    var newCell = Engine.Instance.CreateEnt(Owner);
-
-                    var cellType = CellInfoCom.CellType.Dirt;
-                    var selectorNum = Utility.Random.Next(100);
-                    if(selectorNum > 30)
-                    {
-                        cellType = CellInfoCom.CellType.Dirt;
-                    }
-                    else if (selectorNum > 10)
-                    {
-                        cellType = CellInfoCom.CellType.Mud;
-                    }
-                    else
-                    {
-                        cellType = CellInfoCom.CellType.Water;
-                    }
-
-                    _cells[i, j] = newCell.AddCom
-                    (
-                        new CellInfoCom()
-                        {
-                            Cords = new Vector2i(i, j),
-                            Subject = new Subject(this),
-                            Type = cellType
-                        }
-                    );
-                    newCell.PostionCom.X = j * cellWidth;
-                    newCell.PostionCom.Y = i * cellHeight;
-                    newCell.PostionCom.SizeX = cellWidth;
-                    newCell.PostionCom.SizeY = cellHeight;
-
-                    newCell.AddCom
-                    (
-                        new DrawRectCom()
-                        {
-                            OutlineColor = new Color(byte.MaxValue, byte.MaxValue, byte.MaxValue),
-                            LineThickness = 2,
-                            Priority = 3
-                        }
-                    );
-                    
-                    newCell.AddCom
-                    (
-                        new CellInputCom()
-                    );
-
-                    var cellBackgroundEnt = Engine.Instance.CreateEnt(newCell);
-                    var background = cellBackgroundEnt.AddCom
-                    (
-                        new DrawRectCom()
-                        {
-                            OutlineColor = new Color(byte.MaxValue, byte.MaxValue, byte.MaxValue, 0),
-                            Priority = 2
-                        }
-                    );
-                    cellBackgroundEnt.PostionCom.X = j * cellWidth;
-                    cellBackgroundEnt.PostionCom.Y = i * cellHeight;
-                    cellBackgroundEnt.PostionCom.SizeX = cellWidth;
-                    cellBackgroundEnt.PostionCom.SizeY = cellHeight;
-
-                    _cells[i, j].Background = background;
+                    _cells[i, j] = EntFactory.Instance.CreateCell(this, i, j, CellWidth, CellHeight).GetCom<CellInfoCom>();
                 }
             }
+
+            int x = 0;
         }
 
         public void OnNotify(IEnt ent, GameEvent evt)

@@ -1,7 +1,7 @@
 using RectClash.ECS;
 using RectClash.ECS.Graphics;
 using RectClash.ECS.Input;
-using RectClash.game;
+using RectClash.Game;
 using RectClash.Misc;
 using SFML.Graphics;
 
@@ -9,7 +9,7 @@ namespace RectClash.Game
 {
     public class CellInputCom: Com
     {
-        private Subject _subject = new Subject();
+        private GameSubject _subject = new GameSubject();
 
         protected override void InternalStart()
         {
@@ -22,7 +22,8 @@ namespace RectClash.Game
 
             bool InsideRect()
             {
-                return Owner.PostionCom.Rect.Contains(mouse.WorldMouseX, mouse.WorldMouseY);
+                var result = Owner.PostionCom.GetWorldToLocalMatrix().TransformPoint(mouse.WorldMouseX, mouse.WorldMouseY);
+                return Owner.PostionCom.Rect.Contains(result.X, result.Y);
             }
 
             if(mouse.IsButtonPressed(SFML.Window.Mouse.Button.Left) && InsideRect())

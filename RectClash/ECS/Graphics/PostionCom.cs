@@ -1,3 +1,4 @@
+using System.Linq;
 using SFML.Graphics;
 
 namespace RectClash.ECS.Graphics
@@ -7,54 +8,149 @@ namespace RectClash.ECS.Graphics
 	{
 		private Transform _trans = Transform.Identity;
 
-		public SFML.System.Vector2f _postion = new SFML.System.Vector2f();
+		private Transform _localToWorldMatrix = Transform.Identity;
+
+		private Transform _worldToLocalMatrix  = Transform.Identity;
+
+		private float _localRotation = 0.0f;
+
+		private bool _isDirty = true;
+
+		private bool _isInverseDirty  = true;
+
+
+		public SFML.System.Vector2f _postion = new SFML.System.Vector2f(0f, 0f);
+
+		public SFML.System.Vector2f _localScale = new SFML.System.Vector2f(1f, 1f);
 
 		public SFML.System.Vector2f _size = new SFML.System.Vector2f();
 
-		public SFML.System.Vector2f Postion
+		public Transform LocalToWorldMatrix 
+		{
+			get
+			{
+				if(_isDirty)
+				{
+					if(Owner.Parent == null)
+					{
+						_localToWorldMatrix = CalculateLocalToParentMatrix();
+					}
+					else
+					{
+						_localToWorldMatrix = Owner.Parent.PostionCom.LocalToWorldMatrix * CalculateLocalToParentMatrix();
+					}
+
+					_isDirty = false;
+				}
+
+				return _localToWorldMatrix;
+			}
+		}
+
+		public SFML.System.Vector2f LocalPostion
 		{
 			get => _postion;
-			set => _postion = value;
+			set
+			{
+				_postion = value;
+				SetDirty();	
+			}
 		}
 
-		public SFML.System.Vector2f Size
+		public SFML.System.Vector2f LocalScale
 		{
-			get => _size;
-			set => _size = value;
+			get => _localScale;
+			set
+			{
+				_localScale = value;
+				SetDirty();
+			}
 		}
 
-		public Transform Transform
-		{ 
-			get => _trans;
-		}
-
-		public float SizeX
+		public SFML.System.Vector2f WorldPostion
 		{
-			get => Size.X;
-			set => Size = new SFML.System.Vector2f(value, SizeY);
+			get => TransformPoint(LocalPostion);
 		}
 
-		public float SizeY
+		public float LocalX
 		{
-			get => Size.Y;
-			set => Size = new SFML.System.Vector2f(SizeX, value);
+			get => LocalPostion.X;
+			set => LocalPostion = new SFML.System.Vector2f(value, LocalY);
 		}
 
-		public float X
+		public float LocalY
 		{
-			get => Postion.X;
-			set => Postion = new SFML.System.Vector2f(value, Y);
-		}
-
-		public float Y
-		{
-			get => Postion.Y;
-			set => Postion = new SFML.System.Vector2f(X, value);
+			get => LocalPostion.Y;
+			set => LocalPostion = new SFML.System.Vector2f(LocalX, value);
 		}
 
 		public FloatRect Rect
 		{
-			get => new FloatRect(X, Y, SizeX, SizeY);
+			get => new FloatRect(LocalX, LocalY, LocalScale.X, LocalScale.Y);
+		}
+
+		// https://www.gamedev.net/articles/programming/math-and-physics/making-a-game-engine-transformations-r3566/
+		private void SetDirty()
+		{
+			if(!_isDirty)
+			{
+				_isDirty = true;
+				_isInverseDirty = true;
+
+				foreach (var child in Owner.Children)
+				{
+					child.PostionCom.SetDirty();	
+				}
+			}
+		}
+
+		private Transform MutiplyTransRec(int i, params Transform[] trans)
+		{
+			if(i >= trans.Length)
+			{
+				return trans[i - 1];
+			}
+
+			return trans[i] * MutiplyTransRec(i + 1, trans);
+		}
+
+		private Transform MutiplyTrans(params Transform[] trans)
+		{
+			return MutiplyTransRec(0, trans);
+		}
+
+		public Transform CalculateLocalToParentMatrix()
+		{
+			var translate = Transform.Identity;
+			translate.Translate(LocalPostion);
+			var rotate = Transform.Identity;
+			rotate.Rotate(_localRotation);
+			var scale = Transform.Identity;
+			scale.Scale(LocalScale);
+
+			return MutiplyTrans(translate, rotate, scale);
+		}
+
+		public Transform GetWorldToLocalMatrix()
+		{
+			if(_isInverseDirty)
+			{
+				_worldToLocalMatrix = LocalToWorldMatrix.GetInverse();
+
+				_isInverseDirty = false;
+			}
+
+			return _worldToLocalMatrix;
+		}
+
+		public SFML.System.Vector2f TransformPoint(SFML.System.Vector2f point)
+		{
+			return LocalToWorldMatrix.TransformPoint(point);
+		}
+
+		public void ParentChanged()
+		{
+			SetDirty();
 		}
 
 		public PostionCom()

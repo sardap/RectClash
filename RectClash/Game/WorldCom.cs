@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using RectClash.ECS;
 using RectClash.Misc;
+using RectClash.Game.Unit;
 
 namespace RectClash.Game
 {

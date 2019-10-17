@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Priority_Queue;
 using RectClash.ECS.Graphics;
 using RectClash.Misc;
+using SFML.Graphics;
 using SFML.System;
 
 namespace RectClash.ECS
@@ -14,6 +15,12 @@ namespace RectClash.ECS
         { 
             get;
         }
+
+        public abstract RenderWindow RenderWindow
+        {
+            get;
+        }
+
         
         public Vector2f Size 
         {
@@ -57,7 +64,7 @@ namespace RectClash.ECS
         {
             foreach(var i in toDraw)
             {
-                Draw(i, i.Priority);
+                Draw(i, (int)i.Priority);
             }
         }
     }

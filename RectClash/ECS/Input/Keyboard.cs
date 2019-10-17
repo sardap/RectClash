@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace RectClash.ECS.Input
 {
     public class Keyboard

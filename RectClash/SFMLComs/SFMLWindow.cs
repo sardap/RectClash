@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Priority_Queue;
 using RectClash.ECS;
@@ -5,10 +6,11 @@ using RectClash.ECS.Graphics;
 using RectClash.Misc;
 using SFML.Graphics;
 using SFML.System;
+using SFML.Window;
 
 namespace RectClash.SFMLComs
 {
-    public class SFMLWindow : Window
+    public class SFMLWindow : ECS.Window
     {
         private Dictionary<string, SFML.Graphics.Font> _loadedFonts = new Dictionary<string, SFML.Graphics.Font>();
 
@@ -24,7 +26,7 @@ namespace RectClash.SFMLComs
             }
         }
 
-        public RenderWindow Window
+        public override RenderWindow RenderWindow
         {
             get => _window;
         }
@@ -66,50 +68,43 @@ namespace RectClash.SFMLComs
 
         private RenderStates _states = RenderStates.Default;
 
+        private SFML.Graphics.Drawable _toDraw;
+
         public override void DrawDrawQueue(SimplePriorityQueue<IDrawableCom> drawQueue)
         {
             while(drawQueue.Count > 0)
             {
                 var top = drawQueue.Dequeue();
-                SFML.Graphics.Drawable toDraw;
 
                 if(top is DrawCircleCom)
                 {
                     var cirlce = (DrawCircleCom)top;
-                    _sfmlCircle.Position = top.Owner.PostionCom.Postion;
+                    _sfmlCircle.Position = top.Owner.PostionCom.LocalPostion;
                     _sfmlCircle.Radius = (float)cirlce.Radius;
                     _sfmlCircle.FillColor = cirlce.Color;
 
-                    toDraw = _sfmlCircle;
+                    _states.Transform = top.Owner.PostionCom.LocalToWorldMatrix;
+                    _toDraw = _sfmlCircle;
                 }
                 else if(top is RenderTextCom)
                 {
                     var text = (RenderTextCom)top;
-                    _sfmlText.Position = top.Owner.PostionCom.Postion;
+                    _sfmlText.Position = top.Owner.PostionCom.LocalPostion;
                     _sfmlText.Font = LoadFont(text.Font.FileLocation);
-                    _sfmlText.FillColor = ConvertToSFMLColor(text.Color);
+                    _sfmlText.FillColor = text.Color;
                     _sfmlText.DisplayedString = text.Text;
                     
-                    toDraw = _sfmlText;
+                    _states.Transform = top.Owner.PostionCom.LocalToWorldMatrix;
+                   _toDraw = _sfmlText;
                 }
                 else if(top is DrawRectCom)
                 {
-                    var rect = (DrawRectCom)top;
-                    _sfmlRect.Position = rect.PostionCom.Postion;
-                    _sfmlRect.Size = rect.PostionCom.Size;
-
-                    _sfmlRect.FillColor = rect.FillColor;
-                    _sfmlRect.OutlineColor = rect.OutlineColor;
-                    _sfmlRect.OutlineThickness = (float)rect.LineThickness;
-
-                    toDraw = _sfmlRect;
+                    _toDraw = top as DrawRectCom;
                 }
                 else
                 {
                     continue;
                 }
-
-                _states.Transform = top.Owner.PostionCom.Transform;
 
                 if(top.Floating)
                 {
@@ -120,13 +115,8 @@ namespace RectClash.SFMLComs
                     _window.SetView(Camera.View);
                 }
 
-                _window.Draw(toDraw, _states);
+                _window.Draw(_toDraw, _states);
             }
-        }
-
-        private Color ConvertToSFMLColor(Color col)
-        {
-            return new Color(col.R, col.G, col.B);
         }
 
         private SFML.Graphics.Font LoadFont(string fileLocation)

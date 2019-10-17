@@ -17,6 +17,8 @@ namespace RectClash.ECS
 
         void AddChild(IEnt ent);
 
+        void ChangeParent(IEnt ent);
+
         T GetCom<T>() where T : ICom;
 
         T AddCom<T>(T com) where T : ICom;

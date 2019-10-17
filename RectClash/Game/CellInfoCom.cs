@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using RectClash.ECS;
 using RectClash.ECS.Graphics;
-using RectClash.game;
+using RectClash.Game;
 using SFML.Graphics;
 using SFML.System;
 
@@ -27,7 +27,7 @@ namespace RectClash.Game
 
         private static Dictionary<State, Color> _fillColorMap = new Dictionary<State, Color>()
         {
-            {State.UnSelected, new Color(0, 0, 0, 0)},
+            {State.UnSelected, Color.White},
             {State.Selected, new Color(byte.MaxValue, 0, 0, 120)},
             {State.InMovementRange, new Color(byte.MaxValue, byte.MaxValue, byte.MaxValue, 120)},
             {State.OnPath, new Color(0, byte.MaxValue, 0, byte.MaxValue)}
@@ -36,7 +36,7 @@ namespace RectClash.Game
 
         private static Dictionary<CellType, Color> _backgroundColorMap = new Dictionary<CellType, Color>()
         {
-            {CellType.Dirt, Color.Black},
+            {CellType.Dirt, new Color(124, 252, 0)},
             {CellType.Water, Color.Blue},
             {CellType.Mud, new Color(165, 42, 42)}
         };
@@ -49,7 +49,7 @@ namespace RectClash.Game
 
         public CellType Type { get; set; }
 
-        public Subject Subject { get; set; }
+        public GameSubject Subject { get; set; }
 
         public Vector2i Cords { get; set; }
 
@@ -96,25 +96,8 @@ namespace RectClash.Game
 
             _stateStack.Push(newState);
 
-            switch(newState)
-            {
-                case CellInfoCom.State.Selected:
-                    CurrentState = newState;
-                    _drawRectCom.FillColor = _fillColorMap[newState];
-                    break;
-                case CellInfoCom.State.UnSelected:
-                case CellInfoCom.State.OnPath:
-                    CurrentState = newState;
-                    _drawRectCom.FillColor = _fillColorMap[newState];
-                    break;
-                case CellInfoCom.State.InMovementRange:
-                    CurrentState = newState;
-                    _drawRectCom.FillColor = _fillColorMap[newState];
-                    break;
-                default:
-                    throw new System.NotImplementedException();
-            }
-            
+            CurrentState = newState;
+            _drawRectCom.FillColor = _fillColorMap[newState];
             Background.FillColor = _backgroundColorMap[Type];
         }
 

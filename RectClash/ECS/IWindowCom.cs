@@ -6,12 +6,15 @@ using VelcroPhysics.Dynamics;
 using RectClash.Misc;
 using RectClash.ECS.Graphics;
 using SFML.System;
+using SFML.Graphics;
 
 namespace RectClash.ECS
 {
     public interface IWindow
     {
         bool IsOpen { get; }
+
+        RenderWindow RenderWindow { get; }
         
         Vector2f Size { get; set; }
 

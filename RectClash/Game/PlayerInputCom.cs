@@ -7,7 +7,16 @@ namespace RectClash.Game
     {
         private const float CAM_SPEED = 500.0f;
 
-        public Subject Subject { get; set; }
+        public GameSubject Subject { get; set; }
+
+        protected override void InternalStart()
+        {
+            Engine.Instance.Window.RenderWindow.KeyReleased += Window_KeyReleased;
+        }
+
+        private void Window_KeyReleased(object sender, SFML.Window.KeyEventArgs e)
+        {
+        }
 
         public override void Update()
         {
@@ -44,4 +53,5 @@ namespace RectClash.Game
             }
         }
     }
+
 }

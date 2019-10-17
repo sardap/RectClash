@@ -4,6 +4,6 @@ namespace RectClash.ECS.Graphics
     {
         public bool Floating { get; set; }
 
-        public int Priority { get ; set ; }
+        public DrawPriority Priority { get ; set ; }
     }
 }

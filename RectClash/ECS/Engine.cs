@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using RectClash.ECS.Input;
-using RectClash.ECS.Performance;
 
 namespace RectClash.ECS
 {
@@ -30,7 +29,6 @@ namespace RectClash.ECS
             _instance._time = new Time();
             _instance._window = window;
             _instance._toBeUpdated = new Stack<IEnt>();
-            _instance._perfMessure = new PerfMessure();
             _instance._toDraw = new HashSet<IEnt>();
             _instance._mouse = mouseInput;
 
@@ -46,7 +44,6 @@ namespace RectClash.ECS
         private long _timeDrawLoopTook;
         private IWindow _window;
         public IMouseInput _mouse;
-        private PerfMessure _perfMessure;
 
         public IWindow Window { get { return _window; } }
 
@@ -54,18 +51,16 @@ namespace RectClash.ECS
 
         public Time Time { get { return _time; } }
 
-        public PerfMessure PerfMessure { get { return _perfMessure; } }
-
-        public IEnt CreateEnt(IEnt parent)
+        public IEnt CreateEnt(IEnt parent, string name = "")
         {
-            var result = new Ent(parent);
+            var result = new Ent(parent, name);
             parent.AddChild(result);
             return result;
         }
 
-        public IEnt CreateEnt()
+        public IEnt CreateEnt(string name = "")
         {
-            return CreateEnt(_root);
+            return CreateEnt(_root, name);
         }
       
         public void  Step()
@@ -84,28 +79,12 @@ namespace RectClash.ECS
 
                 current.Update();
                 Window.Draw(current.DrawableComs);
-
-                /*
-                if(_time.ElapsedTime > _max_loop_time)
-                {
-                    _timeDrawLoopTook = _time.ElapsedTime;
-                    foreach(var i in _toBeUpdated)
-                    {
-                        Window.Draw(i.DrawableComs);
-                    }
-
-                    _timeDrawLoopTook = _time.ElapsedTime - _timeDrawLoopTook;
-                    Console.WriteLine("RAN OUT OF TIME LEFT : {0}", _toBeUpdated.Count);
-                    return;
-                }
-                */
             }
         }
 
         public void UpdateWindow()
         {
             _window.Update();
-            PerfMessure.Step();
         }
 
         private Stack<IEnt> GetEntsToUpdate()

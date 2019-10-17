@@ -1,9 +1,6 @@
 ﻿using System;
 using RectClash.ECS;
 using RectClash.ECS.Graphics;
-using RectClash.ECS.Input;
-using RectClash.ECS.Performance;
-using RectClash.game;
 using RectClash.Game;
 using SFML.Graphics;
 
@@ -32,6 +29,40 @@ namespace RectClash
 
 			var worldEnt = EntFactory.Instance.CreateWorld();
 			EntFactory.Instance.CreatePlayerInput();
+
+			var firstRect = Engine.Instance.CreateEnt("firstRect");
+			firstRect.PostionCom.LocalScale = new SFML.System.Vector2f(4f, 4f);
+			firstRect.AddCom
+			(
+				new DrawRectCom()
+				{
+					FillColor = Color.White,
+					Priority = DrawPriority.GRID_BACKGROUND
+				}
+			);
+
+			var secRect = Engine.Instance.CreateEnt(firstRect, "secRect");
+			secRect.AddCom
+			(
+				new DrawRectCom()
+				{
+					FillColor = Color.Red,
+					Priority = DrawPriority.GRID_OVERLAY
+				}
+			);
+
+			/*
+			var thirdRect = Engine.Instance.CreateEnt(secRect, "thirdRect");
+			thirdRect.AddCom
+			(
+				new DrawRectCom()
+				{
+					FillColor = Color.Blue,
+					Priority = DrawPriority.UNITS
+				}
+			);
+			*/
+
 			
 
 			while(Engine.Instance.Window.IsOpen)
