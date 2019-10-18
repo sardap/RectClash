@@ -85,13 +85,11 @@ namespace RectClash.Game
 			(
 				new WorldCom()
 				{
-					WorldSize = new Misc.Vector2<int>(50, 50)
+					WorldSize = new Misc.Vector2<int>(100, 100)
 				}
 			);
 
             WorldEnt =  worldEnt;
-
-            /*
 
 			var gridEnt = Engine.Instance.CreateEnt(worldEnt, "Grid");
 			var gridCom = gridEnt.AddCom
@@ -105,11 +103,10 @@ namespace RectClash.Game
             (
                 (int)(worldCom.WorldSize.X / scale), 
                 (int)(worldCom.WorldSize.Y / scale),
-                8,
-                8
+                10,
+                10
             );
 			worldCom.Grid = gridCom;
-            */
 
             return worldEnt;
         }
@@ -225,14 +222,13 @@ namespace RectClash.Game
             );
 
             newCell.PostionCom.LocalPostion =  new Vector2f(j, i);
-            newCell.PostionCom.LocalScale = newCell.PostionCom.GetWorldToLocalMatrix().TransformPoint(new Vector2f(width, height));
 
             newCell.AddCom
             (
                 new DrawRectCom()
                 {
-                    //OutlineColor = new Color(byte.MaxValue, byte.MaxValue, byte.MaxValue),
-                    //LineThickness = 2,
+                    OutlineColor = new Color(byte.MaxValue, byte.MaxValue, byte.MaxValue),
+                    LineThickness = 0.03,
                     Priority = DrawPriority.GRID_OVERLAY
                 }
             );
@@ -250,8 +246,6 @@ namespace RectClash.Game
                     Priority = DrawPriority.GRID_BACKGROUND
                 }
             );
-            cellBackgroundEnt.PostionCom.LocalPostion = new Vector2f();
-            cellBackgroundEnt.PostionCom.LocalScale = new Vector2f(0.9f, 0.9f);
 
             infoCom.Background = background;
 

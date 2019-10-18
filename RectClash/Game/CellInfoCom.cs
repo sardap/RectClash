@@ -27,7 +27,7 @@ namespace RectClash.Game
 
         private static Dictionary<State, Color> _fillColorMap = new Dictionary<State, Color>()
         {
-            {State.UnSelected, Color.White},
+            {State.UnSelected, new Color(0, 0, 0, 0)},
             {State.Selected, new Color(byte.MaxValue, 0, 0, 120)},
             {State.InMovementRange, new Color(byte.MaxValue, byte.MaxValue, byte.MaxValue, 120)},
             {State.OnPath, new Color(0, byte.MaxValue, 0, byte.MaxValue)}

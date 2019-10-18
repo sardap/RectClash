@@ -6,6 +6,7 @@ namespace RectClash.ECS.Graphics
 	// Stolen https://www.gamedev.net/articles/programming/math-and-physics/making-a-game-engine-transformations-r3566/
 	public class PostionCom : Com
 	{
+		
 		private Transform _trans = Transform.Identity;
 
 		private Transform _localToWorldMatrix = Transform.Identity;

@@ -30,8 +30,10 @@ namespace RectClash
 			var worldEnt = EntFactory.Instance.CreateWorld();
 			EntFactory.Instance.CreatePlayerInput();
 
+
+			/*
 			var firstRect = Engine.Instance.CreateEnt("firstRect");
-			firstRect.PostionCom.LocalScale = new SFML.System.Vector2f(4f, 4f);
+			firstRect.PostionCom.LocalScale = new SFML.System.Vector2f(10f, 10f);
 			firstRect.AddCom
 			(
 				new DrawRectCom()
@@ -42,6 +44,7 @@ namespace RectClash
 			);
 
 			var secRect = Engine.Instance.CreateEnt(firstRect, "secRect");
+			secRect.PostionCom.LocalPostion = new SFML.System.Vector2f(0, 0);
 			secRect.AddCom
 			(
 				new DrawRectCom()
@@ -51,8 +54,8 @@ namespace RectClash
 				}
 			);
 
-			/*
-			var thirdRect = Engine.Instance.CreateEnt(secRect, "thirdRect");
+			var thirdRect = Engine.Instance.CreateEnt(firstRect, "thirdRect");
+			secRect.PostionCom.LocalPostion = new SFML.System.Vector2f(1, 0);
 			thirdRect.AddCom
 			(
 				new DrawRectCom()
@@ -62,8 +65,6 @@ namespace RectClash
 				}
 			);
 			*/
-
-			
 
 			while(Engine.Instance.Window.IsOpen)
 			{

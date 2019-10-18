@@ -314,6 +314,7 @@ namespace RectClash.Game
             CellHeight = cellHeight;
             CellWidth = cellWidth;
             _cells = new CellInfoCom[gridWidth, gridHeight];
+            Owner.PostionCom.LocalScale = new Vector2f(cellWidth, cellHeight);
 
             for(int i = 0; i < _cells.GetLength(0); i++)
             {
@@ -322,8 +323,6 @@ namespace RectClash.Game
                     _cells[i, j] = EntFactory.Instance.CreateCell(this, i, j, CellWidth, CellHeight).GetCom<CellInfoCom>();
                 }
             }
-
-            int x = 0;
         }
 
         public void OnNotify(IEnt ent, GameEvent evt)
