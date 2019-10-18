@@ -36,9 +36,9 @@ namespace RectClash.Game
 
         private static Dictionary<CellType, Color> _backgroundColorMap = new Dictionary<CellType, Color>()
         {
-            {CellType.Dirt, new Color(124, 252, 0)},
+            {CellType.Dirt, new Color(109, 168, 74)},
             {CellType.Water, Color.Blue},
-            {CellType.Mud, new Color(165, 42, 42)}
+            {CellType.Mud, new Color(143, 116, 63)}
         };
 
         private Stack<State> _stateStack = new Stack<State>();
