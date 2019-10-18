@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using RectClash.ECS;
+using SFML.Graphics;
 
 namespace RectClash.Misc
 {
@@ -42,5 +43,19 @@ namespace RectClash.Misc
 
         }
 
+        private static Transform MultiplyTransRec(int i, params Transform[] trans)
+		{
+			if(i >= trans.Length)
+			{
+				return trans[i - 1];
+			}
+
+			return trans[i] * MultiplyTransRec(i + 1, trans);
+		}
+
+		public static Transform MultiplyTrans(params Transform[] trans)
+		{
+			return MultiplyTransRec(0, trans);
+		}
     }
 }

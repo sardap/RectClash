@@ -10,6 +10,8 @@ namespace RectClash.ECS.Input
         float WorldMouseX { get; }
         float WorldMouseY { get; }
 
+        Vector2f ToWorldMouse(Vector2f x);
+
         bool IsButtonPressed(Mouse.Button button); 
     }
 }

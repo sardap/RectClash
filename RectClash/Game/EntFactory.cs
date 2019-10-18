@@ -85,7 +85,7 @@ namespace RectClash.Game
 			(
 				new WorldCom()
 				{
-					WorldSize = new Misc.Vector2<int>(100, 100)
+					WorldSize = new Misc.Vector2<int>(2000, 500)
 				}
 			);
 
@@ -198,7 +198,7 @@ namespace RectClash.Game
 
             var cellType = CellInfoCom.CellType.Dirt;
             var selectorNum = Utility.Random.Next(100);
-            if(selectorNum > 0)
+            if(selectorNum > 30)
             {
                 cellType = CellInfoCom.CellType.Dirt;
             }

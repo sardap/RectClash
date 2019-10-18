@@ -1,4 +1,5 @@
 using System.Linq;
+using RectClash.Misc;
 using SFML.Graphics;
 
 namespace RectClash.ECS.Graphics
@@ -85,10 +86,23 @@ namespace RectClash.ECS.Graphics
 			set => LocalPostion = new SFML.System.Vector2f(LocalX, value);
 		}
 
+		public FloatRect WorldRect
+		{
+			get
+			{
+				var worldScale = LocalToWorldMatrix.TransformPoint(LocalScale);
+				return new FloatRect(WorldPostion.X, WorldPostion.Y, worldScale.X, worldScale.Y);
+			}
+		}
+
 		public FloatRect Rect
 		{
-			get => new FloatRect(LocalX, LocalY, LocalScale.X, LocalScale.Y);
+			get
+			{
+				return new FloatRect(LocalPostion.X, LocalPostion.Y, LocalScale.X, LocalScale.Y);
+			}
 		}
+
 
 		// https://www.gamedev.net/articles/programming/math-and-physics/making-a-game-engine-transformations-r3566/
 		private void SetDirty()
@@ -105,21 +119,6 @@ namespace RectClash.ECS.Graphics
 			}
 		}
 
-		private Transform MutiplyTransRec(int i, params Transform[] trans)
-		{
-			if(i >= trans.Length)
-			{
-				return trans[i - 1];
-			}
-
-			return trans[i] * MutiplyTransRec(i + 1, trans);
-		}
-
-		private Transform MutiplyTrans(params Transform[] trans)
-		{
-			return MutiplyTransRec(0, trans);
-		}
-
 		public Transform CalculateLocalToParentMatrix()
 		{
 			var translate = Transform.Identity;
@@ -129,7 +128,7 @@ namespace RectClash.ECS.Graphics
 			var scale = Transform.Identity;
 			scale.Scale(LocalScale);
 
-			return MutiplyTrans(translate, rotate, scale);
+			return Utility.MultiplyTrans(translate, rotate, scale);
 		}
 
 		public Transform GetWorldToLocalMatrix()

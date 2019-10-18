@@ -176,6 +176,9 @@ namespace RectClash.Game
 
         private void ClearCellsInRange()
         {
+            if(_cellsInRange == null)
+                return;
+
             foreach(var node in _cellsInRange)
             {
                 Get(node).ChangeState(CellInfoCom.State.UnSelected);

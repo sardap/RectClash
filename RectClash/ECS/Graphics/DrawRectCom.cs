@@ -42,6 +42,7 @@ namespace RectClash.ECS.Graphics
             _rectangle.OutlineColor = OutlineColor;
             _rectangle.OutlineThickness = (float)LineThickness;
 
+            states.Transform.Combine(Engine.Instance.Window.Camera.LocalToWorldTransform);
             states.Transform.Combine(PostionCom.LocalToWorldMatrix);
 
             target.Draw(_rectangle, states);

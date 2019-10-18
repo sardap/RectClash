@@ -30,7 +30,6 @@ namespace RectClash
 			var worldEnt = EntFactory.Instance.CreateWorld();
 			EntFactory.Instance.CreatePlayerInput();
 
-
 			/*
 			var firstRect = Engine.Instance.CreateEnt("firstRect");
 			firstRect.PostionCom.LocalScale = new SFML.System.Vector2f(10f, 10f);
