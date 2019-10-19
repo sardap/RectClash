@@ -26,30 +26,13 @@ namespace RectClash.Game
 
 		private void MouseButtonPressed(object sender, SFML.Window.MouseButtonEventArgs mouse)
 		{
-			System.Console.WriteLine("RAW MOUSE PRESSED: {0} {1}", mouse.X, mouse.Y);
-			
 			var trans = Owner.PostionCom.GetWorldToLocalMatrix();
-			trans.Combine(Engine.Instance.Window.Camera.LocalToWorldTransform.GetInverse());
+			trans.Combine(Engine.Instance.Window.Camera.WorldToLocalTransform);
 			var mousePos = trans.TransformPoint(mouse.X, mouse.Y);
-
-			System.Console.WriteLine("WORLD MOUSE PRESSED: {0} {1}", mousePos.X, mousePos.Y);
 
 			bool InsideRect()
 			{
 				var rect = Owner.PostionCom.Rect;
-				
-				System.Console.WriteLine
-				(
-					"{0}: Left: {1} Right {2} Top {3} Bot {4}", 
-					((Ent)Owner).Name, rect.Left, rect.Left + rect.Width, rect.Top, rect.Top + rect.Height
-				);
-
-				System.Console.WriteLine
-				(
-					"{0}: Left: {1} Right {2} Top {3} Bot {4}", 
-					((Ent)Owner).Name, mousePos.X > 0, mousePos.X < 1, mousePos.Y > 0, mousePos.Y < 1
-				);
-
 				
 				return mousePos.X > 0 && 
 					mousePos.X < 1 && 

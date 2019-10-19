@@ -10,10 +10,12 @@ namespace RectClash.Game.Perf
 
 		protected override void InternalStart()
 		{
-			Engine.Instance.Window.RenderWindow.KeyReleased += Window_KeyReleased;
+			Engine.Instance.Window.RenderWindow.KeyReleased += WindowKeyReleased;
+			Subject.Notify("Creating: " + Enum.GetName(EntFactory.Instance.UnitTypeToCreate.GetType(), EntFactory.Instance.UnitTypeToCreate), PerfEvents.UNIT_CREATE_SELECTION);
+			Subject.Notify("Faction: " + Enum.GetName(EntFactory.Instance.FactionToCreate.GetType(), EntFactory.Instance.FactionToCreate), PerfEvents.FACTION_SELECTION);
 		}
 
-		private void Window_KeyReleased(object sender, SFML.Window.KeyEventArgs e)
+		private void WindowKeyReleased(object sender, SFML.Window.KeyEventArgs e)
 		{ 
 			switch(e.Code)
 			{
@@ -31,7 +33,17 @@ namespace RectClash.Game.Perf
 					Subject.Notify("Creating: " + Enum.GetName(unitToCreate.GetType(), unitToCreate), PerfEvents.UNIT_CREATE_SELECTION);
 					break;
                 case SFML.Window.Keyboard.Key.Y:
-                    
+                    Faction faction;
+					if(EntFactory.Instance.FactionToCreate == Faction.Red)
+					{
+						faction = Faction.Blue;
+					}
+					else
+					{
+						faction = Faction.Red;
+					}
+					EntFactory.Instance.FactionToCreate = faction;
+					Subject.Notify("Faction: " + Enum.GetName(faction.GetType(), faction), PerfEvents.FACTION_SELECTION);
                     break;
 			}
 		}

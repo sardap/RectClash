@@ -34,9 +34,8 @@ namespace RectClash.Game.Perf
 			}
 
 			Text.Text += 
-				"\nLocalMouse(" + DoubleToString(engine.Mouse.CamMouseX) + "," + DoubleToString(engine.Mouse.CamMouseY) + ")" +
-				//"\nWorldMouse(" + DoubleToString(engine.Mouse.WorldMouseX) + "," + DoubleToString(engine.Mouse.WorldMouseY) + ")" +
-				"\nViewPos(" + DoubleToString(engine.Window.Camera.Postion.X) + "," + DoubleToString(engine.Window.Camera.Postion.Y) + ")";
+				"\nLocalMouse(" + DoubleToString(engine.Mouse.CamMouseX) + "," + DoubleToString(engine.Mouse.CamMouseY) + ")";
+				//"\nWorldMouse(" + DoubleToString(engine.Mouse.WorldMouseX) + "," + DoubleToString(engine.Mouse.WorldMouseY) + ")"
 
 		}
 

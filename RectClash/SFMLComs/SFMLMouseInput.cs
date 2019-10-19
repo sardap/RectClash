@@ -33,8 +33,6 @@ namespace RectClash.SFMLComs
             get
             {
                 throw new System.NotImplementedException();
-                Window.SetView(Engine.Instance.Window.Camera.View);
-                return Window.MapPixelToCoords(MousePostion).X;
             }
         }
 
@@ -43,16 +41,12 @@ namespace RectClash.SFMLComs
             get
             {
                 throw new System.NotImplementedException();
-                Window.SetView(Engine.Instance.Window.Camera.View);
-                return Window.MapPixelToCoords(MousePostion).Y;
             }
         }
 
         public Vector2f ToWorldMouse(Vector2f pos)
         {
             throw new System.NotImplementedException();
-            Window.SetView(Engine.Instance.Window.Camera.View);
-            return Window.MapPixelToCoords(MousePostion);
         }
 
         public bool IsButtonPressed(Mouse.Button button)

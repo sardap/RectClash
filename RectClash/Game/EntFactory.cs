@@ -64,6 +64,8 @@ namespace RectClash.Game
                 
             );
 
+            Engine.Instance.Window.Camera.Subject.AddObvs(debugInfo);
+
 			debugEnt.AddCom
 			(
 				new RenderTextCom()
@@ -85,7 +87,7 @@ namespace RectClash.Game
 			(
 				new WorldCom()
 				{
-					WorldSize = new Misc.Vector2<int>(2000, 500)
+					WorldSize = new Misc.Vector2<int>(500, 1000)
 				}
 			);
 
@@ -177,16 +179,18 @@ namespace RectClash.Game
                 }
             );
 
-            // var hat = Engine.Instance.CreateEnt(ent);
-            // hat.AddCom
-            // (
-            //     new DrawRectCom()
-            //     {
-            //         OutlineColor = hatColour,
-            //         LineThickness = 2.0,
-            //         Priority = DrawPriority.UNITS_TOP_LAYER
-            //     }
-            // );
+            var hat = Engine.Instance.CreateEnt(ent);
+            hat.PostionCom.LocalScale = new Vector2f(0.8f, 0.8f);
+            hat.PostionCom.LocalPostion = new Vector2f(0.2f, 0.2f);
+            hat.AddCom
+            (
+                new DrawRectCom()
+                {
+                    OutlineColor = hatColour,
+                    LineThickness = 0.1,
+                    Priority = DrawPriority.UNITS_TOP_LAYER
+                }
+            );
             
             return ent;
         }

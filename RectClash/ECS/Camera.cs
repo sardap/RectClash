@@ -1,3 +1,4 @@
+using RectClash.Game.Perf;
 using RectClash.Misc;
 using RectClash.SFMLComs;
 using SFML.Graphics;
@@ -7,18 +8,13 @@ namespace RectClash.ECS
 {
 	public class Camera
 	{
-		private View _view;
-
 		private Vector2f _postion { get; set; }
 		private Vector2f _zoom { get; set; }
 
 		private Transform _localToWorldTransform = Transform.Identity;
 		private Transform _worldToLocalTransform = Transform.Identity;
 
-		public View View
-		{
-			get => _view;
-		}
+		public readonly Subject<string, PerfEvents> Subject = new Subject<string, PerfEvents>();
 
 		public Transform LocalToWorldTransform
 		{
@@ -44,9 +40,9 @@ namespace RectClash.ECS
 		{
 			get
 			{
-				if(InveserveDirty)
+				if(_inverseDirty)
 				{
-					InveserveDirty = false;
+					_inverseDirty = false;
 
 					_worldToLocalTransform = LocalToWorldTransform.GetInverse();
 				}
@@ -61,6 +57,7 @@ namespace RectClash.ECS
 			set
 			{
 				_postion = value;
+				Subject.Notify("LocalMouse(" + _postion.X.ToString("0.##") + "," + _postion.Y.ToString("0.##") + ")", PerfEvents.CAMERA_MOVED);
 				SetDirty();
 			}
 		}
@@ -83,6 +80,7 @@ namespace RectClash.ECS
 			set
 			{
 				_zoom = value;
+				Subject.Notify("Zoom:" + _zoom.X.ToString("0.##"), PerfEvents.CAMERA_ZOOMED);
 				SetDirty();
 			}
 		}
@@ -114,7 +112,7 @@ namespace RectClash.ECS
 			set;
 		}
 
-		public bool InveserveDirty
+		private bool _inverseDirty
 		{
 			get;
 			set;
@@ -123,15 +121,14 @@ namespace RectClash.ECS
 
 		public Camera()
 		{
-			_view = new View();
-			_view.Size = Engine.Instance.Window.Size;
+			Postion = new Vector2f();
 			Zoom = new Vector2f(1, 1);
 		}
 
 		private void SetDirty()
 		{
 			Dirty = true;
-			InveserveDirty = true;
+			_inverseDirty = true;
 		}
 
 		public Vector2f TransformLocalToWorldPoint(Transform transform, float x, float y)
