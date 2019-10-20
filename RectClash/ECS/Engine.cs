@@ -51,11 +51,16 @@ namespace RectClash.ECS
 
         public Time Time { get { return _time; } }
 
-        public IEnt CreateEnt(IEnt parent, string name = "")
+        public IEnt CreateEnt(IEnt parent, string name, List<string> tags)
         {
-            var result = new Ent(parent, name);
+            var result = new Ent(parent, name, tags);
             parent.AddChild(result);
             return result;
+        }
+
+        public IEnt CreateEnt(IEnt parent, string name = "")
+        {
+            return CreateEnt(parent, name, new List<string>());
         }
 
         public IEnt CreateEnt(string name = "")

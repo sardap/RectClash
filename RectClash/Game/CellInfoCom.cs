@@ -7,111 +7,141 @@ using SFML.System;
 
 namespace RectClash.Game
 {
-    public class CellInfoCom : Com, IGameObv
-    {
-        public enum CellType
-        {
-            Dirt,
-            Mud,
-            Water
-        }
+	public class CellInfoCom : Com, IGameObv
+	{
+		public enum CellType
+		{
+			Dirt,
+			Mud,
+			Water
+		}
 
-        public enum State
-        {
-            StartingSate,
-            UnSelected,
-            Selected,
-            InMovementRange,
-            OnPath
-        }
+		public enum State
+		{
+			StartingSate,
+			UnSelected,
+			Selected,
+			InMovementRange,
+			CanAttack,
+			OnPath
+		}
 
-        private static Dictionary<State, Color> _fillColorMap = new Dictionary<State, Color>()
-        {
-            {State.UnSelected, new Color(0, 0, 0, 0)},
-            {State.Selected, new Color(byte.MaxValue, 0, 0, 120)},
-            {State.InMovementRange, new Color(byte.MaxValue, byte.MaxValue, byte.MaxValue, 120)},
-            {State.OnPath, new Color(0, byte.MaxValue, 0, byte.MaxValue)}
-        };
-
-
-        private static Dictionary<CellType, Color> _backgroundColorMap = new Dictionary<CellType, Color>()
-        {
-            {CellType.Dirt, new Color(109, 168, 74)},
-            {CellType.Water, Color.Blue},
-            {CellType.Mud, new Color(143, 116, 63)}
-        };
-
-        private Stack<State> _stateStack = new Stack<State>();
-
-        private IList<IEnt> _inside = new List<IEnt>();
-        
-        private DrawRectCom _drawRectCom;
-
-        public CellType Type { get; set; }
-
-        public GameSubject Subject { get; set; }
-
-        public Vector2i Cords { get; set; }
-
-        public State CurrentState { get; set; }
-
-        public ICollection<IEnt> Inside { get { return _inside; } }
-
-        public DrawRectCom Background { get; set; }
+		private static Dictionary<State, Color> _fillColorMap = new Dictionary<State, Color>()
+		{
+			{State.UnSelected, new Color(0, 0, 0, 0)},
+			{State.Selected, new Color(0, 0, 125, 120)},
+			{State.InMovementRange, new Color(byte.MaxValue, byte.MaxValue, byte.MaxValue, 120)},
+			{State.OnPath, new Color(0, byte.MaxValue, 0, byte.MaxValue)},
+			{State.CanAttack, new Color(byte.MaxValue, 0, 0, 125)}
+		};
 
 
-        public int MovementCost
-        {
-            get
-            {
-                switch(Type)
-                {
-                    case CellType.Mud:
-                        return 3;
-                    default:
-                        return 1;
-                }
-            }
-            
-        }
+		private static Dictionary<CellType, Color> _backgroundColorMap = new Dictionary<CellType, Color>()
+		{
+			{CellType.Dirt, new Color(109, 168, 74)},
+			{CellType.Water, Color.Blue},
+			{CellType.Mud, new Color(143, 116, 63)}
+		};
 
-        public bool SpaceAvailable 
-        { 
-            get
-            {
-                return (Type == CellType.Dirt || Type == CellType.Mud) && Inside.Count <= 0;
-            }
-        }
+		private Stack<State> _stateStack = new Stack<State>();
 
-        protected override void InternalStart()
-        {
-            _drawRectCom = Owner.GetCom<DrawRectCom>();
-            ChangeState(State.UnSelected);
-        }
+		private IList<IEnt> _inside = new List<IEnt>();
+		
+		private DrawRectCom _drawRectCom;
 
-        public void ChangeState(State newState)
-        {
-            if(newState == CurrentState)
-                return;
+		private CellType _type;
 
-            _stateStack.Push(newState);
+		private DrawRectCom _background;
 
-            CurrentState = newState;
-            _drawRectCom.FillColor = _fillColorMap[newState];
-            Background.FillColor = _backgroundColorMap[Type];
-        }
+		public CellType Type 
+		{ 
+			get => _type;
+			set
+			{
+				_type = value;
+				if(Background != null)
+					Background.FillColor = _backgroundColorMap[Type];
+			}
+		}
 
-        public void OnNotify(IEnt ent, GameEvent evt)
-        {
-            switch(evt)
-            {
-                case GameEvent.GRID_CELL_SELECTED:
-                    Subject.Notify(Owner, GameEvent.GRID_CELL_SELECTED);
-                    break;
-                case GameEvent.GRID_CLEAR_SELECTION:
-                    Subject.Notify(Owner, GameEvent.GRID_CLEAR_SELECTION);
-                    break;
-            }
-        }
-    }
+		public GameSubject Subject { get; set; }
+
+		public Vector2i Cords { get; set; }
+
+		public State CurrentState { get; set; }
+
+		public ICollection<IEnt> Inside { get { return _inside; } }
+
+		public DrawRectCom Background 
+		{ 
+			get => _background;
+			set
+			{
+				_background = value;
+				Background.FillColor = _backgroundColorMap[Type];
+			}
+		}
+
+
+		public int MovementCost
+		{
+			get
+			{
+				switch(Type)
+				{
+					case CellType.Mud:
+						return 3;
+					default:
+						return 1;
+				}
+			}
+			
+		}
+
+		public bool Selectable 
+		{
+			get
+			{
+				return (Type == CellType.Dirt || Type == CellType.Mud);
+			}
+		}
+
+		public bool SpaceAvailable 
+		{ 
+			get
+			{
+				return Selectable && Inside.Count <= 0;
+			}
+		}
+
+		protected override void InternalStart()
+		{
+			_drawRectCom = Owner.GetCom<DrawRectCom>();
+			ChangeState(State.UnSelected);
+		}
+
+		public void ChangeState(State newState)
+		{
+			if(newState == CurrentState)
+				return;
+
+			_stateStack.Push(newState);
+
+			CurrentState = newState;
+			_drawRectCom.FillColor = _fillColorMap[newState];
+		}
+
+		public void OnNotify(IEnt ent, GameEvent evt)
+		{
+			switch(evt)
+			{
+				case GameEvent.GRID_CELL_SELECTED:
+					Subject.Notify(Owner, GameEvent.GRID_CELL_SELECTED);
+					break;
+				case GameEvent.GRID_CLEAR_SELECTION:
+					Subject.Notify(Owner, GameEvent.GRID_CLEAR_SELECTION);
+					break;
+			}
+		}
+	}
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using RectClash.ECS;
 using RectClash.Misc;
 using RectClash.Game.Unit;
+using RectClash.Game.Combat;
 
 namespace RectClash.Game
 {
@@ -15,6 +16,8 @@ namespace RectClash.Game
         public Vector2<int> WorldSize { get; set; }
 
         public List<UnitInfoCom> Units { get; set; }
+
+        public CombatHandlerCom CombatHandler { get; set; }
 
         public WorldCom() : base()
         {

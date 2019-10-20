@@ -1,12 +1,14 @@
 namespace RectClash.ECS.Graphics
 {
-    public enum DrawPriority
+    public enum DrawLayer
     {
         BACKGROUND = 0,
         GRID_BACKGROUND,
-        GRID_OVERLAY,
         UNITS,
-        UNITS_TOP_LAYER,
+        UNITS_TOP,
+        UNITS_INFO_BOTTOM,
+        UNITS_INFO_TOP,
+        GRID_OVERLAY,
         UI
     }
 }

@@ -57,5 +57,10 @@ namespace RectClash.Misc
 		{
 			return MultiplyTransRec(0, trans);
 		}
+
+        public static string GetEnumName<T>(T val) where T : struct, IConvertible 
+        {
+            return Enum.GetName(val.GetType(), val);
+        }
     }
 }

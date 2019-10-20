@@ -6,6 +6,9 @@ namespace RectClash.Game
         GRID_CELL_SELECTED,
         GRID_CELL_UNSELECTED,
         GRID_MOVE_CONF,
-        GRID_CLEAR_SELECTION
+        GRID_CLEAR_SELECTION,
+        ATTACK_TARGET,
+        ATTACK_ATTACKER,
+        ATTACK_CONF
     }
 }

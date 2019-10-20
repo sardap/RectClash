@@ -10,61 +10,63 @@ using UnitType = RectClash.Game.Unit.UnitType;
 using RectClash.Game.Perf;
 using RectClash.Misc;
 using SFML.System;
+using System.Collections.Generic;
+using RectClash.Game.Combat;
 
 namespace RectClash.Game
 {
-    public class EntFactory
-    {
-        private static readonly EntFactory _instance = new EntFactory();
+	public class EntFactory
+	{
+		private static readonly EntFactory _instance = new EntFactory();
 
-        private EntFactory() {}
+		private EntFactory() {}
 
-        public static EntFactory Instance { get { return _instance; } }
+		public static EntFactory Instance { get { return _instance; } }
 
-        public IEnt WorldEnt { get; set; }
+		public IEnt WorldEnt { get; set; }
 
-        public UnitType UnitTypeToCreate { get; set; }
+		public UnitType UnitTypeToCreate { get; set; }
 
-        public Faction FactionToCreate { get; set; }
+		public Faction FactionToCreate { get; set; }
 
-        public IEnt CreateDebugInfo()
-        {
+		public IEnt CreateDebugInfo()
+		{
 			var font = new ECS.Graphics.Font()
 			{
 				FileLocation = "calibri.ttf"
 			};
 
-            var debugEnt = Engine.Instance.CreateEnt();
+			var debugEnt = Engine.Instance.CreateEnt();
 			debugEnt.PostionCom.LocalX = 10;
 			debugEnt.PostionCom.LocalY = 10;
 
 
-            var debugInfo = debugEnt.AddCom
-            (
-                new UpdateDebugInfoCom()
-            );
+			var debugInfo = debugEnt.AddCom
+			(
+				new UpdateDebugInfoCom()
+			);
 
-            var subject = new Subject<string, PerfEvents>(debugInfo);
-            
-            debugEnt.AddCom
-            (
-                new PerfMessureCom()
-                {
-                    Subject = subject
-                }
-                
-            );
+			var subject = new Subject<string, PerfEvents>(debugInfo);
+			
+			debugEnt.AddCom
+			(
+				new PerfMessureCom()
+				{
+					Subject = subject
+				}
+				
+			);
 
-            debugEnt.AddCom
-            (
-                new DebugInputCom()
-                {
-                    Subject = subject
-                }
-                
-            );
+			debugEnt.AddCom
+			(
+				new DebugInputCom()
+				{
+					Subject = subject
+				}
+				
+			);
 
-            Engine.Instance.Window.Camera.Subject.AddObvs(debugInfo);
+			Engine.Instance.Window.Camera.Subject.AddObvs(debugInfo);
 
 			debugEnt.AddCom
 			(
@@ -73,16 +75,16 @@ namespace RectClash.Game
 					Font = font,
 					Color = new Color(byte.MaxValue, 0, 0),
 					Floating = true,
-                    Priority = DrawPriority.UI
+					Priority = DrawLayer.UI
 				}
 			);
 
-            return debugEnt;
-        }
+			return debugEnt;
+		}
 
-        public IEnt CreateWorld()
-        {
-            var worldEnt = Engine.Instance.CreateEnt();
+		public IEnt CreateWorld()
+		{
+			var worldEnt = Engine.Instance.CreateEnt();
 			var worldCom = worldEnt.AddCom
 			(
 				new WorldCom()
@@ -91,32 +93,41 @@ namespace RectClash.Game
 				}
 			);
 
-            WorldEnt =  worldEnt;
+			WorldEnt =  worldEnt;
+
+			var combatHandlerEnt = Engine.Instance.CreateEnt(worldEnt);
+			var combatHandlerCom = combatHandlerEnt.AddCom
+			(
+				new CombatHandlerCom()
+			);
 
 			var gridEnt = Engine.Instance.CreateEnt(worldEnt, "Grid");
 			var gridCom = gridEnt.AddCom
-            (
-                new GridCom()
-            );
+			(
+				new GridCom()
+				{
+					Subject = new GameSubject(combatHandlerCom)
+				}
+			);
 
-            float scale = 50f;
+			float scale = 50f;
 
 			gridCom.GenrateGrid
-            (
-                (int)(worldCom.WorldSize.X / scale), 
-                (int)(worldCom.WorldSize.Y / scale),
-                10,
-                10
-            );
+			(
+				(int)(worldCom.WorldSize.X / scale), 
+				(int)(worldCom.WorldSize.Y / scale),
+				10,
+				10
+			);
 			worldCom.Grid = gridCom;
 
-            return worldEnt;
-        }
+			return worldEnt;
+		}
 
-        public IEnt CreatePlayerInput()
-        {
-            var result = Engine.Instance.CreateEnt();
-            result.AddCom
+		public IEnt CreatePlayerInput()
+		{
+			var result = Engine.Instance.CreateEnt();
+			result.AddCom
 			(
 				new PlayerInputCom()
 				{
@@ -124,136 +135,182 @@ namespace RectClash.Game
 				}
 			);
 
-            return result;
-        }
+			return result;
+		}
 
-        public IEnt CreateFootSolider(GridCom grid, int i, int j)
-        {
-            var ent = Engine.Instance.CreateEnt(WorldEnt);
-            grid.AddEnt(ent, i, j);           
-            Color baseColour;
-            Color hatColour;
-            int range;
-            switch(UnitTypeToCreate)
-            {
-                case UnitType.Regular:
-                    baseColour = Color.White;
-                    range = 5;
-                    break;
-                case UnitType.Heavy:
-                    baseColour = Color.Magenta;
-                    range = 3;
-                    break;
-                default:
-                    throw new System.NotImplementedException();
-            }
+		private int _footSolider = 0;
 
-            switch(FactionToCreate)
-            {
-                case Faction.Red:
-                    hatColour = Color.Red;
-                    break;
-                case Faction.Blue:
-                    hatColour = Color.Blue;
-                    break;
-                default:
-                    throw new System.NotImplementedException();
-            }
+		public IEnt CreateFootSolider(GridCom grid, int i, int j)
+		{
+			var ent = Engine.Instance.CreateEnt
+			(
+				WorldEnt, 
+				"FootSoilder:" + (_footSolider++).ToString() + " " + Utility.GetEnumName(UnitTypeToCreate) + " " + Utility.GetEnumName(FactionToCreate), 
+				new List<string>(){Tags.FOOT_SOILDER}
+			);
 
-            ent.AddCom
-            (
-                new UnitInfoCom()
-                {
-                    Range = range,
-                    Type = UnitTypeToCreate,
-                    Faction = FactionToCreate
-                }
-            );
+			grid.AddEnt(ent, i, j);
+			Color hatColour;
 
-            ent.AddCom
-            (
-                new DrawRectCom()
-                {
-                    FillColor = baseColour,
-                    Priority = DrawPriority.UNITS
-                }
-            );
+			switch(FactionToCreate)
+			{
+				case Faction.Red:
+					hatColour = Color.Red;
+					break;
+				case Faction.Blue:
+					hatColour = Color.Blue;
+					break;
+				default:
+					throw new System.NotImplementedException();
+			}
 
-            var hat = Engine.Instance.CreateEnt(ent);
-            hat.PostionCom.LocalScale = new Vector2f(0.8f, 0.8f);
-            hat.PostionCom.LocalPostion = new Vector2f(0.2f, 0.2f);
-            hat.AddCom
-            (
-                new DrawRectCom()
-                {
-                    OutlineColor = hatColour,
-                    LineThickness = 0.1,
-                    Priority = DrawPriority.UNITS_TOP_LAYER
-                }
-            );
-            
-            return ent;
-        }
+			var unitCom = ent.AddCom
+			(
+				new UnitInfoCom()
+				{
+					Type = UnitTypeToCreate,
+					Faction = FactionToCreate
+				}
+			);
 
-        public IEnt CreateCell(GridCom gridCom, int i, int j, float width, float height)
-        {
-            var cellName = "Cell:" + i + "," + j;
-            var newCell = Engine.Instance.CreateEnt(gridCom.Owner, cellName);
+			var progressBarEnt = CreateProgressBar(ent);
+			progressBarEnt.PostionCom.LocalScale = new Vector2f(0.9f, 0.4f);
+			progressBarEnt.PostionCom.LocalY = -0.2f;
+			progressBarEnt.PostionCom.LocalX = 0.1f;
 
-            var cellType = CellInfoCom.CellType.Dirt;
-            var selectorNum = Utility.Random.Next(100);
-            if(selectorNum > 30)
-            {
-                cellType = CellInfoCom.CellType.Dirt;
-            }
-            else if (selectorNum > 10)
-            {
-                cellType = CellInfoCom.CellType.Mud;
-            }
-            else
-            {
-                cellType = CellInfoCom.CellType.Water;
-            }
+			var progressBarCom = progressBarEnt.GetCom<ProgressBarCom>();
 
-            var infoCom = newCell.AddCom
-            (
-                new CellInfoCom()
-                {
-                    Cords = new Vector2i(i, j),
-                    Subject = new GameSubject(gridCom),
-                    Type = cellType
-                }
-            );
+			progressBarCom.Background.FillColor = Color.Red;
+			progressBarCom.Forground.FillColor = Color.Green;
 
-            newCell.PostionCom.LocalPostion =  new Vector2f(j, i);
+			var healthCom = ent.AddCom
+			(
+				new HealthCom()
+				{
+					MaxHealth = unitCom.MaxHealth,
+					CurrentHealth = unitCom.MaxHealth,
+					HealthBarCom = progressBarCom
+				}
+			);
 
-            newCell.AddCom
-            (
-                new DrawRectCom()
-                {
-                    OutlineColor = new Color(byte.MaxValue, byte.MaxValue, byte.MaxValue),
-                    LineThickness = 0.03,
-                    Priority = DrawPriority.GRID_OVERLAY
-                }
-            );
-            
-            newCell.AddCom
-            (
-                new CellInputCom()
-            );
+			ent.AddCom
+			(
+				new DrawRectCom()
+				{
+					FillColor = unitCom.BaseColor,
+					Priority = DrawLayer.UNITS
+				}
+			);
 
-            var cellBackgroundEnt = Engine.Instance.CreateEnt(newCell, "Background: " + cellName);
-            var background = cellBackgroundEnt.AddCom
-            (
-                new DrawRectCom()
-                {
-                    Priority = DrawPriority.GRID_BACKGROUND
-                }
-            );
 
-            infoCom.Background = background;
+			var hat = Engine.Instance.CreateEnt(ent);
+			hat.PostionCom.LocalScale = new Vector2f(0.8f, 0.8f);
+			hat.PostionCom.LocalPostion = new Vector2f(0.2f, 0.2f);
+			hat.AddCom
+			(
+				new DrawRectCom()
+				{
+					OutlineColor = hatColour,
+					LineThickness = 0.1,
+					Priority = DrawLayer.UNITS_TOP
+				}
+			);
+			
+			return ent;
+		}
 
-            return newCell;
-        }
-    }
+		public IEnt CreateProgressBar(IEnt ent)
+		{
+			var resultEnt = Engine.Instance.CreateEnt(ent);
+			var backgroundCom = resultEnt.AddCom
+			(
+				new DrawRectCom()
+				{
+					Priority = DrawLayer.UNITS_INFO_BOTTOM
+				}
+			);
+
+			var healthBarForgroundEnt = Engine.Instance.CreateEnt(resultEnt);
+			var forgroundCom = healthBarForgroundEnt.AddCom
+			(
+				new DrawRectCom()
+				{
+					Priority = DrawLayer.UNITS_INFO_TOP
+				}
+			);
+
+			resultEnt.AddCom
+			(
+				new ProgressBarCom()
+				{
+					Background = backgroundCom,
+					Forground = forgroundCom
+				}
+			);
+
+			return resultEnt;
+		}
+		
+
+		public IEnt CreateCell(GridCom gridCom, int i, int j, float width, float height)
+		{
+			var cellName = "Cell:" + i + "," + j;
+			var newCell = Engine.Instance.CreateEnt(gridCom.Owner, cellName);
+
+			var cellType = CellInfoCom.CellType.Dirt;
+			var selectorNum = Utility.Random.Next(100);
+			if(selectorNum > 30)
+			{
+				cellType = CellInfoCom.CellType.Dirt;
+			}
+			else if (selectorNum > 10)
+			{
+				cellType = CellInfoCom.CellType.Mud;
+			}
+			else
+			{
+				cellType = CellInfoCom.CellType.Water;
+			}
+
+			var infoCom = newCell.AddCom
+			(
+				new CellInfoCom()
+				{
+					Cords = new Vector2i(i, j),
+					Subject = new GameSubject(gridCom),
+					Type = cellType
+				}
+			);
+
+			newCell.PostionCom.LocalPostion =  new Vector2f(j, i);
+
+			newCell.AddCom
+			(
+				new DrawRectCom()
+				{
+					OutlineColor = new Color(byte.MaxValue, byte.MaxValue, byte.MaxValue),
+					LineThickness = 0.03,
+					Priority = DrawLayer.GRID_OVERLAY
+				}
+			);
+			
+			newCell.AddCom
+			(
+				new CellInputCom()
+			);
+
+			var cellBackgroundEnt = Engine.Instance.CreateEnt(newCell, "Background: " + cellName);
+			var background = cellBackgroundEnt.AddCom
+			(
+				new DrawRectCom()
+				{
+					Priority = DrawLayer.GRID_BACKGROUND
+				}
+			);
+
+			infoCom.Background = background;
+
+			return newCell;
+		}
+	}
 }

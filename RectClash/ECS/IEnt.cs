@@ -13,6 +13,8 @@ namespace RectClash.ECS
 
         IEnumerable<IDrawableCom> DrawableComs { get; }
 
+        IList<string> Tags { get; }
+
         PostionCom PostionCom { get; }
 
         void AddChild(IEnt ent);

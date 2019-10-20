@@ -6,15 +6,17 @@ namespace RectClash.ECS
 {
     public class Ent : IEnt
     {
-        private volatile IList<ICom> _coms = new List<ICom>();
+        private readonly IList<ICom> _coms = new List<ICom>();
 
-        private volatile IList<IEnt> _children = new List<IEnt>();
+        private readonly IList<IEnt> _children = new List<IEnt>();
 
-        private volatile Stack<int> _justCreatedComs = new Stack<int>();
+        private readonly Stack<int> _justCreatedComs = new Stack<int>();
 
-        private volatile IList<IDrawableCom> _drawables = new List<IDrawableCom>();
+        private readonly IList<IDrawableCom> _drawables = new List<IDrawableCom>();
 
-        private volatile PostionCom _postionCom;
+        private readonly PostionCom _postionCom;
+
+        private readonly List<string> _tags = new List<string>();
 
         public IEnumerable<ICom> Coms { get { return _coms; } }
 
@@ -22,8 +24,23 @@ namespace RectClash.ECS
 
         public readonly string Name;
 
-        public Ent(IEnt parent, string name = "") 
+        
+        public IEnt Parent { get; set; }
+
+        public IEnumerable<IEnt> Children { get { return _children; } }
+
+        public IEnumerable<IDrawableCom> DrawableComs { get => _drawables; }
+
+        public IList<string> Tags => _tags;
+        
+        public Ent(IEnt parent, string name = "") : this(parent, name, new List<string>())
         {
+        }
+
+        public Ent(IEnt parent, string name, IEnumerable<string> tags)
+        {
+            _tags.AddRange(tags);
+
             Name = name;
 
             if(Parent == null)
@@ -36,12 +53,6 @@ namespace RectClash.ECS
             }
             _postionCom = AddCom(new PostionCom());
         }
-        
-        public IEnt Parent { get; set; }
-
-        public IEnumerable<IEnt> Children { get { return _children; } }
-
-        public IEnumerable<IDrawableCom> DrawableComs { get => _drawables; }
 
         private ICollection<IDrawableCom> GetDrawableComs(List<IDrawableCom> result)
         {
