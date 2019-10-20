@@ -14,6 +14,11 @@ namespace RectClash.Game.Unit
 				_currentHealth = value;
 				if(HealthBarCom != null)
 					HealthBarCom.Percent = _currentHealth / MaxHealth;
+
+				if(_currentHealth < 0)
+				{
+					Owner.Destory();
+				}
 			}
 		}
 		

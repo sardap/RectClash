@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using RectClash.ECS;
 using RectClash.ECS.Graphics;
 using RectClash.Game;
@@ -70,7 +71,13 @@ namespace RectClash.Game
 
 		public State CurrentState { get; set; }
 
-		public ICollection<IEnt> Inside { get { return _inside; } }
+		public IEnumerable<IEnt> Inside 
+		{ 
+			get 
+			{ 
+				return Owner.Children.Where(i => i.Tags.Contains(Tags.FOOT_SOILDER)); 
+			} 
+		}
 
 		public DrawRectCom Background 
 		{ 
@@ -110,7 +117,7 @@ namespace RectClash.Game
 		{ 
 			get
 			{
-				return Selectable && Inside.Count <= 0;
+				return Selectable && Inside.Count() <= 0;
 			}
 		}
 

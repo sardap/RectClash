@@ -64,6 +64,5 @@ namespace RectClash.Game.Unit
 		{
 			get => _staticUnitInfo[Type].maxHealth;
 		}
-
-	}
+    }
 }

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using RectClash.ECS.Exception;
 using RectClash.ECS.Graphics;
 
@@ -83,6 +84,19 @@ namespace RectClash.ECS
             return com;
         }
 
+		public void RemoveCom(ICom com)
+		{
+			if(!_coms.Contains(com))
+				throw new CannotRemoveNoneOwnedCom();
+
+			_coms.Remove(com);
+			if(com is IDrawableCom)
+			{
+				_drawables.Remove((IDrawableCom)com);
+			}
+			com.Destory();
+		}
+
         public void AddComs(IEnumerable<ICom> coms)
         {
             foreach(var i in coms)
@@ -129,6 +143,23 @@ namespace RectClash.ECS
             Parent = ent;
             ent.AddChild(this);
             PostionCom.ParentChanged();
+        }
+
+        public void Destory()
+        {
+			((Ent)Parent)._children.Remove(this);
+
+			foreach(var ent in Children.ToList())
+			{
+				ent.Destory();
+			}
+			_children.Clear();
+
+			foreach(var com in Coms.ToList())
+			{
+				RemoveCom(com);
+			}
+			_coms.Clear();
         }
     }
 }

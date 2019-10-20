@@ -25,8 +25,12 @@ namespace RectClash.ECS
 
         T AddCom<T>(T com) where T : ICom;
 
+		void RemoveCom(ICom com);
+
         void AddComs(IEnumerable<ICom> com);
 
         void Update();
+
+		void Destory();
     } 
 }

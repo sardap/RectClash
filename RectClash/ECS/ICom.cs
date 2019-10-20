@@ -9,5 +9,7 @@ namespace RectClash.ECS
         void Update();
 
         void OnStart();
+
+		void Destory();
     }
 }

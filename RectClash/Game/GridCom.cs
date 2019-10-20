@@ -72,7 +72,7 @@ namespace RectClash.Game
 						{
 							i.ChangeState(CellInfoCom.State.InMovementRange);
 						}
-						else if (i.Inside.Count > 0)
+						else if (i.Inside.Count() > 0)
 						{
 							var first = i.Inside.First();
 							if(first.Tags.Contains(Tags.FOOT_SOILDER) && first.GetCom<UnitInfoCom>().Faction != faction)
@@ -164,7 +164,7 @@ namespace RectClash.Game
 			{
 				case State.NothingSelected:
 					if( 
-						!(cell.CurrentState == CellInfoCom.State.UnSelected && cell.Inside.Count > 0) &&
+						!(cell.CurrentState == CellInfoCom.State.UnSelected && cell.Inside.Count() > 0) &&
 						!(cell.CurrentState == CellInfoCom.State.InMovementRange)
 					)
 					{
@@ -381,7 +381,6 @@ namespace RectClash.Game
 		{
 			var curCell = Get(_startCell);
 			var current = curCell.Inside.First();
-			curCell.Inside.Remove(current);
 			Move(current, _targetCell.X, _targetCell.Y);
 			ChangeState(State.ClearSelection);
 		}
@@ -400,7 +399,7 @@ namespace RectClash.Game
 		private void Move(IEnt ent, int x, int y)
 		{
 			ent.ChangeParent(_cells[x,y].Owner);
-			_cells[x,y].Inside.Add(ent);
+			//_cells[x,y].Inside.Add(ent);
 		}
 
 		public void GenrateGrid(int gridWidth, int gridHeight, float cellWidth, float cellHeight)

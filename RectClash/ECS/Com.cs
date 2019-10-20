@@ -16,6 +16,10 @@ namespace RectClash.ECS
         {
         }
 
+		protected virtual void InternalDestroy()
+		{
+		}
+
         public void OnStart()
         {
             if(!StartRan)
@@ -26,6 +30,10 @@ namespace RectClash.ECS
             _startRan = true;
 
         }
-        
+
+        public void Destory()
+        {
+			InternalDestroy();
+        }
     }
 }
