@@ -200,14 +200,23 @@ namespace RectClash.Game
 					{
 						var target = Get(_targetCell).Inside.First();
 						var start = Get(_startCell).Inside.First();
+						
+						var adjacentSquares = GetAdjacentSquares(_targetCell);
 
-						_pathCells = AStar(_startCell, GetAdjacentSquares(_targetCell).Where(i => Get(i).SpaceAvailable)).ToList();
-						foreach(var i in _pathCells.Select(i => Get(i)))
+						if(!adjacentSquares.Contains(_startCell))
 						{
-							i.ChangeState(CellInfoCom.State.OnPath);
-						}
+							_pathCells = AStar(_startCell, adjacentSquares.Where(i => Get(i).SpaceAvailable)).ToList();
+							foreach(var i in _pathCells.Select(i => Get(i)))
+							{
+								i.ChangeState(CellInfoCom.State.OnPath);
+							}
 
-						_targetCell = _pathCells.Last();
+							_targetCell = _pathCells.Last();	
+						}
+						else
+						{
+							_targetCell = _startCell;
+						}
 
 						Subject.Notify(target, GameEvent.ATTACK_TARGET);
 						Subject.Notify(start, GameEvent.ATTACK_ATTACKER);
