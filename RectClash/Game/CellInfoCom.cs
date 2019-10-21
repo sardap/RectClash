@@ -111,7 +111,7 @@ namespace RectClash.Game
 		{
 			get
 			{
-				return (Type == CellType.Dirt || Type == CellType.Mud);
+				return (Type == CellType.Dirt || Type == CellType.Mud) && CurrentState != State.TurnComplete;
 			}
 		}
 

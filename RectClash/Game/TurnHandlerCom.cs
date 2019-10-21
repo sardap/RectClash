@@ -38,6 +38,7 @@ namespace RectClash.Game
 			}
 
 			EndTurn();
+			EndTurn();
 		}
 
 		private void EndTurn()

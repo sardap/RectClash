@@ -112,7 +112,14 @@ namespace RectClash.Game
 
 			result.Add(new Vector2i(i, j));
 
-			foreach(var cell in GetAdjacentSquares(i, j).Where(node => Get(node).Selectable))
+			var adjacentSquares = GetAdjacentSquares(i, j).Where(node => Get(node).Selectable);
+
+			foreach(var cell in adjacentSquares.Where(node => !Get(node).SpaceAvailable))
+			{
+				result.Add(cell);
+			}
+
+			foreach(var cell in adjacentSquares.Where(node => Get(node).SpaceAvailable))
 			{
 				GetAdjacentSquaresInRange(cell.X, cell.Y, range - _cells[i, j].MovementCost, result);
 			}
