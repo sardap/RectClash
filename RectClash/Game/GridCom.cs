@@ -167,7 +167,8 @@ namespace RectClash.Game
 				case State.NothingSelected:
 					if( 
 						!(cell.CurrentState == CellInfoCom.State.UnSelected && cell.Inside.Count() > 0) &&
-						!(cell.CurrentState == CellInfoCom.State.InMovementRange)
+						!(cell.CurrentState == CellInfoCom.State.InMovementRange) &&
+						!(cell.CurrentState == CellInfoCom.State.TurnComplete)
 					)
 					{
 						EntFactory.Instance.CreateFootSolider(this, index.X, index.Y);
@@ -390,10 +391,12 @@ namespace RectClash.Game
 		{
 			var curCell = Get(_startCell);
 			var current = curCell.Inside.First();
-			Move(current, _targetCell.X, _targetCell.Y);
+			var targetCellIndex = _targetCell;
+			Move(current, targetCellIndex.X, targetCellIndex.Y);
 			ChangeState(State.ClearSelection);
 			
 			current.GetCom<UnitInfoCom>().TurnTaken = true;
+			Get(targetCellIndex).ChangeState(CellInfoCom.State.TurnComplete);
 		}
 
 		private void ApplyAttack()
@@ -439,6 +442,7 @@ namespace RectClash.Game
 					if(unitCom.Faction == TurnHandler.Faction)
 					{
 						unitCom.TurnTaken = false;
+						cell.ChangeState(CellInfoCom.State.UnSelected);
 					}
 				}
 			}
@@ -452,11 +456,7 @@ namespace RectClash.Game
 			{
 				case GameEvent.GRID_CELL_SELECTED:
 					var cell = ent.GetCom<CellInfoCom>();
-					if(!CellSelected(cell))
-					{
-						cell.ChangeState(CellInfoCom.State.UnSelected);
-					}
-					else
+					if(CellSelected(cell))
 					{
 						cell.ChangeState(CellInfoCom.State.Selected);
 					}

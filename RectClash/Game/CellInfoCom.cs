@@ -24,7 +24,8 @@ namespace RectClash.Game
 			Selected,
 			InMovementRange,
 			CanAttack,
-			OnPath
+			OnPath,
+			TurnComplete
 		}
 
 		private static Dictionary<State, Color> _fillColorMap = new Dictionary<State, Color>()
@@ -33,7 +34,8 @@ namespace RectClash.Game
 			{State.Selected, new Color(0, 0, 125, 120)},
 			{State.InMovementRange, new Color(byte.MaxValue, byte.MaxValue, byte.MaxValue, 120)},
 			{State.OnPath, new Color(0, byte.MaxValue, 0, byte.MaxValue)},
-			{State.CanAttack, new Color(byte.MaxValue, 0, 0, 125)}
+			{State.CanAttack, new Color(byte.MaxValue, 0, 0, 120)},
+			{State.TurnComplete, new Color(169, 169, 169, 120)}
 		};
 
 

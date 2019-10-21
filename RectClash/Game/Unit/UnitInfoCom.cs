@@ -45,8 +45,6 @@ namespace RectClash.Game.Unit
 
 		public Faction Faction { get; set; }
 
-		public UnitStatusShowCom StatusCom { get; set; }
-
 		public GameSubject GameSubject { get; set; }
 
 		public bool TurnTaken 
@@ -55,7 +53,6 @@ namespace RectClash.Game.Unit
 			set
 			{
 				_turnTaken = value;
-				StatusCom.Update(_turnTaken);
 			} 
 		}
 

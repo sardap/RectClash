@@ -190,19 +190,13 @@ namespace RectClash.Game
 					Priority = DrawLayer.UNITS_INFO_TOP
 				}
 			);
-			var unitStatusShowCom = statusShowEnt.AddCom
-			(
-				new UnitStatusShowCom()
-			);
-
 
 			var unitCom = ent.AddCom
 			(
 				new UnitInfoCom()
 				{
 					Type = UnitTypeToCreate,
-					Faction = FactionToCreate,
-					StatusCom = unitStatusShowCom
+					Faction = FactionToCreate
 				}
 			);
 
