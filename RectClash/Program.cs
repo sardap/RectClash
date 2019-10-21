@@ -1,4 +1,6 @@
 ﻿using System;
+using System.IO;
+using Newtonsoft.Json;
 using RectClash.ECS;
 using RectClash.ECS.Graphics;
 using RectClash.Game;
@@ -25,10 +27,24 @@ namespace RectClash
 				new SFMLComs.SFMLMouseInput()
 			);
 
-			EntFactory.Instance.CreateDebugInfo();
+			if(!File.Exists(GameConstants.KEY_BINDING_FILE))
+			{
+				using (var writer = new StreamWriter(GameConstants.KEY_BINDING_FILE, append: false))
+				{
+					writer.WriteLine(JsonConvert.SerializeObject(new KeyBinds()));
+				}
+			}
+
+			using (StreamReader reader = new StreamReader(GameConstants.KEY_BINDING_FILE))
+			{
+				string json = reader.ReadToEnd();
+				KeyBindsAccessor.SetNewKeyBinds(JsonConvert.DeserializeObject<KeyBinds>(json));
+			}
 
 			var worldEnt = EntFactory.Instance.CreateWorld();
 			EntFactory.Instance.CreatePlayerInput();
+
+			EntFactory.Instance.CreateDebugInfo();
 
 			while(Engine.Instance.Window.IsOpen)
 			{

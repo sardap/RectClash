@@ -13,15 +13,15 @@ namespace RectClash.ECS
 
         public Subject(IObv<S, T> obv)
         {
-            AddObvs(obv);
+            AddObv(obv);
         }
 
-        public void AddObvs(IObv<S, T> obv)
+        public void AddObv(IObv<S, T> obv)
         {
             _obvs.Add(obv);
         }
 
-        public void RemoveObvs(IObv<S, T> obv)
+        public void RemoveObv(IObv<S, T> obv)
         {
             _obvs.Remove(obv);
         }

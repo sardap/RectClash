@@ -1,5 +1,6 @@
 using RectClash.ECS;
 using RectClash.Game.Unit;
+using RectClash.Misc;
 using System.Collections.Generic;
 
 namespace RectClash.Game.Combat
@@ -34,7 +35,9 @@ namespace RectClash.Game.Combat
 			var targetUnitCom = _attackTarget.GetCom<HealthCom>();
 			var attackerUnitCom = _attacker.GetCom<UnitInfoCom>();
 
-			targetUnitCom.CurrentHealth -= attackerUnitCom.Damage;
+			var damageVariation = attackerUnitCom.Damage * GameConstants.DAMAGE_VARIATION;
+			var damageModifer = Utility.RandomDouble(-(damageVariation), damageVariation);
+			targetUnitCom.CurrentHealth -= attackerUnitCom.Damage + damageModifer;
 		}
 	}
 }

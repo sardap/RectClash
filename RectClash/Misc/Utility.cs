@@ -11,6 +11,16 @@ namespace RectClash.Misc
         
 		public static Random Random { get { return _random; } }
 
+		public static bool RandomBool()
+		{
+			return Random.NextDouble() >= 0.5;
+		}
+
+		public static double RandomDouble(double minValue = double.MinValue, double maxValue = double.MaxValue)
+		{
+			return Random.Next((int)minValue, (int)maxValue) + Random.NextDouble();
+		}
+
 		public static double NextDouble(double minimum, double maximum)
 		{
 			Random random = new Random();

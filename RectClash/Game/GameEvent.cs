@@ -9,6 +9,8 @@ namespace RectClash.Game
         GRID_CLEAR_SELECTION,
         ATTACK_TARGET,
         ATTACK_ATTACKER,
-        ATTACK_CONF
+        ATTACK_CONF,
+		TRIGGER_TURN_END,
+		TURN_END
     }
 }

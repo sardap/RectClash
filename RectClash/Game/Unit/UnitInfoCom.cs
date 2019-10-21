@@ -38,12 +38,26 @@ namespace RectClash.Game.Unit
 				}
 			}
 		};
+
+		private bool _turnTaken;
 		
 		public UnitType Type { get; set; }
 
 		public Faction Faction { get; set; }
 
+		public UnitStatusShowCom StatusCom { get; set; }
+
 		public GameSubject GameSubject { get; set; }
+
+		public bool TurnTaken 
+		{ 
+			get => _turnTaken; 
+			set
+			{
+				_turnTaken = value;
+				StatusCom.Update(_turnTaken);
+			} 
+		}
 
 		public int Range 
 		{
@@ -63,6 +77,11 @@ namespace RectClash.Game.Unit
 		public double MaxHealth
 		{
 			get => _staticUnitInfo[Type].maxHealth;
+		}
+
+		protected override void InternalStart()
+		{
+			TurnTaken = false;
 		}
     }
 }

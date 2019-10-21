@@ -43,6 +43,8 @@ namespace RectClash.Game
 
 		public GameSubject Subject { get; set; }
 
+		public TurnHandlerCom TurnHandler { get; set; }
+
 		public GridCom()
 		{
 		}
@@ -60,7 +62,7 @@ namespace RectClash.Game
 					var UnitInfoCom = Get(_startCell).Inside.First().GetCom<UnitInfoCom>();
 					var range = UnitInfoCom.Range;
 					var faction = UnitInfoCom.Faction;
-					
+
 					_cellsInRange = GetAdjacentSquaresInRange(_startCell.X, _startCell.Y, range);
 					_cellsInRange.Remove(_startCell);
 					
@@ -170,6 +172,13 @@ namespace RectClash.Game
 					{
 						EntFactory.Instance.CreateFootSolider(this, index.X, index.Y);
 					}
+
+					var inside = Get(index).Inside.First().GetCom<UnitInfoCom>();
+					if(inside.Faction != TurnHandler.Faction || inside.TurnTaken)
+					{
+						break;
+					}
+
 					_startCell = index;
 					ChangeState(State.StartCellSelected);
 					return true;
@@ -383,6 +392,8 @@ namespace RectClash.Game
 			var current = curCell.Inside.First();
 			Move(current, _targetCell.X, _targetCell.Y);
 			ChangeState(State.ClearSelection);
+			
+			current.GetCom<UnitInfoCom>().TurnTaken = true;
 		}
 
 		private void ApplyAttack()
@@ -418,6 +429,23 @@ namespace RectClash.Game
 			}
 		}
 
+		private void OnTurnEnd()
+		{
+			foreach(var cell in _cells)
+			{
+				if(cell.Inside.Count() > 0)
+				{
+					var unitCom = cell.Inside.First().GetCom<UnitInfoCom>();
+					if(unitCom.Faction == TurnHandler.Faction)
+					{
+						unitCom.TurnTaken = false;
+					}
+				}
+			}
+			
+			ChangeState(State.ClearSelection);
+		}
+
 		public void OnNotify(IEnt ent, GameEvent evt)
 		{
 			switch(evt)
@@ -445,11 +473,12 @@ namespace RectClash.Game
 					else if(_state == State.AttackTargetCellSelected)
 						ApplyAttack();
 					break;
+				case GameEvent.TURN_END:
+					OnTurnEnd();
+					break;
 				case GameEvent.GRID_CLEAR_SELECTION:
 					ChangeState(State.ClearSelection);
 					break;
-				default:
-					throw new System.NotImplementedException();
 			}
 		}
 	}

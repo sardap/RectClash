@@ -5,7 +5,6 @@ using RectClash.Game.Unit;
 using RectClash.Game;
 using RectClash.Game.Unit;
 using SFML.Graphics;
-using UnitInfoCom = RectClash.Game.Unit.UnitInfoCom;
 using UnitType = RectClash.Game.Unit.UnitType;
 using RectClash.Game.Perf;
 using RectClash.Misc;
@@ -23,6 +22,13 @@ namespace RectClash.Game
 
 		public static EntFactory Instance { get { return _instance; } }
 
+        public EntFactory(IEnt worldEnt, UnitType unitTypeToCreate, Faction factionToCreate) 
+        {
+            this.WorldEnt = worldEnt;
+                this.UnitTypeToCreate = unitTypeToCreate;
+                this.FactionToCreate = factionToCreate;
+               
+        }
 		public IEnt WorldEnt { get; set; }
 
 		public UnitType UnitTypeToCreate { get; set; }
@@ -66,8 +72,6 @@ namespace RectClash.Game
 				
 			);
 
-			Engine.Instance.Window.Camera.Subject.AddObvs(debugInfo);
-
 			debugEnt.AddCom
 			(
 				new RenderTextCom()
@@ -78,6 +82,9 @@ namespace RectClash.Game
 					Priority = DrawLayer.UI
 				}
 			);
+
+			Engine.Instance.Window.Camera.Subject.AddObv(debugInfo);
+			WorldEnt.GetCom<TurnHandlerCom>().DebugSubject = subject;
 
 			return debugEnt;
 		}
@@ -92,6 +99,7 @@ namespace RectClash.Game
 					WorldSize = new Misc.Vector2<int>(500, 1000)
 				}
 			);
+
 
 			WorldEnt =  worldEnt;
 
@@ -109,6 +117,16 @@ namespace RectClash.Game
 					Subject = new GameSubject(combatHandlerCom)
 				}
 			);
+
+			var turnHandlerCom = worldEnt.AddCom
+			(
+				new TurnHandlerCom()
+				{
+					Subjects = new GameSubject(gridCom)
+				}
+			);
+
+			gridCom.TurnHandler = turnHandlerCom;
 
 			float scale = 50f;
 
@@ -131,7 +149,7 @@ namespace RectClash.Game
 			(
 				new PlayerInputCom()
 				{
-					Subject = new GameSubject(WorldEnt.GetCom<WorldCom>().Grid)
+					Subject = new GameSubject(WorldEnt.GetCom<WorldCom>().Grid, WorldEnt.GetCom<TurnHandlerCom>())
 				}
 			);
 
@@ -164,12 +182,27 @@ namespace RectClash.Game
 					throw new System.NotImplementedException();
 			}
 
+			var statusShowEnt = Engine.Instance.CreateEnt(ent);
+			statusShowEnt.AddCom
+			(
+				new DrawRectCom()
+				{
+					Priority = DrawLayer.UNITS_INFO_TOP
+				}
+			);
+			var unitStatusShowCom = statusShowEnt.AddCom
+			(
+				new UnitStatusShowCom()
+			);
+
+
 			var unitCom = ent.AddCom
 			(
 				new UnitInfoCom()
 				{
 					Type = UnitTypeToCreate,
-					Faction = FactionToCreate
+					Faction = FactionToCreate,
+					StatusCom = unitStatusShowCom
 				}
 			);
 
@@ -202,7 +235,6 @@ namespace RectClash.Game
 				}
 			);
 
-
 			var hat = Engine.Instance.CreateEnt(ent);
 			hat.PostionCom.LocalScale = new Vector2f(0.8f, 0.8f);
 			hat.PostionCom.LocalPostion = new Vector2f(0.2f, 0.2f);
@@ -215,7 +247,7 @@ namespace RectClash.Game
 					Priority = DrawLayer.UNITS_TOP
 				}
 			);
-			
+
 			return ent;
 		}
 

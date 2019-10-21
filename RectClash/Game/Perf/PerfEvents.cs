@@ -6,6 +6,7 @@ namespace RectClash.Game.Perf
         UNIT_CREATE_SELECTION,
         FACTION_SELECTION,
         CAMERA_MOVED,
-        CAMERA_ZOOMED
+        CAMERA_ZOOMED,
+		TURN_CHANGED
     }
 }

@@ -14,7 +14,7 @@ namespace RectClash.Game
 
 		protected override void InternalStart()
 		{
-			_subject.AddObvs(Owner.GetCom<CellInfoCom>());
+			_subject.AddObv(Owner.GetCom<CellInfoCom>());
 			Engine.Instance.Window.RenderWindow.MouseButtonPressed += MouseButtonPressed;
 		}
 

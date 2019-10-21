@@ -16,35 +16,34 @@ namespace RectClash.Game.Perf
 		}
 
 		private void WindowKeyReleased(object sender, SFML.Window.KeyEventArgs e)
-		{ 
-			switch(e.Code)
+		{
+			if(e.Code == KeyBindsAccessor.Instance.ToggleTeamSelection)
 			{
-				case SFML.Window.Keyboard.Key.T:
-					UnitType unitToCreate;
-					if(EntFactory.Instance.UnitTypeToCreate == UnitType.Regular)
-					{
-						unitToCreate = UnitType.Heavy;
-					}
-					else
-					{
-						unitToCreate = UnitType.Regular;
-					}
-					EntFactory.Instance.UnitTypeToCreate = unitToCreate;
-					Subject.Notify("Creating: " + Enum.GetName(unitToCreate.GetType(), unitToCreate), PerfEvents.UNIT_CREATE_SELECTION);
-					break;
-                case SFML.Window.Keyboard.Key.Y:
-                    Faction faction;
-					if(EntFactory.Instance.FactionToCreate == Faction.Red)
-					{
-						faction = Faction.Blue;
-					}
-					else
-					{
-						faction = Faction.Red;
-					}
-					EntFactory.Instance.FactionToCreate = faction;
-					Subject.Notify("Faction: " + Enum.GetName(faction.GetType(), faction), PerfEvents.FACTION_SELECTION);
-                    break;
+				UnitType unitToCreate;
+				if(EntFactory.Instance.UnitTypeToCreate == UnitType.Regular)
+				{
+					unitToCreate = UnitType.Heavy;
+				}
+				else
+				{
+					unitToCreate = UnitType.Regular;
+				}
+				EntFactory.Instance.UnitTypeToCreate = unitToCreate;
+				Subject.Notify("Creating: " + Enum.GetName(unitToCreate.GetType(), unitToCreate), PerfEvents.UNIT_CREATE_SELECTION);
+			}
+			else if(e.Code == KeyBindsAccessor.Instance.CycleUnitType)
+			{
+				Faction faction;
+				if(EntFactory.Instance.FactionToCreate == Faction.Red)
+				{
+					faction = Faction.Blue;
+				}
+				else
+				{
+					faction = Faction.Red;
+				}
+				EntFactory.Instance.FactionToCreate = faction;
+				Subject.Notify("Faction: " + Enum.GetName(faction.GetType(), faction), PerfEvents.FACTION_SELECTION);
 			}
 		}
 	}

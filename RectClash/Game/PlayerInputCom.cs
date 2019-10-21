@@ -32,38 +32,38 @@ namespace RectClash.Game
 
         private void WindowKeyReleased(object sender, SFML.Window.KeyEventArgs e)
         {
-            switch(e.Code)
-            {
-                case SFML.Window.Keyboard.Key.Escape:
-                    Engine.Instance.Window.Exit();
-                    break;
-
-                case SFML.Window.Keyboard.Key.Space:
-                    Subject.Notify(Owner, GameEvent.GRID_MOVE_CONF);
-                    break;
-            }
+			if(e.Code == KeyBindsAccessor.Instance.QuitProgram)
+			{
+				Engine.Instance.Window.Exit();
+			}
+			else if(e.Code == KeyBindsAccessor.Instance.EndTurn)
+			{
+				Subject.Notify(Owner, GameEvent.TRIGGER_TURN_END);
+			}
+			else if(e.Code == KeyBindsAccessor.Instance.ConfMove)
+			{
+				Subject.Notify(Owner, GameEvent.GRID_MOVE_CONF);
+			}
         }
 
         public override void Update()
         {
-            var keyboard = Keyboard.Instance;
-
             var deltaTime = Engine.Instance.Time.DeltaTimePercentOfSec;
             
             // Move Camrea
-            if(keyboard.IsKeyPressed(Keys.D))
+            if(SFML.Window.Keyboard.IsKeyPressed(KeyBindsAccessor.Instance.MoveCameraRight))
             {
                 Engine.Instance.Window.Camera.X -= CAM_SPEED * deltaTime;
             }
-            if(keyboard.IsKeyPressed(Keys.A))
+            if(SFML.Window.Keyboard.IsKeyPressed(KeyBindsAccessor.Instance.MoveCameraLeft))
             {
                 Engine.Instance.Window.Camera.X += CAM_SPEED * deltaTime;
             }
-            if(keyboard.IsKeyPressed(Keys.W))
+            if(SFML.Window.Keyboard.IsKeyPressed(KeyBindsAccessor.Instance.MoveCameraUp))
             {
                 Engine.Instance.Window.Camera.Y += CAM_SPEED * deltaTime;
             }
-            if(keyboard.IsKeyPressed(Keys.S))
+            if(SFML.Window.Keyboard.IsKeyPressed(KeyBindsAccessor.Instance.MoveCameraDown))
             {
                 Engine.Instance.Window.Camera.Y -= CAM_SPEED * deltaTime;
             }
