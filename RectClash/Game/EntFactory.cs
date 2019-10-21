@@ -11,6 +11,7 @@ using RectClash.Misc;
 using SFML.System;
 using System.Collections.Generic;
 using RectClash.Game.Combat;
+using RectClash.Game.Sound;
 
 namespace RectClash.Game
 {
@@ -100,7 +101,6 @@ namespace RectClash.Game
 				}
 			);
 
-
 			WorldEnt =  worldEnt;
 
 			var combatHandlerEnt = Engine.Instance.CreateEnt(worldEnt);
@@ -109,12 +109,18 @@ namespace RectClash.Game
 				new CombatHandlerCom()
 			);
 
+			var soundEnt = Engine.Instance.CreateEnt(worldEnt);
+			var soundCom = soundEnt.AddCom
+			(
+				new SoundPlayerCom()
+			);
+
 			var gridEnt = Engine.Instance.CreateEnt(worldEnt, "Grid");
 			var gridCom = gridEnt.AddCom
 			(
 				new GridCom()
 				{
-					Subject = new GameSubject(combatHandlerCom)
+					Subject = new GameSubject(combatHandlerCom, soundCom)
 				}
 			);
 

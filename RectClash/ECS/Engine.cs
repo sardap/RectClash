@@ -51,6 +51,27 @@ namespace RectClash.ECS
 
         public Time Time { get { return _time; } }
 
+		private void BroadcastMessage<S, T>(IEnt ent, S sender, T message)
+		{
+			foreach(var com in ent.Coms)
+			{
+				if(com is IObv<S, T>)
+				{
+					((IObv<S, T>)com).OnNotify(sender, message);
+				}
+			}
+
+			foreach(var child in ent.Children)
+			{
+				BroadcastMessage(child, sender, message);
+			}
+		}
+
+		public void BroadcastMessage<S, T>(S sender, T message)
+		{
+			BroadcastMessage(_root, sender, message);
+		}
+
         public IEnt CreateEnt(IEnt parent, string name, List<string> tags)
         {
             var result = new Ent(parent, name, tags);

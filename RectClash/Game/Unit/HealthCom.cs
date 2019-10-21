@@ -18,6 +18,7 @@ namespace RectClash.Game.Unit
 				if(_currentHealth < 0)
 				{
 					Owner.Destory();
+					Engine.Instance.BroadcastMessage(Owner, GameEvent.FOOT_SOLIDER_DIED);
 				}
 			}
 		}
