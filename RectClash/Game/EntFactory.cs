@@ -193,7 +193,7 @@ namespace RectClash.Game
 				}
 			);
 
-			ent.AddCom
+			var unitActionCom = ent.AddCom
 			(
 				new UnitActionContCom()
 			);
@@ -214,7 +214,8 @@ namespace RectClash.Game
 				{
 					MaxHealth = unitCom.MaxHealth,
 					CurrentHealth = unitCom.MaxHealth,
-					HealthBarCom = progressBarCom
+					HealthBarCom = progressBarCom,
+					Subject = new GameSubject(unitActionCom)
 				}
 			);
 

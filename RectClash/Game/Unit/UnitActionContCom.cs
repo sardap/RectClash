@@ -27,20 +27,29 @@ namespace RectClash.Game.Unit
 
 				case GameEvent.ATTACK_TARGET:
 					_unitInfoCom.TurnTaken = true;
-					Engine.Instance.Sound.PlayRandomSound(_unitInfoCom.SoundInfo.AttackSound);
-					PerformAttack(ent);
+					if(PerformAttack(ent))
+						Engine.Instance.Sound.PlayRandomSound(_unitInfoCom.SoundInfo.AttackSound);
+					break;
+				case GameEvent.UNIT_DIED:
+					Engine.Instance.Sound.PlayRandomSound(_unitInfoCom.SoundInfo.DeathSound);
+					Owner.Destory();
 					break;
 			}
-		}
+		} 
 
-		private void PerformAttack(IEnt target)
+		private bool PerformAttack(IEnt target)
 		{
 			var targetUnitCom = target.GetCom<HealthCom>();
 			var attackerUnitCom = _unitInfoCom;
 
 			var damageVariation = attackerUnitCom.Damage * GameConstants.DAMAGE_VARIATION;
 			var damageModifer = Utility.RandomDouble(-(damageVariation), damageVariation);
+
+			var result = targetUnitCom.CurrentHealth - attackerUnitCom.Damage + damageModifer >= 0;
+
 			targetUnitCom.CurrentHealth -= attackerUnitCom.Damage + damageModifer;
+
+			return result;
 		}
 	}
 }

@@ -30,7 +30,7 @@ namespace RectClash.Game.Unit
 					maxHealth = 30d,
 					SoundInfo = new UnitSoundInfo()
 					{
-						DeathSound = GameConstants.SOUND_FOOT_SOLIDER_SELECTED,
+						DeathSound = GameConstants.SOUND_FOOT_SOLIDER_DIED,
 						SelectSound = GameConstants.SOUND_FOOT_SOLIDER_SELECTED,
 						MoveSound = GameConstants.SOUND_FOOT_SOLIDER_MOVE,
 						AttackSound = GameConstants.SOUND_FOOT_SOLIDER_ATTACK
@@ -47,7 +47,10 @@ namespace RectClash.Game.Unit
 					maxHealth = 60d,
 					SoundInfo = new UnitSoundInfo()
 					{
-
+						DeathSound = GameConstants.SOUND_HEAVY_SOLIDER_DIED,
+						SelectSound = GameConstants.SOUND_HEAVY_SOLIDER_SELECTED,
+						MoveSound = GameConstants.SOUND_HEAVY_SOLIDER_MOVE,
+						AttackSound = GameConstants.SOUND_HEAVY_SOLIDER_ATTACK
 					}
 				}
 			}

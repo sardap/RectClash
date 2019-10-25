@@ -11,7 +11,7 @@ namespace RectClash.Game
         ATTACK_TARGET,
         ATTACK_ATTACKER,
 		UNIT_SELECTED,
-		FOOT_SOLIDER_DIED,
+		UNIT_DIED,
         ATTACK_CONF,
 		TRIGGER_TURN_END,
 		TURN_END

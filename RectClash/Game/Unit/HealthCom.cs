@@ -3,7 +3,7 @@ using RectClash.ECS;
 namespace RectClash.Game.Unit
 {
 	public class HealthCom : Com
-	{
+	{		
 		private double _currentHealth { get; set; }
 
 		public double CurrentHealth 
@@ -12,13 +12,13 @@ namespace RectClash.Game.Unit
 			set
 			{
 				_currentHealth = value;
+
 				if(HealthBarCom != null)
 					HealthBarCom.Percent = _currentHealth / MaxHealth;
 
 				if(_currentHealth < 0)
 				{
-					Owner.Destory();
-					Engine.Instance.BroadcastMessage(Owner, GameEvent.FOOT_SOLIDER_DIED);
+					Subject.Notify(Owner, GameEvent.UNIT_DIED);
 				}
 			}
 		}
@@ -26,6 +26,8 @@ namespace RectClash.Game.Unit
 		public double MaxHealth { get; set; }
 
 		public ProgressBarCom HealthBarCom { get; set; }
+
+		public GameSubject Subject { get; set; }
 
 		protected override void InternalStart()
 		{

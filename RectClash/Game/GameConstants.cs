@@ -8,26 +8,52 @@ namespace RectClash.Game
 
 		public const string KEY_BINDING_FILE = "Keybinds.json";
 
-		public const string SOUND_FOOT_SOLIDER_DIED = "death_sound.flac";
-
 		public static readonly IEnumerable<string> SOUND_FOOT_SOLIDER_ATTACK = new List<string>()
 		{
-			"Sounds/attack_01.wav",
-			"Sounds/attack_02.wav"
+			"Sounds/FootSolider/attack_01.wav",
+			"Sounds/FootSolider/attack_02.wav"
 		};
 
 		public static readonly IEnumerable<string> SOUND_FOOT_SOLIDER_MOVE = new List<string>()
 		{
-			"Sounds/move_01.wav",
-			"Sounds/move_02.wav",
-			"Sounds/move_03.wav",
-			"Sounds/move_04.wav"
+			"Sounds/FootSolider/move_01.wav",
+			"Sounds/FootSolider/move_02.wav",
+			"Sounds/FootSolider/move_03.wav",
+			"Sounds/FootSolider/move_04.wav"
 		};
 
 		public static readonly IEnumerable<string> SOUND_FOOT_SOLIDER_SELECTED = new List<string>()
 		{
-			"Sounds/select_01.wav",
-			"Sounds/select_02.wav"
+			"Sounds/FootSolider/select_01.wav",
+			"Sounds/FootSolider/select_02.wav"
+		};
+
+		public static readonly IEnumerable<string> SOUND_FOOT_SOLIDER_DIED = new List<string>()
+		{
+			"Sounds/FootSolider/death_sound_01.wav"
+		};
+
+		public static readonly IEnumerable<string> SOUND_HEAVY_SOLIDER_ATTACK = new List<string>()
+		{
+			"Sounds/HeavySolider/attack_01.wav"
+		};
+
+		public static readonly IEnumerable<string> SOUND_HEAVY_SOLIDER_MOVE = new List<string>()
+		{
+			"Sounds/HeavySolider/move_01.wav"
+		};
+
+		public static readonly IEnumerable<string> SOUND_HEAVY_SOLIDER_SELECTED = new List<string>()
+		{
+			"Sounds/HeavySolider/select_01.wav",
+			"Sounds/HeavySolider/select_02.wav"
+		};
+
+		public static readonly IEnumerable<string> SOUND_HEAVY_SOLIDER_DIED = new List<string>()
+		{
+			"Sounds/HeavySolider/death_01.wav",
+			"Sounds/HeavySolider/death_02.wav",
+			"Sounds/HeavySolider/death_03.wav"
 		};
     }
 }
