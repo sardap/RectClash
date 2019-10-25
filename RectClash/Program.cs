@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using RectClash.ECS;
 using RectClash.ECS.Graphics;
 using RectClash.Game;
+using RectClash.Game.Sound;
 using SFML.Graphics;
 
 namespace RectClash
@@ -24,7 +25,8 @@ namespace RectClash
 				{
 					Size = new SFML.System.Vector2f(windowWidth, windowHeight)
 				},
-				new SFMLComs.SFMLMouseInput()
+				new SFMLComs.SFMLMouseInput(),
+				new SFMLSoundOutput()
 			);
 
 			if(!File.Exists(GameConstants.KEY_BINDING_FILE))

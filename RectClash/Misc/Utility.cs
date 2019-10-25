@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using RectClash.ECS;
 using SFML.Graphics;
 
@@ -31,6 +32,11 @@ namespace RectClash.Misc
 		{
 			Random random = new Random();
 			return (float)(random.NextDouble() * (maximum - minimum) + minimum);
+		}
+
+		public static T RandomElement<T>(IEnumerable<T> enumerable)
+		{
+		    return enumerable.ElementAt(Random.Next(0, enumerable.Count()));
 		}
 
 		public static T RandomElement<T>(IList<T> collection)

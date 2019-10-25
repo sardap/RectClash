@@ -103,24 +103,12 @@ namespace RectClash.Game
 
 			WorldEnt =  worldEnt;
 
-			var combatHandlerEnt = Engine.Instance.CreateEnt(worldEnt);
-			var combatHandlerCom = combatHandlerEnt.AddCom
-			(
-				new CombatHandlerCom()
-			);
-
-			var soundEnt = Engine.Instance.CreateEnt(worldEnt);
-			var soundCom = soundEnt.AddCom
-			(
-				new SoundPlayerCom()
-			);
-
 			var gridEnt = Engine.Instance.CreateEnt(worldEnt, "Grid");
 			var gridCom = gridEnt.AddCom
 			(
 				new GridCom()
 				{
-					Subject = new GameSubject(combatHandlerCom, soundCom)
+					Subject = new GameSubject()
 				}
 			);
 
@@ -173,7 +161,6 @@ namespace RectClash.Game
 				new List<string>(){Tags.FOOT_SOILDER}
 			);
 
-			grid.AddEnt(ent, i, j);
 			Color hatColour;
 
 			switch(FactionToCreate)
@@ -206,6 +193,11 @@ namespace RectClash.Game
 				}
 			);
 
+			ent.AddCom
+			(
+				new UnitActionContCom()
+			);
+	
 			var progressBarEnt = CreateProgressBar(ent);
 			progressBarEnt.PostionCom.LocalScale = new Vector2f(0.9f, 0.4f);
 			progressBarEnt.PostionCom.LocalY = -0.2f;
@@ -248,6 +240,7 @@ namespace RectClash.Game
 				}
 			);
 
+			grid.AddEnt(ent, i, j);
 			return ent;
 		}
 
@@ -287,7 +280,7 @@ namespace RectClash.Game
 		public IEnt CreateCell(GridCom gridCom, int i, int j, float width, float height)
 		{
 			var cellName = "Cell:" + i + "," + j;
-			var newCell = Engine.Instance.CreateEnt(gridCom.Owner, cellName);
+			var newCell = Engine.Instance.CreateEnt(gridCom.Owner, cellName, Tags.GRID_CELL);
 
 			var cellType = CellInfoCom.CellType.Dirt;
 			var selectorNum = Utility.Random.Next(100);

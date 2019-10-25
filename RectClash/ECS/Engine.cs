@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using RectClash.ECS.Input;
+using RectClash.ECS.Sound;
 
 namespace RectClash.ECS
 {
@@ -16,7 +18,7 @@ namespace RectClash.ECS
         {
         }
 
-        public static void Initialise(IKeyboardInput keyboardInput, IWindow window, IMouseInput mouseInput)
+        public static void Initialise(IKeyboardInput keyboardInput, IWindow window, IMouseInput mouseInput, ISoundOutput soundOutput)
         {
             if(_instance != null)
             {
@@ -31,6 +33,7 @@ namespace RectClash.ECS
             _instance._toBeUpdated = new Stack<IEnt>();
             _instance._toDraw = new HashSet<IEnt>();
             _instance._mouse = mouseInput;
+			_instance._sound = soundOutput;
 
             _instance._window.OnStart();
             _instance._time.Start();
@@ -43,11 +46,14 @@ namespace RectClash.ECS
         private long _max_loop_time;
         private long _timeDrawLoopTook;
         private IWindow _window;
+		private ISoundOutput _sound;
         public IMouseInput _mouse;
 
         public IWindow Window { get { return _window; } }
 
         public IMouseInput Mouse { get { return _mouse; } }
+
+		public ISoundOutput Sound { get { return _sound; } }
 
         public Time Time { get { return _time; } }
 
@@ -78,6 +84,11 @@ namespace RectClash.ECS
             parent.AddChild(result);
             return result;
         }
+
+        public IEnt CreateEnt(IEnt parent, string name, params string[] tags)
+		{
+			return CreateEnt(parent, name, tags.ToList());
+		}
 
         public IEnt CreateEnt(IEnt parent, string name = "")
         {

@@ -331,3 +331,5 @@ ASALocalRun/
 
 #Resouce Files
 *.ogg
+*.wav
+*.flac

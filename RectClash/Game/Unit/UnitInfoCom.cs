@@ -13,6 +13,9 @@ namespace RectClash.Game.Unit
 			public double damage;
 			public Color baseColor;
 			public int range;
+
+			public UnitSoundInfo SoundInfo;
+
 		}
 
 		private static Dictionary<UnitType, StaticUnitInfo> _staticUnitInfo = new Dictionary<UnitType, StaticUnitInfo>()
@@ -24,7 +27,14 @@ namespace RectClash.Game.Unit
 					damage = 10.0d,
 					baseColor = Color.White,
 					range = 5,
-					maxHealth = 30d
+					maxHealth = 30d,
+					SoundInfo = new UnitSoundInfo()
+					{
+						DeathSound = GameConstants.SOUND_FOOT_SOLIDER_SELECTED,
+						SelectSound = GameConstants.SOUND_FOOT_SOLIDER_SELECTED,
+						MoveSound = GameConstants.SOUND_FOOT_SOLIDER_MOVE,
+						AttackSound = GameConstants.SOUND_FOOT_SOLIDER_ATTACK
+					}
 				}
 			},
 			{
@@ -34,12 +44,17 @@ namespace RectClash.Game.Unit
 					damage = 20.0d,
 					baseColor = Color.Magenta,
 					range = 3,
-					maxHealth = 60d
+					maxHealth = 60d,
+					SoundInfo = new UnitSoundInfo()
+					{
+
+					}
 				}
 			}
 		};
 
 		private bool _turnTaken;
+
 		
 		public UnitType Type { get; set; }
 
@@ -54,6 +69,11 @@ namespace RectClash.Game.Unit
 			{
 				_turnTaken = value;
 			} 
+		}
+
+		public UnitSoundInfo SoundInfo
+		{
+			get => _staticUnitInfo[Type].SoundInfo;
 		}
 
 		public int Range 

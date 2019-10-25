@@ -1,10 +1,12 @@
 using RectClash.ECS;
 using SFML.Audio;
 using System.Collections.Generic;
+using RectClash.ECS.Sound;
+using System.Linq;
 
 namespace RectClash.Game.Sound
 {
-	public class SoundPlayerCom : Com, IGameObv
+	public class SFMLSoundOutput : ISoundOutput
 	{
 		private readonly Dictionary<string, SFML.Audio.Sound> _loadedSounds = new Dictionary<string, SFML.Audio.Sound>();
 
@@ -21,21 +23,16 @@ namespace RectClash.Game.Sound
 			return _loadedSounds[path];
 		}
 
-		private void PlaySound(string path)
+		public void PlaySound(string path)
 		{
 			GetSound(path).Play();
 		}
 
-		public void OnNotify(IEnt ent, GameEvent evt)
+		public void PlayRandomSound(IEnumerable<string> sounds)
 		{
-			switch(evt)
+			if(sounds != null && sounds.Count() > 0 )
 			{
-				case GameEvent.FOOT_SOLIDER_DIED:
-					PlaySound(GameConstants.SOUND_FOOT_SOLIDER_DIED);
-					break;
-
-				case GameEvent.GRID_CELL_SELECTED:
-					break;
+				PlaySound(RectClash.Misc.Utility.RandomElement(sounds));
 			}
 		}
 	}

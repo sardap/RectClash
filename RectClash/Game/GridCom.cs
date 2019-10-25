@@ -26,6 +26,8 @@ namespace RectClash.Game
 
 		private Vector2i _targetCell;
 
+		private IEnt _attackTarget;
+
 		private ICollection<Vector2i> _cellsInRange;
 
 		private List<Vector2i> _pathCells = new List<Vector2i>();
@@ -67,6 +69,7 @@ namespace RectClash.Game
 					_cellsInRange.Remove(_startCell);
 					
 					Get(_startCell).ChangeState(CellInfoCom.State.Selected);
+					Get(_startCell).Subject.Notify(Owner, GameEvent.UNIT_SELECTED);
 
 					foreach(var i in _cellsInRange.Select(i => Get(i)).ToList())
 					{
@@ -179,6 +182,7 @@ namespace RectClash.Game
 					)
 					{
 						EntFactory.Instance.CreateFootSolider(this, index.X, index.Y);
+						break;
 					}
 
 					var inside = Get(index).Inside.First().GetCom<UnitInfoCom>();
@@ -235,8 +239,7 @@ namespace RectClash.Game
 							_targetCell = _startCell;
 						}
 
-						Subject.Notify(target, GameEvent.ATTACK_TARGET);
-						Subject.Notify(start, GameEvent.ATTACK_ATTACKER);
+						_attackTarget = target;
 
 						ChangeState(State.AttackTargetCellSelected);
 					}
@@ -401,15 +404,22 @@ namespace RectClash.Game
 			var targetCellIndex = _targetCell;
 			Move(current, targetCellIndex.X, targetCellIndex.Y);
 			ChangeState(State.ClearSelection);
-			
-			current.GetCom<UnitInfoCom>().TurnTaken = true;
+
+			Get(targetCellIndex).Subject.Notify(Get(targetCellIndex).Owner, GameEvent.UNIT_MOVED);
 			Get(targetCellIndex).ChangeState(CellInfoCom.State.TurnComplete);
 		}
 
 		private void ApplyAttack()
 		{
-			ApplyMove();
-			Subject.Notify(Owner, GameEvent.ATTACK_CONF);
+			var curCell = Get(_startCell);
+			var current = curCell.Inside.First();
+			var targetCellIndex = _targetCell;
+			Move(current, targetCellIndex.X, targetCellIndex.Y);
+			ChangeState(State.ClearSelection);
+
+			Get(targetCellIndex).Subject.Notify(_attackTarget, GameEvent.ATTACK_TARGET);
+			_attackTarget = null;
+			Get(targetCellIndex).ChangeState(CellInfoCom.State.TurnComplete);
 		}
 
 		public void AddEnt(IEnt ent, int x, int y)
@@ -419,8 +429,13 @@ namespace RectClash.Game
 
 		private void Move(IEnt ent, int x, int y)
 		{
+			if(ent.Parent.Tags.Contains(Tags.GRID_CELL))
+			{
+				ent.Parent.GetCom<CellInfoCom>().Subject.RemoveObv(ent.GetCom<UnitActionContCom>());
+			}
+
 			ent.ChangeParent(_cells[x,y].Owner);
-			//_cells[x,y].Inside.Add(ent);
+			_cells[x,y].Subject.AddObv(ent.GetCom<UnitActionContCom>());
 		}
 
 		public void GenrateGrid(int gridWidth, int gridHeight, float cellWidth, float cellHeight)
@@ -466,6 +481,11 @@ namespace RectClash.Game
 					if(CellSelected(cell))
 					{
 						cell.ChangeState(CellInfoCom.State.Selected);
+
+						foreach(var unit in cell.Inside)
+						{
+							unit.GetCom<UnitActionContCom>();
+						}
 					}
 					break;
 				case GameEvent.CREATE_FOOTSOLIDER:
