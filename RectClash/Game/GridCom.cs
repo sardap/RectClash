@@ -3,6 +3,7 @@ using System.Linq;
 using Priority_Queue;
 using RectClash.ECS;
 using RectClash.Game.Unit;
+using RectClash.Misc;
 using SFML.System;
 
 namespace RectClash.Game
@@ -28,7 +29,9 @@ namespace RectClash.Game
 
 		private IEnt _attackTarget;
 
-		private ICollection<Vector2i> _cellsInRange;
+		private ICollection<Vector2i> _cellsInMoveRange;
+
+		private ICollection<Vector2i> _cellsInAttackRange;
 
 		private List<Vector2i> _pathCells = new List<Vector2i>();
 
@@ -62,30 +65,51 @@ namespace RectClash.Game
 
 				case State.StartCellSelected:
 					var UnitInfoCom = Get(_startCell).Inside.First().GetCom<UnitInfoCom>();
-					var range = UnitInfoCom.Range;
+					var range = !UnitInfoCom.MoveTaken ? UnitInfoCom.MovementRange : 0;
+					var attackRange = UnitInfoCom.attackRange;
 					var faction = UnitInfoCom.Faction;
 
-					_cellsInRange = GetAdjacentSquaresInRange(_startCell.X, _startCell.Y, range);
-					_cellsInRange.Remove(_startCell);
+					var edges = new HashSet<Vector2i>();
+					_cellsInMoveRange = GetAdjacentSquaresInRangeMovement(_startCell.X, _startCell.Y, range, edges);
+					_cellsInMoveRange.Remove(_startCell);
 					
 					Get(_startCell).ChangeState(CellInfoCom.State.Selected);
 					Get(_startCell).Subject.Notify(Owner, GameEvent.UNIT_SELECTED);
 
-					foreach(var i in _cellsInRange.Select(i => Get(i)).ToList())
+					foreach(var cell in _cellsInMoveRange.Select(i => Get(i)))
 					{
-						if(i.SpaceAvailable)
+						if(cell.SpaceAvailable)
 						{
-							i.ChangeState(CellInfoCom.State.InMovementRange);
+							cell.ChangeState(CellInfoCom.State.InMovementRange);
 						}
-						else if (i.Inside.Count() > 0)
+						else if (cell.Inside.Count() > 0 && cell.Inside.First().Tags.Contains(Tags.UNIT))
 						{
-							var first = i.Inside.First();
-							if(first.Tags.Contains(Tags.FOOT_SOILDER) && first.GetCom<UnitInfoCom>().Faction != faction)
+							var first = cell.Inside.First();
+							var otherUnitCom = first.GetCom<UnitInfoCom>();
+							if(otherUnitCom.Faction != faction)
 							{
-								i.ChangeState(CellInfoCom.State.CanAttack);
+								cell.ChangeState(CellInfoCom.State.CanAttack);
 							}
 						}
 					}
+
+					_cellsInAttackRange = GetAdjacentSquaresInRangeAttack(edges, attackRange);
+
+					_cellsInAttackRange.RemoveAll(_cellsInMoveRange);
+
+					foreach(var cell in _cellsInAttackRange.Select(i => Get(i)))
+					{
+						cell.ChangeState(CellInfoCom.State.CanAttack);
+						if (cell.Inside.Count() > 0 && cell.Inside.First().Tags.Contains(Tags.UNIT))
+						{
+							var first = cell.Inside.First();
+							var otherUnitCom = first.GetCom<UnitInfoCom>();
+							if(otherUnitCom.Faction != faction)
+							{
+							}
+						}
+					}
+					
 					break;
 
 				case State.ClearSelection:
@@ -102,16 +126,41 @@ namespace RectClash.Game
 			}
 		}
 
-		private ICollection<Vector2i> GetAdjacentSquaresInRange(int i, int j, int range)
+		private HashSet<Vector2i> GetAdjacentSquaresInRangeAttack(HashSet<Vector2i> edges, int range)
 		{
-			var result = GetAdjacentSquaresInRange(i, j, range, new HashSet<Vector2i>());
+
+			return GetAdjacentSquaresInRangeAttack(edges, range, new HashSet<Vector2i>());
+		}	
+
+		private HashSet<Vector2i> GetAdjacentSquaresInRangeAttack(HashSet<Vector2i> edges, int range, HashSet<Vector2i> result)
+		{
+			if(range < 0)
+			{
+				return result;
+			}
+
+			foreach(var cell in edges)
+			{
+				result.Add(cell);
+				GetAdjacentSquaresInRangeAttack(GetAdjacentSquares(cell).ToHashSet(), range - 1, result);
+			}
+
 			return result;
 		}
 
-		private ICollection<Vector2i> GetAdjacentSquaresInRange(int i, int j, int range, ICollection<Vector2i> result)
+		private HashSet<Vector2i> GetAdjacentSquaresInRangeMovement(int i, int j, int range, HashSet<Vector2i> edges)
+		{
+			var result = GetAdjacentSquaresInRangeMovement(i, j, range, new HashSet<Vector2i>(), edges);
+			return result;
+		}
+
+		private HashSet<Vector2i> GetAdjacentSquaresInRangeMovement(int i, int j, int range, HashSet<Vector2i> result, HashSet<Vector2i> edges)
 		{
 			if(range < 0)
+			{
+				edges.Add(new Vector2i(i, j));
 				return result;
+			}
 
 			result.Add(new Vector2i(i, j));
 
@@ -124,7 +173,7 @@ namespace RectClash.Game
 
 			foreach(var cell in adjacentSquares.Where(node => Get(node).SpaceAvailable))
 			{
-				GetAdjacentSquaresInRange(cell.X, cell.Y, range - _cells[i, j].MovementCost, result);
+				GetAdjacentSquaresInRangeMovement(cell.X, cell.Y, range - _cells[i, j].MovementCost, result, edges);
 			}
 
 			return result;
@@ -134,7 +183,6 @@ namespace RectClash.Game
 		{
 			return GetAdjacentSquares(index.X, index.Y);
 		}
-
 
 		private IEnumerable<Vector2i> GetAdjacentSquares(int i, int j)
 		{
@@ -224,7 +272,9 @@ namespace RectClash.Game
 						
 						var adjacentSquares = GetAdjacentSquares(_targetCell);
 
-						if(!adjacentSquares.Contains(_startCell))
+						inside = Get(_startCell).Inside.First().GetCom<UnitInfoCom>();
+
+						if(inside.attackRange == GameConstants.MELEE_ATTACK_RANGE && !adjacentSquares.Contains(_startCell))
 						{
 							_pathCells = AStar(_startCell, adjacentSquares.Where(i => Get(i).SpaceAvailable)).ToList();
 							foreach(var i in _pathCells.Select(i => Get(i)))
@@ -263,17 +313,24 @@ namespace RectClash.Game
 
 		private void ClearCellsInRange()
 		{
-			if(_cellsInRange == null)
-				return;
-
-			foreach(var node in _cellsInRange)
+			void ClearPathSet(ICollection<Vector2i> toClear)
 			{
-				Get(node).ChangeState(CellInfoCom.State.UnSelected);
+				if(toClear != null)
+				{
+					foreach(var node in toClear)
+					{
+						Get(node).ChangeState(CellInfoCom.State.UnSelected);
+					}
+
+					toClear.Clear();
+				}
 			}
-			_cellsInRange.Clear();
+
+			ClearPathSet(_cellsInMoveRange);
+			ClearPathSet(_cellsInAttackRange);
 		}    
 
-		private double GetHeuristic(Vector2i aPos, Vector2i bPos)
+		private double DistanceBetween(Vector2i aPos, Vector2i bPos)
 		{
 			var dx = System.Math.Abs(aPos.X - bPos.X);
 			var dy = System.Math.Abs(aPos.Y - bPos.Y);
@@ -281,7 +338,7 @@ namespace RectClash.Game
 			return Get(aPos).MovementCost * (dx + dy);
 		}
 
-		private double DistanceBetween(Vector2i aPos, Vector2i bPos)
+		private double GetHeuristic(Vector2i aPos, Vector2i bPos)
 		{
 			return System.Math.Sqrt(System.Math.Pow(bPos.X - aPos.X, 2) + System.Math.Pow(bPos.Y - aPos.Y, 2));
 		}
@@ -406,20 +463,35 @@ namespace RectClash.Game
 			ChangeState(State.ClearSelection);
 
 			Get(targetCellIndex).Subject.Notify(Get(targetCellIndex).Owner, GameEvent.UNIT_MOVED);
-			Get(targetCellIndex).ChangeState(CellInfoCom.State.TurnComplete);
+
+			if(Get(targetCellIndex).Inside.First().GetCom<UnitInfoCom>().TurnTaken)
+			{
+				Get(targetCellIndex).ChangeState(CellInfoCom.State.TurnComplete);
+			}
 		}
 
 		private void ApplyAttack()
 		{
 			var curCell = Get(_startCell);
-			var current = curCell.Inside.First();
 			var targetCellIndex = _targetCell;
-			Move(current, targetCellIndex.X, targetCellIndex.Y);
+
+			var attackerUnitComInfo = curCell.Inside.First().GetCom<UnitInfoCom>();
+
+			if(DistanceBetween(_startCell, _targetCell) > attackerUnitComInfo.attackRange)
+			{
+				var current = curCell.Inside.First();
+				Move(current, targetCellIndex.X, targetCellIndex.Y);
+			}
+
 			ChangeState(State.ClearSelection);
 
-			Get(targetCellIndex).Subject.Notify(_attackTarget, GameEvent.ATTACK_TARGET);
+			Get(targetCellIndex). Subject.Notify(_attackTarget, GameEvent.ATTACK_TARGET);
 			_attackTarget = null;
-			Get(targetCellIndex).ChangeState(CellInfoCom.State.TurnComplete);
+
+			if(attackerUnitComInfo.TurnTaken)
+			{
+				Get(targetCellIndex).ChangeState(CellInfoCom.State.TurnComplete);
+			}
 		}
 
 		public void AddEnt(IEnt ent, int x, int y)
@@ -463,7 +535,7 @@ namespace RectClash.Game
 					var unitCom = cell.Inside.First().GetCom<UnitInfoCom>();
 					if(unitCom.Faction == TurnHandler.Faction)
 					{
-						unitCom.TurnTaken = false;
+						unitCom.TurnReset();
 						cell.ChangeState(CellInfoCom.State.UnSelected);
 					}
 				}

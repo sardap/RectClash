@@ -1,6 +1,8 @@
 using System;
 using RectClash.ECS;
 using RectClash.Game.Unit;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace RectClash.Game.Perf
 {
@@ -19,15 +21,17 @@ namespace RectClash.Game.Perf
 		{
 			if(e.Code == KeyBindsAccessor.Instance.ToggleTeamSelection)
 			{
-				UnitType unitToCreate;
-				if(EntFactory.Instance.UnitTypeToCreate == UnitType.Regular)
+				var unitTypes = Enum.GetValues(typeof(UnitType)).Cast<UnitType>().ToList();
+				var i = unitTypes.IndexOf(EntFactory.Instance.UnitTypeToCreate);
+
+				i++;
+				
+				if(i >= unitTypes.Count)
 				{
-					unitToCreate = UnitType.Heavy;
+					i = 0;
 				}
-				else
-				{
-					unitToCreate = UnitType.Regular;
-				}
+
+				var unitToCreate = unitTypes[i];
 				EntFactory.Instance.UnitTypeToCreate = unitToCreate;
 				Subject.Notify("Creating: " + Enum.GetName(unitToCreate.GetType(), unitToCreate), PerfEvents.UNIT_CREATE_SELECTION);
 			}

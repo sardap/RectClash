@@ -158,7 +158,7 @@ namespace RectClash.Game
 			(
 				WorldEnt, 
 				"FootSoilder:" + (_footSolider++).ToString() + " " + Utility.GetEnumName(UnitTypeToCreate) + " " + Utility.GetEnumName(FactionToCreate), 
-				new List<string>(){Tags.FOOT_SOILDER}
+				new List<string>(){Tags.UNIT}
 			);
 
 			Color hatColour;

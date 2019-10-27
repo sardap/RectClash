@@ -21,12 +21,12 @@ namespace RectClash.Game.Unit
 					break;
 
 				case GameEvent.UNIT_MOVED:
-					_unitInfoCom.TurnTaken = true;
+					_unitInfoCom.MoveTaken = true;
 					Engine.Instance.Sound.PlayRandomSound(_unitInfoCom.SoundInfo.MoveSound);
 					break;
 
 				case GameEvent.ATTACK_TARGET:
-					_unitInfoCom.TurnTaken = true;
+					_unitInfoCom.AttackTaken = true;
 					if(PerformAttack(ent))
 						Engine.Instance.Sound.PlayRandomSound(_unitInfoCom.SoundInfo.AttackSound);
 					break;

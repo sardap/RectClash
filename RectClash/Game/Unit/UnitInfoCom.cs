@@ -7,26 +7,27 @@ namespace RectClash.Game.Unit
 {
 	public class UnitInfoCom : Com
 	{
-		private class StaticUnitInfo
+		private class CommonUnitInfo
 		{
 			public double maxHealth;
 			public double damage;
 			public Color baseColor;
-			public int range;
-
+			public int movementRange;
+			public int attackRange;
 			public UnitSoundInfo SoundInfo;
 
 		}
 
-		private static Dictionary<UnitType, StaticUnitInfo> _staticUnitInfo = new Dictionary<UnitType, StaticUnitInfo>()
+		private static Dictionary<UnitType, CommonUnitInfo> _staticUnitInfo = new Dictionary<UnitType, CommonUnitInfo>()
 		{
 			{
 				UnitType.Regular,
-				new StaticUnitInfo()
+				new CommonUnitInfo()
 				{
 					damage = 10.0d,
 					baseColor = Color.White,
-					range = 5,
+					movementRange = 5,
+					attackRange = GameConstants.MELEE_ATTACK_RANGE,
 					maxHealth = 30d,
 					SoundInfo = new UnitSoundInfo()
 					{
@@ -39,11 +40,12 @@ namespace RectClash.Game.Unit
 			},
 			{
 				UnitType.Heavy,
-				new StaticUnitInfo()
+				new CommonUnitInfo()
 				{
 					damage = 20.0d,
 					baseColor = Color.Magenta,
-					range = 3,
+					movementRange = 3,
+					attackRange = GameConstants.MELEE_ATTACK_RANGE,
 					maxHealth = 60d,
 					SoundInfo = new UnitSoundInfo()
 					{
@@ -53,25 +55,55 @@ namespace RectClash.Game.Unit
 						AttackSound = GameConstants.SOUND_HEAVY_SOLIDER_ATTACK
 					}
 				}
+			},
+			{
+				UnitType.LightArcher,
+				new CommonUnitInfo()
+				{
+					damage = 5.0d,
+					baseColor = new Color(255, 255, 102),
+					movementRange = 4,
+					attackRange = 4,
+					maxHealth = 10d,
+					SoundInfo = new UnitSoundInfo()
+					{
+						DeathSound = GameConstants.SOUND_LIGHT_ARCHER_DIED,
+						SelectSound = GameConstants.SOUND_LIGHT_ARCHER_SELECTED,
+						MoveSound = GameConstants.SOUND_LIGHT_ARCHER_MOVE,
+						AttackSound = GameConstants.SOUND_LIGHT_ARCHER_ATTACK
+					}
+				}
 			}
 		};
 
-		private bool _turnTaken;
+		private bool _moveTaken;
 
-		
+		private bool _attackTaken;
+
 		public UnitType Type { get; set; }
 
 		public Faction Faction { get; set; }
 
 		public GameSubject GameSubject { get; set; }
 
-		public bool TurnTaken 
+		public bool MoveTaken
+		{
+			get => _moveTaken;
+			set => _moveTaken = value;
+		}
+
+		public bool AttackTaken
+		{
+			get => _attackTaken;
+			set => _attackTaken = value;
+		}
+
+		public bool TurnTaken
 		{ 
-			get => _turnTaken; 
-			set
+			get
 			{
-				_turnTaken = value;
-			} 
+				return _moveTaken && _attackTaken;
+			}
 		}
 
 		public UnitSoundInfo SoundInfo
@@ -79,9 +111,14 @@ namespace RectClash.Game.Unit
 			get => _staticUnitInfo[Type].SoundInfo;
 		}
 
-		public int Range 
+		public int MovementRange 
 		{
-			get => _staticUnitInfo[Type].range;
+			get => _staticUnitInfo[Type].movementRange;
+		}
+
+		public int attackRange
+		{
+			get => _staticUnitInfo[Type].attackRange;
 		}
 
 		public Color BaseColor
@@ -99,9 +136,15 @@ namespace RectClash.Game.Unit
 			get => _staticUnitInfo[Type].maxHealth;
 		}
 
+		public void TurnReset()
+		{
+			_moveTaken = false;
+			_attackTaken = false;
+		}
+
 		protected override void InternalStart()
 		{
-			TurnTaken = false;
+			TurnReset();
 		}
     }
 }
