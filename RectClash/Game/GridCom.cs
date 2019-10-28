@@ -66,7 +66,7 @@ namespace RectClash.Game
 				case State.StartCellSelected:
 					var UnitInfoCom = Get(_startCell).Inside.First().GetCom<UnitInfoCom>();
 					var range = !UnitInfoCom.MoveTaken ? UnitInfoCom.MovementRange : 0;
-					var attackRange = UnitInfoCom.attackRange;
+					var attackRange = !UnitInfoCom.AttackTaken ? UnitInfoCom.attackRange : -1;
 					var faction = UnitInfoCom.Faction;
 
 					var edges = new HashSet<Vector2i>();
@@ -82,7 +82,11 @@ namespace RectClash.Game
 						{
 							cell.ChangeState(CellInfoCom.State.InMovementRange);
 						}
-						else if (cell.Inside.Count() > 0 && cell.Inside.First().Tags.Contains(Tags.UNIT))
+						else if (
+							attackRange >= GameConstants.MELEE_ATTACK_RANGE && 
+							cell.Inside.Count() > 0 && 
+							cell.Inside.First().Tags.Contains(Tags.UNIT)
+						)
 						{
 							var first = cell.Inside.First();
 							var otherUnitCom = first.GetCom<UnitInfoCom>();
@@ -99,14 +103,18 @@ namespace RectClash.Game
 
 					foreach(var cell in _cellsInAttackRange.Select(i => Get(i)))
 					{
-						cell.ChangeState(CellInfoCom.State.CanAttack);
 						if (cell.Inside.Count() > 0 && cell.Inside.First().Tags.Contains(Tags.UNIT))
 						{
 							var first = cell.Inside.First();
 							var otherUnitCom = first.GetCom<UnitInfoCom>();
 							if(otherUnitCom.Faction != faction)
 							{
+								cell.ChangeState(CellInfoCom.State.CanAttack);
 							}
+						}
+						else
+						{
+							cell.ChangeState(CellInfoCom.State.Attackable);
 						}
 					}
 					
@@ -481,6 +489,7 @@ namespace RectClash.Game
 			{
 				var current = curCell.Inside.First();
 				Move(current, targetCellIndex.X, targetCellIndex.Y);
+				Get(targetCellIndex).Subject.Notify(Get(targetCellIndex).Owner, GameEvent.UNIT_MOVED);
 			}
 
 			ChangeState(State.ClearSelection);

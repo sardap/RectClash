@@ -2,16 +2,12 @@ using System;
 using RectClash.ECS;
 using RectClash.ECS.Graphics;
 using RectClash.Game.Unit;
-using RectClash.Game;
-using RectClash.Game.Unit;
 using SFML.Graphics;
-using UnitType = RectClash.Game.Unit.UnitType;
 using RectClash.Game.Perf;
 using RectClash.Misc;
 using SFML.System;
 using System.Collections.Generic;
-using RectClash.Game.Combat;
-using RectClash.Game.Sound;
+using UnitType = RectClash.Game.Unit.UnitType;
 
 namespace RectClash.Game
 {
@@ -97,7 +93,7 @@ namespace RectClash.Game
 			(
 				new WorldCom()
 				{
-					WorldSize = new Misc.Vector2<int>(500, 1000)
+					WorldSize = new Misc.Vector2<int>(500, 2000)
 				}
 			);
 
