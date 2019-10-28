@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Priority_Queue;
 using RectClash.ECS;
+using RectClash.Game.Generation;
 using RectClash.Game.Unit;
 using RectClash.Misc;
 using SFML.System;
@@ -519,11 +520,11 @@ namespace RectClash.Game
 			_cells[x,y].Subject.AddObv(ent.GetCom<UnitActionContCom>());
 		}
 
-		public void GenrateGrid(int gridWidth, int gridHeight, float cellWidth, float cellHeight)
+		public void GenrateGrid(int chunksX, int chunksY, float cellWidth, float cellHeight)
 		{
 			CellHeight = cellHeight;
 			CellWidth = cellWidth;
-			_cells = new CellInfoCom[gridWidth, gridHeight];
+			_cells = new CellInfoCom[chunksY * GameConstants.CHUNK_SIZE, chunksX * GameConstants.CHUNK_SIZE];
 			Owner.PostionCom.LocalScale = new Vector2f(cellWidth, cellHeight);
 
 			for(int i = 0; i < _cells.GetLength(0); i++)
@@ -531,6 +532,19 @@ namespace RectClash.Game
 				for(int j = 0; j < _cells.GetLength(1); j++)
 				{
 					_cells[i, j] = EntFactory.Instance.CreateCell(this, i, j, CellWidth, CellHeight).GetCom<CellInfoCom>();
+				}
+			}
+
+			var generators = new List<IChunkGenerator>()
+			{
+				new GrassChunkGenerator()
+			};
+
+			for(int i = 0; i < chunksY; i++)
+			{
+				for(int j = 0; j < chunksX; j++)
+				{
+					Utility.RandomElement(generators).GenrateChunk(i * GameConstants.CHUNK_SIZE, j * GameConstants.CHUNK_SIZE, _cells);
 				}
 			}
 		}

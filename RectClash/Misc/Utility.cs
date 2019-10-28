@@ -17,6 +17,11 @@ namespace RectClash.Misc
 			return Random.NextDouble() >= 0.5;
 		}
 
+		public static int RandomInt(int minValue = int.MinValue, int maxValue = int.MaxValue)
+		{
+			return Random.Next(minValue, maxValue);
+		}
+
 		public static double RandomDouble(double minValue = double.MinValue, double maxValue = double.MaxValue)
 		{
 			return Random.Next((int)minValue, (int)maxValue) + Random.NextDouble();
@@ -78,5 +83,10 @@ namespace RectClash.Misc
         {
             return Enum.GetName(val.GetType(), val);
         }
+
+		public static T RandomEnum<T>() where T : struct, IConvertible
+		{
+			return RandomElement(Enum.GetValues(typeof(T)).Cast<T>());
+		}
     }
 }

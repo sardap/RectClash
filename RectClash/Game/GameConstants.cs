@@ -8,6 +8,8 @@ namespace RectClash.Game
 
 		public const int MELEE_ATTACK_RANGE = 0;
 
+		public const int CHUNK_SIZE = 10;
+
 		public const string KEY_BINDING_FILE = "Keybinds.json";
 
 		public static readonly IEnumerable<string> SOUND_FOOT_SOLIDER_ATTACK = new List<string>()

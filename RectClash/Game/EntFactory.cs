@@ -120,10 +120,13 @@ namespace RectClash.Game
 
 			float scale = 50f;
 
+			var chunksX = 10;
+			var chunksY = 2;
+
 			gridCom.GenrateGrid
 			(
-				(int)(worldCom.WorldSize.X / scale), 
-				(int)(worldCom.WorldSize.Y / scale),
+				chunksX, 
+				chunksY,
 				10,
 				10
 			);
@@ -279,28 +282,13 @@ namespace RectClash.Game
 			var cellName = "Cell:" + i + "," + j;
 			var newCell = Engine.Instance.CreateEnt(gridCom.Owner, cellName, Tags.GRID_CELL);
 
-			var cellType = CellInfoCom.CellType.Dirt;
-			var selectorNum = Utility.Random.Next(100);
-			if(selectorNum > 30)
-			{
-				cellType = CellInfoCom.CellType.Dirt;
-			}
-			else if (selectorNum > 10)
-			{
-				cellType = CellInfoCom.CellType.Mud;
-			}
-			else
-			{
-				cellType = CellInfoCom.CellType.Water;
-			}
-
 			var infoCom = newCell.AddCom
 			(
 				new CellInfoCom()
 				{
 					Cords = new Vector2i(i, j),
 					Subject = new GameSubject(gridCom),
-					Type = cellType
+					Type = CellInfoCom.CellType.Grass
 				}
 			);
 

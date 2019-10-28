@@ -12,7 +12,7 @@ namespace RectClash.Game
 	{
 		public enum CellType
 		{
-			Dirt,
+			Grass,
 			Mud,
 			Water
 		}
@@ -43,7 +43,7 @@ namespace RectClash.Game
 
 		private static Dictionary<CellType, Color> _backgroundColorMap = new Dictionary<CellType, Color>()
 		{
-			{CellType.Dirt, new Color(109, 168, 74)},
+			{CellType.Grass, new Color(109, 168, 74)},
 			{CellType.Water, Color.Blue},
 			{CellType.Mud, new Color(143, 116, 63)}
 		};
@@ -113,7 +113,7 @@ namespace RectClash.Game
 		{
 			get
 			{
-				return (Type == CellType.Dirt || Type == CellType.Mud) && CurrentState != State.TurnComplete;
+				return (Type == CellType.Grass || Type == CellType.Mud) && CurrentState != State.TurnComplete;
 			}
 		}
 
