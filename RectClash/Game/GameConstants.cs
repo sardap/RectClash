@@ -10,6 +10,10 @@ namespace RectClash.Game
 
 		public const int CHUNK_SIZE = 10;
 
+		public const int CHUNKS_X = 3;
+		
+		public const int CHUNKS_Y = 3;
+
 		public const string KEY_BINDING_FILE = "Keybinds.json";
 
 		public static readonly IEnumerable<string> SOUND_FOOT_SOLIDER_ATTACK = new List<string>()

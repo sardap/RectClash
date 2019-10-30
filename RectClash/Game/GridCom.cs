@@ -535,9 +535,53 @@ namespace RectClash.Game
 				}
 			}
 
-			var generators = new List<IChunkGenerator>()
+			var generators = new List<ChunkGenerator>()
 			{
-				new GrassChunkGenerator()
+				new ChunkGenerator()
+				{
+					GenerationComponents = new List<IGenerationComponent>
+					{
+						new MudGenerator()
+						{
+							NumberOfRuns = 5,
+							ProbabilityOfRunning = 0.8f
+						},
+						new LakeGenerator()
+						{
+							LakeMaxSize = 5,
+							LakeMinSize = 3,
+							NumberOfRuns = 1,
+							ProbabilityOfRunning = 0.2f
+						},
+						new WoodsGenerator()
+						{
+							NumberOfRuns = 3,
+							ProbabilityOfRunning = 1f,
+							TreeMaxSize = 4
+						}
+					}					
+				}
+				// ,
+				// new ChunkGenerator()
+				// {
+				// 	GenerationComponents = new List<IGenerationComponent>
+				// 	{
+				// 		new LakeGenerator()
+				// 		{
+				// 			LakeMaxSize = 10,
+				// 			LakeMinSize = 5,
+				// 			NumberOfRuns = 1,
+				// 			ProbabilityOfRunning = 0.8f
+				// 		},
+				// 		new LakeGenerator()
+				// 		{
+				// 			LakeMaxSize = 2,
+				// 			LakeMinSize = 1,
+				// 			NumberOfRuns = 3,
+				// 			ProbabilityOfRunning = 0.5f
+				// 		}
+				// 	}
+				// }
 			};
 
 			for(int i = 0; i < chunksY; i++)

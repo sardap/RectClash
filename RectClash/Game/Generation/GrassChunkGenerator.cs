@@ -2,7 +2,7 @@ using RectClash.Misc;
 
 namespace RectClash.Game.Generation
 {
-	public class GrassChunkGenerator : IChunkGenerator
+	public class GrassChunkGenerator : ChunkGenerator
 	{
 		private int _offsetI;
 		private int _offsetJ;

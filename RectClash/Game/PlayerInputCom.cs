@@ -22,6 +22,18 @@ namespace RectClash.Game
                 case SFML.Window.Mouse.Wheel.VerticalWheel:
                     Engine.Instance.Window.Camera.ZoomX += e.Delta * 0.2f;
                     Engine.Instance.Window.Camera.ZoomY += e.Delta * 0.2f;
+
+					// if(e.Delta > 0)
+					// {
+					// 	Engine.Instance.Window.Camera.X -= e.Delta * 0.2f;
+					// 	Engine.Instance.Window.Camera.Y -= e.Delta * 0.2f;
+					// }
+					// else
+					// {
+					// 	Engine.Instance.Window.Camera.X += e.Delta * 0.2f;
+					// 	Engine.Instance.Window.Camera.Y += e.Delta * 0.2f;
+					// }
+
                     break;
 
                 default:

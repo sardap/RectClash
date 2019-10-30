@@ -8,6 +8,7 @@ namespace RectClash.ECS.Graphics
         UNITS_TOP,
         UNITS_INFO_BOTTOM,
         UNITS_INFO_TOP,
+		GRID_BACKGROUND_TOP,
         GRID_OVERLAY,
         UI
     }

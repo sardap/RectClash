@@ -118,10 +118,8 @@ namespace RectClash.Game
 
 			gridCom.TurnHandler = turnHandlerCom;
 
-			float scale = 50f;
-
-			var chunksX = 10;
-			var chunksY = 2;
+			var chunksX = GameConstants.CHUNKS_X;
+			var chunksY = GameConstants.CHUNKS_Y;
 
 			gridCom.GenrateGrid
 			(
@@ -299,7 +297,7 @@ namespace RectClash.Game
 				new DrawRectCom()
 				{
 					OutlineColor = new Color(byte.MaxValue, byte.MaxValue, byte.MaxValue),
-					LineThickness = 0.03,
+					LineThickness = 0,
 					Priority = DrawLayer.GRID_OVERLAY
 				}
 			);
@@ -318,7 +316,17 @@ namespace RectClash.Game
 				}
 			);
 
+			var cellBackgroundTopEnt = Engine.Instance.CreateEnt(newCell, "BackgroundTop: " + cellName);
+			var backgroundTop = cellBackgroundTopEnt.AddCom
+			(
+				new DrawRectCom()
+				{
+					Priority = DrawLayer.GRID_BACKGROUND_TOP
+				}
+			);
+
 			infoCom.Background = background;
+			infoCom.BackgroundTop = backgroundTop;
 
 			return newCell;
 		}

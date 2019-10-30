@@ -14,7 +14,9 @@ namespace RectClash.Game
 		{
 			Grass,
 			Mud,
-			Water
+			Water,
+			Leaf,
+			Wood
 		}
 
 		public enum State
@@ -29,6 +31,19 @@ namespace RectClash.Game
 			TurnComplete
 		}
 
+		private class BackgroundInfo
+		{
+			public Color Background { get; set; }
+
+			public Color BackgroundTop { get; set; }
+
+			public BackgroundInfo(Color background, Color backgroundTop)
+			{
+				Background = background;
+				BackgroundTop = backgroundTop;
+			}
+		}
+
 		private static Dictionary<State, Color> _fillColorMap = new Dictionary<State, Color>()
 		{
 			{State.UnSelected, new Color(0, 0, 0, 0)},
@@ -41,11 +56,13 @@ namespace RectClash.Game
 		};
 
 
-		private static Dictionary<CellType, Color> _backgroundColorMap = new Dictionary<CellType, Color>()
+		private static Dictionary<CellType, BackgroundInfo> _backgroundColorMap = new Dictionary<CellType, BackgroundInfo>()
 		{
-			{CellType.Grass, new Color(109, 168, 74)},
-			{CellType.Water, Color.Blue},
-			{CellType.Mud, new Color(143, 116, 63)}
+			{CellType.Grass, new BackgroundInfo(new Color(109, 168, 74), new Color(0,0,0,0))},
+			{CellType.Water, new BackgroundInfo(Color.Blue, new Color(0,0,0,0))},
+			{CellType.Mud, new BackgroundInfo(new Color(143, 116, 63), new Color(0,0,0,0))},
+			{CellType.Leaf, new BackgroundInfo(new Color(109, 168, 74), new Color(82, 107, 45, 200))},
+			{CellType.Wood, new BackgroundInfo(new Color(193, 154, 107), new Color(82, 107, 45, 200))}
 		};
 
 		private Stack<State> _stateStack = new Stack<State>();
@@ -58,14 +75,15 @@ namespace RectClash.Game
 
 		private DrawRectCom _background;
 
+		private DrawRectCom _backgroundTop;
+
 		public CellType Type 
 		{ 
 			get => _type;
 			set
 			{
 				_type = value;
-				if(Background != null)
-					Background.FillColor = _backgroundColorMap[Type];
+				RefreshBackground();
 			}
 		}
 
@@ -89,7 +107,17 @@ namespace RectClash.Game
 			set
 			{
 				_background = value;
-				Background.FillColor = _backgroundColorMap[Type];
+				Background.FillColor = _backgroundColorMap[Type].Background;
+			}
+		}
+
+		public DrawRectCom BackgroundTop
+		{
+			get => _backgroundTop;
+			set
+			{
+				_backgroundTop = value;
+				_backgroundTop.FillColor = _backgroundColorMap[Type].BackgroundTop;
 			}
 		}
 
@@ -113,7 +141,7 @@ namespace RectClash.Game
 		{
 			get
 			{
-				return (Type == CellType.Grass || Type == CellType.Mud) && CurrentState != State.TurnComplete;
+				return (Type == CellType.Grass || Type == CellType.Mud || Type == CellType.Leaf) && CurrentState != State.TurnComplete;
 			}
 		}
 
@@ -153,6 +181,14 @@ namespace RectClash.Game
 					Subject.Notify(Owner, GameEvent.GRID_CLEAR_SELECTION);
 					break;
 			}
+		}
+
+		private void RefreshBackground()
+		{
+			if(Background != null)
+				Background.FillColor = _backgroundColorMap[Type].Background;
+			if(BackgroundTop != null)
+				BackgroundTop.FillColor = _backgroundColorMap[Type].BackgroundTop;
 		}
 	}
 }

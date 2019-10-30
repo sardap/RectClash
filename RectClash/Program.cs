@@ -15,8 +15,8 @@ namespace RectClash
 
 		static void Main(string[] args)
 		{
-			int windowWidth = 1280;
-			int windowHeight = 720;
+			int windowWidth = 1920;
+			int windowHeight = 1080;
 
 			Engine.Initialise
 			(

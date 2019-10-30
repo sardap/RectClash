@@ -22,7 +22,7 @@ namespace RectClash.Misc
 			return Random.Next(minValue, maxValue);
 		}
 
-		public static double RandomDouble(double minValue = double.MinValue, double maxValue = double.MaxValue)
+		public static double RandomDouble(double minValue = 0.0, double maxValue = 1.0)
 		{
 			return Random.Next((int)minValue, (int)maxValue) + Random.NextDouble();
 		}
@@ -46,7 +46,7 @@ namespace RectClash.Misc
 
 		public static T RandomElement<T>(IList<T> collection)
 		{
-			return collection[_random.Next(0, collection.Count - 1)];
+			return collection[_random.Next(0, collection.Count)];
 		}
 
         public static bool WorldMouseInRect(double x, double y, double width, double height)
@@ -88,5 +88,60 @@ namespace RectClash.Misc
 		{
 			return RandomElement(Enum.GetValues(typeof(T)).Cast<T>());
 		}
+
+		public static List<Tuple<int, int>> GetAdjacentSquares<T>(int i, int j, T[,] multiAry)
+		{
+			var result = new List<Tuple<int, int>>();
+
+			if(i + 1 < multiAry.GetLength(0))
+			{
+				result.Add(new Tuple<int, int>(i + 1, j));
+			}
+
+			if(i - 1 >= 0)
+			{
+				result.Add(new Tuple<int, int>(i - 1, j));
+			}
+
+			if(j + 1 < multiAry.GetLength(1))
+			{
+				result.Add(new Tuple<int, int>(i, j + 1));
+			}
+
+			if(j - 1 >= 0)
+			{
+				result.Add(new Tuple<int, int>(i, j - 1));
+			}
+
+			return result;
+		}
+
+		public static List<Tuple<int, int>> GetAdjacentSquaresSixDirections<T>(int i, int j, T[,] multiAry)
+		{
+			var result = GetAdjacentSquares(i, j, multiAry);
+
+			if(j - 1 >= 0 && i + 1 < multiAry.GetLength(0))
+			{
+				result.Add(new Tuple<int, int>(i + 1, j - 1));
+			}
+
+			if(j + 1 < multiAry.GetLength(1) && i + 1 < multiAry.GetLength(0))
+			{
+				result.Add(new Tuple<int, int>(i + 1, j + 1));
+			}
+
+			if(j + 1 < multiAry.GetLength(1) && i - 1 >= 0)
+			{
+				result.Add(new Tuple<int, int>(i - 1, j + 1));
+			}
+
+			if(j - 1 >= 0 && i - 1 >= 0)
+			{
+				result.Add(new Tuple<int, int>(i - 1, j - 1));
+			}
+
+			return result;
+		}
+
     }
 }
