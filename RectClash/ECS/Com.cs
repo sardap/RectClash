@@ -8,7 +8,9 @@ namespace RectClash.ECS
 
         public bool StartRan { get { return _startRan; } }
 
-        public virtual void Update()
+		public bool Enabled { get => throw new System.NotImplementedException(); set => throw new System.NotImplementedException(); }
+
+		public virtual void Update()
         {
         } 
 
@@ -34,6 +36,7 @@ namespace RectClash.ECS
         public void Destory()
         {
 			InternalDestroy();
+			Owner = null;
         }
     }
 }

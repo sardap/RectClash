@@ -4,6 +4,10 @@ namespace RectClash.ECS.Graphics
 {
     public class DrawRectCom: DrawableCom, Drawable
     {
+		private static Color _noColor = new Color(0 ,0 ,0, 0);
+
+		private static SFML.System.Vector2f _size = new SFML.System.Vector2f(1, 1);
+
         private RectangleShape _rectangle = new RectangleShape();
 
         public PostionCom PostionCom { get; set; }
@@ -36,8 +40,7 @@ namespace RectClash.ECS.Graphics
             // texture.Update(pixels);
 
             // sprite.Position = PostionCom.WorldPostion;
-
-            _rectangle.Size = new SFML.System.Vector2f(1f, 1f);
+           
             _rectangle.FillColor = FillColor;
             _rectangle.OutlineColor = OutlineColor;
             _rectangle.OutlineThickness = (float)LineThickness;
@@ -51,6 +54,7 @@ namespace RectClash.ECS.Graphics
         protected override void InternalStart()
         {
             PostionCom = Owner.GetCom<PostionCom>();
+			_rectangle.Size = _size;
         }
     }
 }

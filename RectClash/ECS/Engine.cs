@@ -31,7 +31,6 @@ namespace RectClash.ECS
             _instance._time = new Time();
             _instance._window = window;
             _instance._toBeUpdated = new Stack<IEnt>();
-            _instance._toDraw = new HashSet<IEnt>();
             _instance._mouse = mouseInput;
 			_instance._sound = soundOutput;
 
@@ -39,9 +38,9 @@ namespace RectClash.ECS
             _instance._time.Start();
         }
 
-        private volatile IEnt _root;
-        private volatile Stack<IEnt> _toBeUpdated;
-        public volatile HashSet<IEnt> _toDraw;
+        private IEnt _root;
+        private Stack<IEnt> _toBeUpdated;
+		private bool _entDirty;
         private Time _time;
         private long _max_loop_time;
         private long _timeDrawLoopTook;
@@ -56,6 +55,11 @@ namespace RectClash.ECS
 		public ISoundOutput Sound { get { return _sound; } }
 
         public Time Time { get { return _time; } }
+
+		public int MaxDrawables 
+		{
+			get; private set;
+		}
 
 		private void BroadcastMessage<S, T>(IEnt ent, S sender, T message)
 		{
@@ -80,6 +84,7 @@ namespace RectClash.ECS
 
         public IEnt CreateEnt(IEnt parent, string name, List<string> tags)
         {
+			_entDirty = true;
             var result = new Ent(parent, name, tags);
             parent.AddChild(result);
             return result;
@@ -103,16 +108,18 @@ namespace RectClash.ECS
         public void  Step()
         {
             _max_loop_time = _time.ElapsedTime + (MAX_UPDATE_TIME - _timeDrawLoopTook);
+			_time.StartOfLoop();
 
-            if(_toBeUpdated.Count == 0)
+            if(_entDirty)
             {
-                _time.StartOfLoop();
+				_entDirty = false;
+				_toBeUpdated.Clear();
                 _toBeUpdated = GetEntsToUpdate();
             }
 
-            while(_toBeUpdated.Count > 0)
+            foreach(IEnt current in _toBeUpdated)
             {
-                var current = _toBeUpdated.Pop();
+                //var current = _toBeUpdated.Pop();
 
                 current.Update();
                 Window.Draw(current.DrawableComs);

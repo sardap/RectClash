@@ -5,9 +5,10 @@ namespace RectClash.Game.Perf
     public class PerfMessureCom : Com
     {
         private const long MAXSAMPLES = 100;
-        private long tickindex = 0;
-        private long ticksum = 0;
-        private long[] ticklist = new long[MAXSAMPLES];
+		private bool _bufferFilled = false;
+        private long _tickindex = 0;
+        private long _ticksum = 0;
+        private long[] _ticklist = new long[MAXSAMPLES];
 
         private double _avgTick;
 
@@ -27,14 +28,17 @@ namespace RectClash.Game.Perf
 
         private double CalcAverageTick(long newtick)
         {
-            ticksum -= ticklist[tickindex];  /* subtract value falling off */
-            ticksum += newtick;              /* add new value */
-            ticklist[tickindex] = newtick;   /* save new value so it can be subtracted later */
-            if(++tickindex == MAXSAMPLES)    /* inc buffer index */
-                tickindex = 0;
+            _ticksum -= _ticklist[_tickindex];  /* subtract value falling off */
+            _ticksum += newtick;              /* add new value */
+            _ticklist[_tickindex] = newtick;   /* save new value so it can be subtracted later */
+            if(++_tickindex == MAXSAMPLES)    /* inc buffer index */
+			{
+                _tickindex = 0;
+				_bufferFilled = true;
+			}
 
             /* return average */
-            return((double)ticksum / MAXSAMPLES);
+            return _bufferFilled ? ((double)_ticksum / MAXSAMPLES) : 0;
         }
     }
 }

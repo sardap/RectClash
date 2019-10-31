@@ -34,7 +34,16 @@ namespace RectClash.SFMLComs
 		public override void OnStart()
 		{
 			_window = new SFML.Graphics.RenderWindow(new SFML.Window.VideoMode((uint)Size.X, (uint)Size.Y), "SFML works!");
-			_workingDIR = System.Environment.GetEnvironmentVariable("RES_DIR");
+			
+			if(System.Environment.GetEnvironmentVariable("RES_DIR") != null)
+			{
+				_workingDIR = System.Environment.GetEnvironmentVariable("RES_DIR");
+			}
+			else
+			{
+				_workingDIR = @"C:\Users\pfsar\OneDrive\Documents\GitHub\RectClash\Resources";
+			}
+
 			Camera = new Camera()
 			{
 				Postion = new Vector2f(Engine.Instance.Window.Size.X / 2, Engine.Instance.Window.Size.Y / 2)
@@ -70,11 +79,11 @@ namespace RectClash.SFMLComs
 
 		private SFML.Graphics.Drawable _toDraw;
 
-		public override void DrawDrawQueue(SimplePriorityQueue<IDrawableCom> drawQueue)
+		public override void DrawDrawQueue(FastPriorityQueue<DrawableNode> drawQueue)
 		{
 			while(drawQueue.Count > 0)
 			{
-				var top = drawQueue.Dequeue();
+				var top = drawQueue.Dequeue().Drawable;
 
 				if(top is DrawCircleCom)
 				{

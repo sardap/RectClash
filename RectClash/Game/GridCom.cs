@@ -543,13 +543,13 @@ namespace RectClash.Game
 					{
 						new MudGenerator()
 						{
-							NumberOfRuns = 5,
+							NumberOfRuns = 3,
 							ProbabilityOfRunning = 0.8f
 						},
 						new LakeGenerator()
 						{
-							LakeMaxSize = 5,
-							LakeMinSize = 3,
+							LakeMaxSize = 3,
+							LakeMinSize = 1,
 							NumberOfRuns = 1,
 							ProbabilityOfRunning = 0.2f
 						},
@@ -560,28 +560,27 @@ namespace RectClash.Game
 							TreeMaxSize = 4
 						}
 					}					
+				},
+				new ChunkGenerator()
+				{
+					GenerationComponents = new List<IGenerationComponent>
+					{
+						new LakeGenerator()
+						{
+							LakeMaxSize = 10,
+							LakeMinSize = 5,
+							NumberOfRuns = 1,
+							ProbabilityOfRunning = 0.8f
+						},
+						new LakeGenerator()
+						{
+							LakeMaxSize = 2,
+							LakeMinSize = 1,
+							NumberOfRuns = 3,
+							ProbabilityOfRunning = 0.5f
+						}
+					}
 				}
-				// ,
-				// new ChunkGenerator()
-				// {
-				// 	GenerationComponents = new List<IGenerationComponent>
-				// 	{
-				// 		new LakeGenerator()
-				// 		{
-				// 			LakeMaxSize = 10,
-				// 			LakeMinSize = 5,
-				// 			NumberOfRuns = 1,
-				// 			ProbabilityOfRunning = 0.8f
-				// 		},
-				// 		new LakeGenerator()
-				// 		{
-				// 			LakeMaxSize = 2,
-				// 			LakeMinSize = 1,
-				// 			NumberOfRuns = 3,
-				// 			ProbabilityOfRunning = 0.5f
-				// 		}
-				// 	}
-				// }
 			};
 
 			for(int i = 0; i < chunksY; i++)

@@ -7,6 +7,10 @@ namespace RectClash.ECS
 {
     public class Ent : IEnt
     {
+		private static IList<IDrawableCom> _emptyDrawables = new List<IDrawableCom>();
+
+		private static IList<IEnt> _emptyChildren = new List<IEnt>();
+
         private readonly IList<ICom> _coms = new List<ICom>();
 
         private readonly IList<IEnt> _children = new List<IEnt>();
@@ -19,18 +23,50 @@ namespace RectClash.ECS
 
         private readonly List<string> _tags = new List<string>();
 
+		private readonly List<IEnt> _activeChildren = new List<IEnt>();
+
+		private bool _enabled;
+
         public IEnumerable<ICom> Coms { get { return _coms; } }
 
         public PostionCom PostionCom { get { return _postionCom; }}
 
         public readonly string Name;
 
-        
         public IEnt Parent { get; set; }
 
-        public IEnumerable<IEnt> Children { get { return _children; } }
+        public IEnumerable<IEnt> Children 
+		{ 
+			get 
+			{
+				_activeChildren.Clear();
 
-        public IEnumerable<IDrawableCom> DrawableComs { get => _drawables; }
+				foreach(var child in _children)
+				{
+					if(child.Enabled)
+						_activeChildren.Add(child);
+				}
+
+				return Enabled ? _activeChildren : _emptyChildren; 
+			} 
+		}
+
+        public IEnumerable<IDrawableCom> DrawableComs 
+		{ 
+			get
+			{
+				return Enabled ? _drawables : _emptyDrawables;
+			} 
+		}
+
+		public bool Enabled
+		{
+			get => _enabled;
+			set
+			{
+				_enabled = value;
+			}
+		}
 
         public IList<string> Tags => _tags;
         
@@ -42,6 +78,8 @@ namespace RectClash.ECS
         {
             _tags.AddRange(tags);
 
+			Enabled = true;
+			
             Name = name;
 
             if(Parent == null)
@@ -52,17 +90,8 @@ namespace RectClash.ECS
             {
                ChangeParent(parent);
             }
+
             _postionCom = AddCom(new PostionCom());
-        }
-
-        private ICollection<IDrawableCom> GetDrawableComs(List<IDrawableCom> result)
-        {
-            foreach(var child in _children)
-            {
-                result.AddRange(((Ent)child).GetDrawableComs(result));
-            }
-
-            return _drawables;
         }
 
         public T AddCom<T>(T com) where T : ICom
@@ -120,6 +149,11 @@ namespace RectClash.ECS
 
         public void Update()
         {
+			if(!Enabled)
+			{
+				return;
+			}
+
             while(_justCreatedComs.Count > 0)
             {
                 _coms[_justCreatedComs.Pop()].OnStart();
@@ -149,7 +183,7 @@ namespace RectClash.ECS
         {
 			((Ent)Parent)._children.Remove(this);
 
-			foreach(var ent in Children.ToList())
+			foreach(var ent in _children.ToList())
 			{
 				ent.Destory();
 			}
@@ -160,6 +194,16 @@ namespace RectClash.ECS
 				RemoveCom(com);
 			}
 			_coms.Clear();
+        }
+
+		private ICollection<IDrawableCom> GetDrawableComs(List<IDrawableCom> result)
+        {
+            foreach(var child in _children)
+            {
+                result.AddRange(((Ent)child).GetDrawableComs(result));
+            }
+
+            return _drawables;
         }
     }
 }

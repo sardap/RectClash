@@ -9,7 +9,7 @@ namespace RectClash.ECS
 {
     public abstract class Window : IWindow
     {
-        private volatile SimplePriorityQueue<IDrawableCom> _drawQueue = new SimplePriorityQueue<IDrawableCom>();
+        private volatile FastPriorityQueue<DrawableNode> _drawQueue = new FastPriorityQueue<DrawableNode>(ECSConsants.MAX_DRAWABLES);
 
         public abstract bool IsOpen 
         { 
@@ -40,16 +40,16 @@ namespace RectClash.ECS
 
         public abstract void OnStart();
 
-        public abstract void DrawDrawQueue(SimplePriorityQueue<IDrawableCom> drawQueue);
+        public abstract void DrawDrawQueue(FastPriorityQueue<DrawableNode> drawQueue);
 
         public void Draw(IDrawableCom toDraw)
         {
-            _drawQueue.Enqueue(toDraw, 0);
+            _drawQueue.Enqueue(toDraw.DrawableNode, 0);
         }
 
         public void Draw(IDrawableCom toDraw, int priority)
         {
-            _drawQueue.Enqueue(toDraw, priority);            
+            _drawQueue.Enqueue(toDraw.DrawableNode, priority);            
         }
 
         public void Update()
