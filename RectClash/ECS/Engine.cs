@@ -43,7 +43,6 @@ namespace RectClash.ECS
 		private bool _entDirty;
         private Time _time;
         private long _max_loop_time;
-        private long _timeDrawLoopTook;
         private IWindow _window;
 		private ISoundOutput _sound;
         public IMouseInput _mouse;
@@ -107,7 +106,7 @@ namespace RectClash.ECS
       
         public void  Step()
         {
-            _max_loop_time = _time.ElapsedTime + (MAX_UPDATE_TIME - _timeDrawLoopTook);
+            _max_loop_time = _time.ElapsedTime + (MAX_UPDATE_TIME);
 			_time.StartOfLoop();
 
             if(_entDirty)

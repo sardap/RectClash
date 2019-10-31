@@ -6,7 +6,6 @@ namespace RectClash.ECS
     public class Time
     {
         private Stopwatch _stopWatch = new Stopwatch();
-        private long _timeSinceStart;
         private long _oldTimeStart;
         private long _deltaTime;
 
