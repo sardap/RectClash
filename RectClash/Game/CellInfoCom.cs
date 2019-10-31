@@ -3,12 +3,13 @@ using System.Linq;
 using RectClash.ECS;
 using RectClash.ECS.Graphics;
 using RectClash.Game;
+using RectClash.Game.Combat;
 using SFML.Graphics;
 using SFML.System;
 
 namespace RectClash.Game
 {
-	public class CellInfoCom : Com, IGameObv
+	public class CellInfoCom : Com, IGameObv, IDamageInfoCom
 	{
 		public enum CellType
 		{
@@ -16,7 +17,9 @@ namespace RectClash.Game
 			Mud,
 			Water,
 			Leaf,
-			Wood
+			Wood,
+			Sand,
+			Cactus
 		}
 
 		public enum State
@@ -31,16 +34,19 @@ namespace RectClash.Game
 			TurnComplete
 		}
 
-		private class BackgroundInfo
+		private class CellTypeInfo
 		{
-			public Color Background { get; set; }
+			public Color Background { get; private set; }
 
-			public Color BackgroundTop { get; set; }
+			public Color BackgroundTop { get; private set; }
 
-			public BackgroundInfo(Color background, Color backgroundTop)
+			public float DamageAdjacent { get; private set; }
+
+			public CellTypeInfo(Color background, Color backgroundTop, float damageAdjacent = 0)
 			{
 				Background = background;
 				BackgroundTop = backgroundTop;
+				DamageAdjacent = damageAdjacent;
 			}
 		}
 
@@ -56,13 +62,36 @@ namespace RectClash.Game
 		};
 
 
-		private static Dictionary<CellType, BackgroundInfo> _backgroundColorMap = new Dictionary<CellType, BackgroundInfo>()
+		private static Dictionary<CellType, CellTypeInfo> _staticCellInfo = new Dictionary<CellType, CellTypeInfo>()
 		{
-			{CellType.Grass, new BackgroundInfo(new Color(109, 168, 74), new Color(0,0,0,0))},
-			{CellType.Water, new BackgroundInfo(Color.Blue, new Color(0,0,0,0))},
-			{CellType.Mud, new BackgroundInfo(new Color(143, 116, 63), new Color(0,0,0,0))},
-			{CellType.Leaf, new BackgroundInfo(new Color(109, 168, 74), new Color(82, 107, 45, 200))},
-			{CellType.Wood, new BackgroundInfo(new Color(193, 154, 107), new Color(82, 107, 45, 200))}
+			{
+				CellType.Grass, 
+				new CellTypeInfo(new Color(109, 168, 74), new Color(0, 0, 0, 0))
+			},
+			{
+				CellType.Water, 
+				new CellTypeInfo(new Color(0, 0, 255), new Color(0, 0, 0, 0))
+			},
+			{
+				CellType.Mud, 
+				new CellTypeInfo(new Color(143, 116, 63), new Color(0, 0, 0, 0))
+			},
+			{
+				CellType.Leaf, 
+				new CellTypeInfo(new Color(109, 168, 74), new Color(82, 107, 45, 200))
+			},
+			{
+				CellType.Wood, 
+				new CellTypeInfo(new Color(193, 154, 107), new Color(82, 107, 45, 200))
+			},
+			{
+				CellType.Sand, 
+				new CellTypeInfo(new Color(238, 214, 175), new Color(0, 0, 0, 0))
+			},
+			{
+				CellType.Cactus, 
+				new CellTypeInfo(new Color(91, 111, 85), new Color(0, 0, 0, 0), 5)
+			}
 		};
 
 		private Stack<State> _stateStack = new Stack<State>();
@@ -107,7 +136,7 @@ namespace RectClash.Game
 			set
 			{
 				_background = value;
-				Background.FillColor = _backgroundColorMap[Type].Background;
+				Background.FillColor = _staticCellInfo[Type].Background;
 			}
 		}
 
@@ -117,10 +146,14 @@ namespace RectClash.Game
 			set
 			{
 				_backgroundTop = value;
-				_backgroundTop.FillColor = _backgroundColorMap[Type].BackgroundTop;
+				_backgroundTop.FillColor = _staticCellInfo[Type].BackgroundTop;
 			}
 		}
 
+		public float DamageAdjacent
+		{
+			get => _staticCellInfo[Type].DamageAdjacent;
+		}
 
 		public int MovementCost
 		{
@@ -141,7 +174,7 @@ namespace RectClash.Game
 		{
 			get
 			{
-				return (Type == CellType.Grass || Type == CellType.Mud || Type == CellType.Leaf) && CurrentState != State.TurnComplete;
+				return (Type == CellType.Grass || Type == CellType.Mud || Type == CellType.Leaf || Type == CellType.Sand) && CurrentState != State.TurnComplete;
 			}
 		}
 
@@ -152,6 +185,8 @@ namespace RectClash.Game
 				return Selectable && Inside.Count() <= 0;
 			}
 		}
+
+		public double DamageAmount => DamageAdjacent;
 
 		protected override void InternalStart()
 		{
@@ -186,9 +221,9 @@ namespace RectClash.Game
 		private void RefreshBackground()
 		{
 			if(Background != null)
-				Background.FillColor = _backgroundColorMap[Type].Background;
+				Background.FillColor = _staticCellInfo[Type].Background;
 			if(BackgroundTop != null)
-				BackgroundTop.FillColor = _backgroundColorMap[Type].BackgroundTop;
+				BackgroundTop.FillColor = _staticCellInfo[Type].BackgroundTop;
 		}
 	}
 }

@@ -210,7 +210,6 @@ namespace RectClash.Game
 				new HealthCom()
 				{
 					MaxHealth = unitCom.MaxHealth,
-					CurrentHealth = unitCom.MaxHealth,
 					HealthBarCom = progressBarCom,
 					Subject = new GameSubject(unitActionCom)
 				}

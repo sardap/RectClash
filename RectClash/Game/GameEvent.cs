@@ -9,6 +9,7 @@ namespace RectClash.Game
         GRID_CLEAR_SELECTION,
 		UNIT_MOVED,
         ATTACK_TARGET,
+		RECEIVE_DAMAGE,
         ATTACK_ATTACKER,
 		UNIT_SELECTED,
 		UNIT_DIED,

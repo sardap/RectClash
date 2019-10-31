@@ -2,10 +2,11 @@ using RectClash.ECS;
 using System.Collections.Generic;
 using RectClash.ECS.Graphics;
 using SFML.Graphics;
+using RectClash.Game.Combat;
 
 namespace RectClash.Game.Unit
 {
-	public class UnitInfoCom : Com
+	public class UnitInfoCom : Com, IDamageInfoCom
 	{
 		private class CommonUnitInfo
 		{
@@ -34,7 +35,8 @@ namespace RectClash.Game.Unit
 						DeathSound = GameConstants.SOUND_FOOT_SOLIDER_DIED,
 						SelectSound = GameConstants.SOUND_FOOT_SOLIDER_SELECTED,
 						MoveSound = GameConstants.SOUND_FOOT_SOLIDER_MOVE,
-						AttackSound = GameConstants.SOUND_FOOT_SOLIDER_ATTACK
+						AttackSound = GameConstants.SOUND_FOOT_SOLIDER_ATTACK,
+						DamageSound = GameConstants.SOUND_DAMAGE_SOUND_ALL
 					}
 				}
 			},
@@ -52,7 +54,8 @@ namespace RectClash.Game.Unit
 						DeathSound = GameConstants.SOUND_HEAVY_SOLIDER_DIED,
 						SelectSound = GameConstants.SOUND_HEAVY_SOLIDER_SELECTED,
 						MoveSound = GameConstants.SOUND_HEAVY_SOLIDER_MOVE,
-						AttackSound = GameConstants.SOUND_HEAVY_SOLIDER_ATTACK
+						AttackSound = GameConstants.SOUND_HEAVY_SOLIDER_ATTACK,
+						DamageSound = GameConstants.SOUND_DAMAGE_SOUND_ALL
 					}
 				}
 			},
@@ -70,7 +73,8 @@ namespace RectClash.Game.Unit
 						DeathSound = GameConstants.SOUND_LIGHT_ARCHER_DIED,
 						SelectSound = GameConstants.SOUND_LIGHT_ARCHER_SELECTED,
 						MoveSound = GameConstants.SOUND_LIGHT_ARCHER_MOVE,
-						AttackSound = GameConstants.SOUND_LIGHT_ARCHER_ATTACK
+						AttackSound = GameConstants.SOUND_LIGHT_ARCHER_ATTACK,
+						DamageSound = GameConstants.SOUND_DAMAGE_SOUND_ALL
 					}
 				}
 			}
@@ -126,7 +130,7 @@ namespace RectClash.Game.Unit
 			get => _staticUnitInfo[Type].baseColor;
 		}
 
-		public double Damage 
+		public double DamageAmount 
 		{ 
 			get => _staticUnitInfo[Type].damage;
 		}

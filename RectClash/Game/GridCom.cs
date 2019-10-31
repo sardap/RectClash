@@ -220,6 +220,12 @@ namespace RectClash.Game
 			return result;
 		}
 
+		private CellInfoCom Get(System.Tuple<int, int> index)
+		{
+			return Get(new Vector2i(index.Item1, index.Item2));
+		}
+
+
 		private CellInfoCom Get(Vector2i index)
 		{
 			return _cells[index.X, index.Y];
@@ -537,48 +543,68 @@ namespace RectClash.Game
 
 			var generators = new List<ChunkGenerator>()
 			{
+				// new ChunkGenerator()
+				// {
+				// 	GenerationComponents = new List<IGenerationComponent>
+				// 	{
+				// 		new MudGenerator()
+				// 		{
+				// 			NumberOfRuns = 3,
+				// 			ProbabilityOfRunning = 0.8f
+				// 		},
+				// 		new LakeGenerator()
+				// 		{
+				// 			LakeMaxSize = 3,
+				// 			LakeMinSize = 1,
+				// 			NumberOfRuns = 1,
+				// 			ProbabilityOfRunning = 0.2f
+				// 		},
+				// 		new WoodsGenerator()
+				// 		{
+				// 			NumberOfRuns = 3,
+				// 			ProbabilityOfRunning = 1f,
+				// 			TreeMaxSize = 4
+				// 		}
+				// 	}					
+				// },
+				// new ChunkGenerator()
+				// {
+				// 	GenerationComponents = new List<IGenerationComponent>
+				// 	{
+				// 		new LakeGenerator()
+				// 		{
+				// 			LakeMaxSize = 10,
+				// 			LakeMinSize = 5,
+				// 			NumberOfRuns = 1,
+				// 			ProbabilityOfRunning = 0.8f
+				// 		},
+				// 		new LakeGenerator()
+				// 		{
+				// 			LakeMaxSize = 2,
+				// 			LakeMinSize = 1,
+				// 			NumberOfRuns = 3,
+				// 			ProbabilityOfRunning = 0.5f
+				// 		}
+				// 	}
+				// },
 				new ChunkGenerator()
 				{
 					GenerationComponents = new List<IGenerationComponent>
 					{
-						new MudGenerator()
+						new SandGenerator(),
+						new CactusGenerator()
 						{
-							NumberOfRuns = 3,
-							ProbabilityOfRunning = 0.8f
+							NumberOfRuns = 10,
+							ProbabilityOfRunning = 0.25f
 						},
 						new LakeGenerator()
 						{
 							LakeMaxSize = 3,
 							LakeMinSize = 1,
 							NumberOfRuns = 1,
-							ProbabilityOfRunning = 0.2f
+							ProbabilityOfRunning = 0.05f
 						},
-						new WoodsGenerator()
-						{
-							NumberOfRuns = 3,
-							ProbabilityOfRunning = 1f,
-							TreeMaxSize = 4
-						}
-					}					
-				},
-				new ChunkGenerator()
-				{
-					GenerationComponents = new List<IGenerationComponent>
-					{
-						new LakeGenerator()
-						{
-							LakeMaxSize = 10,
-							LakeMinSize = 5,
-							NumberOfRuns = 1,
-							ProbabilityOfRunning = 0.8f
-						},
-						new LakeGenerator()
-						{
-							LakeMaxSize = 2,
-							LakeMinSize = 1,
-							NumberOfRuns = 3,
-							ProbabilityOfRunning = 0.5f
-						}
+
 					}
 				}
 			};
@@ -602,7 +628,15 @@ namespace RectClash.Game
 					if(unitCom.Faction == TurnHandler.Faction)
 					{
 						unitCom.TurnReset();
-						cell.ChangeState(CellInfoCom.State.UnSelected);
+						cell.ChangeState(CellInfoCom.State.UnSelected);	
+
+						foreach(var adjacentCell in Utility.GetAdjacentSquares(cell.Cords.X, cell.Cords.Y, _cells))
+						{
+							if(Get(adjacentCell).DamageAmount > 0)
+							{
+								cell.Subject.Notify(Get(adjacentCell).Owner, GameEvent.RECEIVE_DAMAGE);
+							}
+						}
 					}
 				}
 			}

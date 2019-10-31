@@ -80,7 +80,7 @@ namespace RectClash.Game.Generation
 				((step < LakeMaxSize && Utility.RandomInt(0, 11) > 3) || minSizeReached) &&
 				(InRange(nextI, _offsetI, _maxI) && InRange(nextJ, _offsetJ, _maxJ)))
 			{
-				GenrateWalkWater(nextI, nextJ, cells, step++);
+				GenrateWalkWater(nextI, nextJ, cells, ++step);
 			}
 		}
 

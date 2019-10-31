@@ -4,7 +4,7 @@ namespace RectClash.Game
 {
     public static class GameConstants
     {
-        public const float DAMAGE_VARIATION = 0.3f;
+        public const float UNIT_DAMAGE_VARIATION = 0.3f;
 
 		public const int MELEE_ATTACK_RANGE = 0;
 
@@ -19,6 +19,11 @@ namespace RectClash.Game
 		public const int MAX_DRAWABLES = 10000;
 
 		public const float ZOOM_MUL = 1.5f;
+
+		public static readonly IEnumerable<string> SOUND_DAMAGE_SOUND_ALL = new List<string>()
+		{
+			"Sounds/damage_sound.wav"
+		};
 
 		public static readonly IEnumerable<string> SOUND_FOOT_SOLIDER_ATTACK = new List<string>()
 		{

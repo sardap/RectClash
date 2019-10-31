@@ -17,8 +17,6 @@ namespace RectClash.Game
 
         public List<UnitInfoCom> Units { get; set; }
 
-        public CombatHandlerCom CombatHandler { get; set; }
-
         public WorldCom() : base()
         {
             Units = new List<UnitInfoCom>();

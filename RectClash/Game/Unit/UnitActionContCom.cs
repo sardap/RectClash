@@ -1,4 +1,5 @@
 using RectClash.ECS;
+using RectClash.Game.Combat;
 using RectClash.Misc;
 
 namespace RectClash.Game.Unit
@@ -30,6 +31,12 @@ namespace RectClash.Game.Unit
 					if(PerformAttack(ent))
 						Engine.Instance.Sound.PlayRandomSound(_unitInfoCom.SoundInfo.AttackSound);
 					break;
+
+				case GameEvent.RECEIVE_DAMAGE:
+					Owner.GetCom<HealthCom>().ReceiveDamage(ent.GetCom<IDamageInfoCom>());
+					Engine.Instance.Sound.PlayRandomSound(_unitInfoCom.SoundInfo.DamageSound);
+					break;
+
 				case GameEvent.UNIT_DIED:
 					Engine.Instance.Sound.PlayRandomSound(_unitInfoCom.SoundInfo.DeathSound);
 					Owner.Destory();
@@ -42,12 +49,16 @@ namespace RectClash.Game.Unit
 			var targetUnitCom = target.GetCom<HealthCom>();
 			var attackerUnitCom = _unitInfoCom;
 
-			var damageVariation = attackerUnitCom.Damage * GameConstants.DAMAGE_VARIATION;
+			var damageVariation = attackerUnitCom.DamageAmount * GameConstants.UNIT_DAMAGE_VARIATION;
 			var damageModifer = Utility.RandomDouble(-(damageVariation), damageVariation);
 
-			var result = targetUnitCom.CurrentHealth - attackerUnitCom.Damage + damageModifer >= 0;
+			var result = targetUnitCom.CurrentHealth - attackerUnitCom.DamageAmount + damageModifer >= 0;
 
-			targetUnitCom.CurrentHealth -= attackerUnitCom.Damage + damageModifer;
+			target.GetCom<UnitActionContCom>().OnNotify
+			(
+				Owner,
+				GameEvent.RECEIVE_DAMAGE
+			);
 
 			return result;
 		}

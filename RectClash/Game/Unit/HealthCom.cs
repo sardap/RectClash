@@ -1,4 +1,6 @@
 using RectClash.ECS;
+using RectClash.Game.Combat;
+using RectClash.Misc;
 
 namespace RectClash.Game.Unit
 {
@@ -9,18 +11,6 @@ namespace RectClash.Game.Unit
 		public double CurrentHealth 
 		{ 
 			get => _currentHealth;
-			set
-			{
-				_currentHealth = value;
-
-				if(HealthBarCom != null)
-					HealthBarCom.Percent = _currentHealth / MaxHealth;
-
-				if(_currentHealth < 0)
-				{
-					Subject.Notify(Owner, GameEvent.UNIT_DIED);
-				}
-			}
 		}
 		
 		public double MaxHealth { get; set; }
@@ -29,9 +19,25 @@ namespace RectClash.Game.Unit
 
 		public GameSubject Subject { get; set; }
 
+		public void ReceiveDamage(IDamageInfoCom damageMessage)
+		{
+			var damageVariation = damageMessage.DamageAmount * GameConstants.UNIT_DAMAGE_VARIATION;
+			var damageModifer = Utility.RandomDouble(-(damageVariation), damageVariation);
+
+			_currentHealth -= damageMessage.DamageAmount + damageModifer;
+
+			if(HealthBarCom != null)
+				HealthBarCom.Percent = _currentHealth / MaxHealth;
+
+			if(_currentHealth < 0)
+			{
+				Subject.Notify(Owner, GameEvent.UNIT_DIED);
+			}
+		}
+
 		protected override void InternalStart()
 		{
-			CurrentHealth = MaxHealth;
+			_currentHealth = MaxHealth;
 		}
 	}
 }
