@@ -8,17 +8,23 @@ namespace RectClash.Game
 
 		public const int MELEE_ATTACK_RANGE = 0;
 
-		public const int CHUNK_SIZE = 10;
+		public const int CHUNK_SIZE = 20;
 
-		public const int CHUNKS_X = 5;
+		public const int MAX_BIOME_SIZE = 18;
 
-		public const int CHUNKS_Y = 5;
+		public const int MIN_BIOME_SIZE = CHUNK_SIZE;
+
+		public const int CHUNKS_X = 4;
+
+		public const int CHUNKS_Y = 4;
 
 		public const string KEY_BINDING_FILE = "Keybinds.json";
 
 		public const int MAX_DRAWABLES = 10000;
 
 		public const float ZOOM_MUL = 1.5f;
+
+		public const string SEED = "Only Lose our chains";
 
 		public static readonly IEnumerable<string> SOUND_DAMAGE_SOUND_ALL = new List<string>()
 		{

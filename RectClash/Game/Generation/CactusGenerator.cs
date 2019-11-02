@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using RectClash.Misc;
+using SFML.System;
 
 namespace RectClash.Game.Generation
 {
@@ -25,6 +27,13 @@ namespace RectClash.Game.Generation
 			int j = Utility.RandomInt(offsetJ, maxJ);
 
 			cells[i,j].Type = CellInfoCom.CellType.Cactus;
+		}
+
+		public void Genrate(Vector2i index, CellInfoCom[,] cells, HashSet<Vector2i> cellsInBiome)
+		{
+			var randomPostion = Utility.RandomElement(cellsInBiome);
+
+			cells[randomPostion.X, randomPostion.Y].Type = CellInfoCom.CellType.Cactus;
 		}
 	}
 }

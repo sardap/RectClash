@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using RectClash.Misc;
+using SFML.System;
 
 namespace RectClash.Game.Generation
 {
@@ -48,41 +50,44 @@ namespace RectClash.Game.Generation
 			_maxJ = offsetJ + GameConstants.CHUNK_SIZE - 1;
 
 
-            GenrateWalkWater(Utility.RandomInt(offsetI, _maxI), Utility.RandomInt(offsetJ, _maxJ), cells);
+//            GenrateWalkWater(Utility.RandomInt(offsetI, _maxI), Utility.RandomInt(offsetJ, _maxJ), cells);
         }
         
-        private void GenrateWalkWater(int i, int j, CellInfoCom[,] cells, int step = 0)
+		public void Genrate(Vector2i index, CellInfoCom[,] cells, HashSet<Vector2i> cellsInBiome)
 		{
-			bool InRange(int val, int min, int max)
-			{
-				return val >= min && val <= max;
-			}
+			var start = Utility.RandomElement(cellsInBiome);
+            GenrateWalkWater(start.X, start.Y, cells, cellsInBiome);
+		}
 
+        private void GenrateWalkWater(int i, int j, CellInfoCom[,] cells, HashSet<Vector2i> cellsInBiome, int step = 0)
+		{
 			cells[i, j].Type = CellInfoCom.CellType.Water;
 
 			int nextI;
 			int nextJ;
 
-			if(Utility.RandomBool())
-			{
-				nextI = i + Utility.RandomInt(-1, 2);
-				nextJ = j;
-			}
-			else
-			{
-				nextI = i;
-				nextJ = j + Utility.RandomInt(-1, 2);
-			}
-			
-			var minSizeReached = !(step > LakeMinSize);
+			nextI = i + Utility.RandomInt(-1, 2);
+			nextJ = j;
 
 			if(
-				((step < LakeMaxSize && Utility.RandomInt(0, 11) > 3) || minSizeReached) &&
-				(InRange(nextI, _offsetI, _maxI) && InRange(nextJ, _offsetJ, _maxJ)))
+				(step < LakeMinSize || Utility.RandomInt(0, LakeMaxSize - step) > 0) && 
+				cellsInBiome.Contains(new Vector2i(nextI, nextJ))
+			)
 			{
-				GenrateWalkWater(nextI, nextJ, cells, ++step);
+				GenrateWalkWater(nextI, nextJ, cells, cellsInBiome, step + 1);
+
+			}
+			
+			nextI = i;
+			nextJ = j + Utility.RandomInt(-1, 2);
+
+			if(
+				(step < LakeMinSize || Utility.RandomInt(0, LakeMaxSize - step) > 0) && 
+				cellsInBiome.Contains(new Vector2i(nextI, nextJ))
+			)
+			{
+				GenrateWalkWater(nextI, nextJ, cells, cellsInBiome, step + 1);
 			}
 		}
-
-    }
+	}
 }

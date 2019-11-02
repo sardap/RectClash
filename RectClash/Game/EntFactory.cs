@@ -126,7 +126,8 @@ namespace RectClash.Game
 				chunksX, 
 				chunksY,
 				10,
-				10
+				10,
+				GameConstants.SEED.GetHashCode()
 			);
 			worldCom.Grid = gridCom;
 
@@ -285,7 +286,7 @@ namespace RectClash.Game
 				{
 					Cords = new Vector2i(i, j),
 					Subject = new GameSubject(gridCom),
-					Type = CellInfoCom.CellType.Grass
+					Type = CellInfoCom.CellType.Nothing
 				}
 			);
 
@@ -326,6 +327,8 @@ namespace RectClash.Game
 
 			infoCom.Background = background;
 			infoCom.BackgroundTop = backgroundTop;
+
+			
 
 			return newCell;
 		}

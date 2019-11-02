@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using RectClash.ECS;
 using SFML.Graphics;
+using SFML.System;
 
 namespace RectClash.Misc
 {
@@ -49,6 +50,14 @@ namespace RectClash.Misc
 			return collection[_random.Next(0, collection.Count)];
 		}
 
+		public static T RandomElement<T>(T[,] array)
+		{
+			int values = array.GetLength(0) * array.GetLength(1);
+			int index = Random.Next(values);
+			return array[index / array.GetLength(0), index % array.GetLength(0)];
+		}
+
+
         public static bool WorldMouseInRect(double x, double y, double width, double height)
         {
             return PointInRect(Engine.Instance.Mouse.WorldMouseX, Engine.Instance.Mouse.WorldMouseY, x, y, width, height);
@@ -89,59 +98,74 @@ namespace RectClash.Misc
 			return RandomElement(Enum.GetValues(typeof(T)).Cast<T>());
 		}
 
-		public static List<Tuple<int, int>> GetAdjacentSquares<T>(int i, int j, T[,] multiAry)
+		public static List<Vector2i> GetAdjacentSquares<T>(int i, int j, T[,] multiAry)
 		{
-			var result = new List<Tuple<int, int>>();
+			var result = new List<Vector2i>();
 
 			if(i + 1 < multiAry.GetLength(0))
 			{
-				result.Add(new Tuple<int, int>(i + 1, j));
+				result.Add(new Vector2i(i + 1, j));
 			}
 
 			if(i - 1 >= 0)
 			{
-				result.Add(new Tuple<int, int>(i - 1, j));
+				result.Add(new Vector2i(i - 1, j));
 			}
 
 			if(j + 1 < multiAry.GetLength(1))
 			{
-				result.Add(new Tuple<int, int>(i, j + 1));
+				result.Add(new Vector2i(i, j + 1));
 			}
 
 			if(j - 1 >= 0)
 			{
-				result.Add(new Tuple<int, int>(i, j - 1));
+				result.Add(new Vector2i(i, j - 1));
 			}
 
 			return result;
 		}
 
-		public static List<Tuple<int, int>> GetAdjacentSquaresSixDirections<T>(int i, int j, T[,] multiAry)
+		public static List<Vector2i> GetAdjacentSquaresSixDirections<T>(int i, int j, T[,] multiAry)
 		{
 			var result = GetAdjacentSquares(i, j, multiAry);
 
 			if(j - 1 >= 0 && i + 1 < multiAry.GetLength(0))
 			{
-				result.Add(new Tuple<int, int>(i + 1, j - 1));
+				result.Add(new Vector2i(i + 1, j - 1));
 			}
 
 			if(j + 1 < multiAry.GetLength(1) && i + 1 < multiAry.GetLength(0))
 			{
-				result.Add(new Tuple<int, int>(i + 1, j + 1));
+				result.Add(new Vector2i(i + 1, j + 1));
 			}
 
 			if(j + 1 < multiAry.GetLength(1) && i - 1 >= 0)
 			{
-				result.Add(new Tuple<int, int>(i - 1, j + 1));
+				result.Add(new Vector2i(i - 1, j + 1));
 			}
 
 			if(j - 1 >= 0 && i - 1 >= 0)
 			{
-				result.Add(new Tuple<int, int>(i - 1, j - 1));
+				result.Add(new Vector2i(i - 1, j - 1));
 			}
 
 			return result;
 		}
 
+		public static double DistanceBetween(Vector2i aPos, Vector2i bPos)
+		{
+			var dx = System.Math.Abs(aPos.X - bPos.X);
+			var dy = System.Math.Abs(aPos.Y - bPos.Y);
+
+			return dx + dy;
+		}
+
+		public static void AddAll<T>(ICollection<T> collection, IEnumerable<T> toAdd)
+		{
+			foreach(var i in toAdd)
+			{
+				collection.Add(i);
+			}
+		}
     }
 }

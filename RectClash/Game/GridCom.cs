@@ -220,12 +220,6 @@ namespace RectClash.Game
 			return result;
 		}
 
-		private CellInfoCom Get(System.Tuple<int, int> index)
-		{
-			return Get(new Vector2i(index.Item1, index.Item2));
-		}
-
-
 		private CellInfoCom Get(Vector2i index)
 		{
 			return _cells[index.X, index.Y];
@@ -526,7 +520,7 @@ namespace RectClash.Game
 			_cells[x,y].Subject.AddObv(ent.GetCom<UnitActionContCom>());
 		}
 
-		public void GenrateGrid(int chunksX, int chunksY, float cellWidth, float cellHeight)
+		public void GenrateGrid(int chunksX, int chunksY, float cellWidth, float cellHeight, long seed)
 		{
 			CellHeight = cellHeight;
 			CellWidth = cellWidth;
@@ -541,79 +535,137 @@ namespace RectClash.Game
 				}
 			}
 
-			var generators = new List<ChunkGenerator>()
+			var lightWoodsBiome = new BiomeGenerator()
 			{
-				// new ChunkGenerator()
-				// {
-				// 	GenerationComponents = new List<IGenerationComponent>
-				// 	{
-				// 		new MudGenerator()
-				// 		{
-				// 			NumberOfRuns = 3,
-				// 			ProbabilityOfRunning = 0.8f
-				// 		},
-				// 		new LakeGenerator()
-				// 		{
-				// 			LakeMaxSize = 3,
-				// 			LakeMinSize = 1,
-				// 			NumberOfRuns = 1,
-				// 			ProbabilityOfRunning = 0.2f
-				// 		},
-				// 		new WoodsGenerator()
-				// 		{
-				// 			NumberOfRuns = 3,
-				// 			ProbabilityOfRunning = 1f,
-				// 			TreeMaxSize = 4
-				// 		}
-				// 	}					
-				// },
-				// new ChunkGenerator()
-				// {
-				// 	GenerationComponents = new List<IGenerationComponent>
-				// 	{
-				// 		new LakeGenerator()
-				// 		{
-				// 			LakeMaxSize = 10,
-				// 			LakeMinSize = 5,
-				// 			NumberOfRuns = 1,
-				// 			ProbabilityOfRunning = 0.8f
-				// 		},
-				// 		new LakeGenerator()
-				// 		{
-				// 			LakeMaxSize = 2,
-				// 			LakeMinSize = 1,
-				// 			NumberOfRuns = 3,
-				// 			ProbabilityOfRunning = 0.5f
-				// 		}
-				// 	}
-				// },
-				new ChunkGenerator()
+				GenerationComponents = new List<IGenerationComponent>
 				{
-					GenerationComponents = new List<IGenerationComponent>
+					new FillWithTypeGenerator()
 					{
-						new SandGenerator(),
-						new CactusGenerator()
-						{
-							NumberOfRuns = 10,
-							ProbabilityOfRunning = 0.25f
-						},
-						new LakeGenerator()
-						{
-							LakeMaxSize = 3,
-							LakeMinSize = 1,
-							NumberOfRuns = 1,
-							ProbabilityOfRunning = 0.05f
-						},
+						Type = CellInfoCom.CellType.Grass
+					},
+					new MudGenerator()
+					{
+						MaxMudSteps = 100,
+						MinMudSteps = 5,
+						NumberOfRuns = 4,
+						ProbabilityOfRunning = 0.8f
+					},
+					new LakeGenerator()
+					{
+						LakeMaxSize = 5,
+						LakeMinSize = 1,
+						NumberOfRuns = 5,
+						ProbabilityOfRunning = 0.2f
+					},
+					new WoodsGenerator()
+					{
+						TreeMaxSize = 4,
+						NumberOfRuns = 6,
+						ProbabilityOfRunning = 0.5f
+					}
+				}					
+			};
 
+			var denseWoodsBiome = new BiomeGenerator()
+			{
+				GenerationComponents = new List<IGenerationComponent>
+				{
+					new FillWithTypeGenerator()
+					{
+						Type = CellInfoCom.CellType.Grass
+					},
+					new LakeGenerator()
+					{
+						LakeMaxSize = 5,
+						LakeMinSize = 1,
+						NumberOfRuns = 2,
+						ProbabilityOfRunning = 0.2f
+					},
+					new WoodsGenerator()
+					{
+						TreeMaxSize = 8,
+						NumberOfRuns = 40,
+						ProbabilityOfRunning = 0.5f
+					}
+				}					
+			};
+
+			var lakeBiome = new BiomeGenerator()
+			{
+				GenerationComponents = new List<IGenerationComponent>
+				{
+					new FillWithTypeGenerator()
+					{
+						Type = CellInfoCom.CellType.Grass
+					},
+					new LakeGenerator()
+					{
+						LakeMaxSize = 8,
+						LakeMinSize = 3,
+						NumberOfRuns = 2,
+						ProbabilityOfRunning = 0.8f
+					},
+					new LakeGenerator()
+					{
+						LakeMaxSize = 2,
+						LakeMinSize = 1,
+						NumberOfRuns = 10,
+						ProbabilityOfRunning = 0.5f
 					}
 				}
 			};
+
+			var dessertBiome = new BiomeGenerator()
+			{
+				GenerationComponents = new List<IGenerationComponent>
+				{
+					new FillWithTypeGenerator()
+					{
+						Type = CellInfoCom.CellType.Sand
+					},
+					new CactusGenerator()
+					{
+						NumberOfRuns = 40,
+						ProbabilityOfRunning = 0.25f
+					},
+					new LakeGenerator()
+					{
+						LakeMaxSize = 3,
+						LakeMinSize = 1,
+						NumberOfRuns = 1,
+						ProbabilityOfRunning = 0.2f
+					}
+				}
+			};
+
+			var generators = new List<BiomeGenerator>()
+			{
+				lightWoodsBiome,
+				lakeBiome,
+				dessertBiome,
+				denseWoodsBiome
+			};
+
+			var visited = new HashSet<Vector2i>();
 
 			for(int i = 0; i < chunksY; i++)
 			{
 				for(int j = 0; j < chunksX; j++)
 				{
-					Utility.RandomElement(generators).GenrateChunk(i * GameConstants.CHUNK_SIZE, j * GameConstants.CHUNK_SIZE, _cells);
+					Utility.RandomElement(generators).
+						GenrateChunk(i * GameConstants.CHUNK_SIZE, j * GameConstants.CHUNK_SIZE, _cells, visited);
+				}
+			}
+
+			// Clean unassignedCells
+			foreach(var cell in _cells)
+			{
+				if(cell.Type == CellInfoCom.CellType.Nothing)
+				{
+					var adjacent = Utility.GetAdjacentSquares(cell.Cords.X, cell.Cords.Y, _cells)
+						.Where(i => Get(i).Type != CellInfoCom.CellType.Nothing);
+					
+					cell.Type = adjacent.Count() > 0 ? Get(Utility.RandomElement(adjacent)).Type : CellInfoCom.CellType.Grass;
 				}
 			}
 		}

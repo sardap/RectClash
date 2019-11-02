@@ -1,14 +1,11 @@
+using System.Collections.Generic;
 using RectClash.Misc;
+using SFML.System;
 
 namespace RectClash.Game.Generation
 {
     public class MudGenerator : IGenerationComponent
     {
-		private int _offsetI;
-		private int _offsetJ;
-		private int _maxI;
-		private int _maxJ;
-
         public int NumberOfRuns
 		{
 			get; 
@@ -21,51 +18,56 @@ namespace RectClash.Game.Generation
 			set;
 		}
 
+		public int MinMudSteps
+		{
+			get;
+			set;
+		}
+
+		public int MaxMudSteps
+		{
+			get;
+			set;
+		}
+
 		public void Genrate(int offsetI, int offsetJ, CellInfoCom[,] cells)
         {
-            _offsetI = offsetI;
-			_offsetJ = offsetJ;
-
-			_maxI = offsetI + GameConstants.CHUNK_SIZE - 1;
-			_maxJ = offsetJ + GameConstants.CHUNK_SIZE - 1;
-
-            GenrateWalkMud(Utility.RandomInt(offsetI, _maxI), Utility.RandomInt(offsetJ, _maxJ), cells);
+            //GenrateWalkMud(Utility.RandomInt(offsetI, _maxI), Utility.RandomInt(offsetJ, _maxJ), cells);
+			throw new System.NotImplementedException();
         }
 
-		private void GenrateWalkMud(int i, int j, CellInfoCom[,] cells, int step = 0)
+		public void Genrate(Vector2i index, CellInfoCom[,] cells, HashSet<Vector2i> cellsInBiome)
 		{
-			int WrapIndex(int val, int min, int max)
-			{
-				if(val < min)
-				{
-					val = max;
-				}
-				else if(val > max)
-				{
-					val = min;
-				}
+			var start = Utility.RandomElement(cellsInBiome);
+            GenrateWalkMud(start.X, start.Y, cells, cellsInBiome);
+		}
 
-				return val;
-			}
-
+		private void GenrateWalkMud(int i, int j, CellInfoCom[,] cells, HashSet<Vector2i> cellsInBiome, int step = 0)
+		{
 			int number = Utility.RandomInt(0, 101);
 
-			if(number > 50)
+			if(number > 25)
 			{
 				cells[i, j].Type = CellInfoCom.CellType.Mud;
 			} 
-			else if(number > 25)
+			else
 			{
 				cells[i, j].Type = CellInfoCom.CellType.Grass;
 			}
 
-			int nextI = WrapIndex(i + Utility.RandomInt(-1, 2), _offsetI, _maxI);
-			int nextJ = WrapIndex(j + Utility.RandomInt(-1, 2), _offsetJ, _maxJ);
+			int nextI = i + Utility.RandomInt(-1, 2);
+			int nextJ = j + Utility.RandomInt(-1, 2);
 			
-			if(Utility.RandomInt(step, GameConstants.CHUNK_SIZE + 1) < GameConstants.CHUNK_SIZE)
+			if(
+				cellsInBiome.Contains(new Vector2i(nextI, nextJ)) && 
+				(step < MinMudSteps || (Utility.RandomInt(0, 101) > 5 && (step < MaxMudSteps)))
+			)
 			{
-				GenrateWalkMud(nextI, nextJ, cells, step++);
+				GenrateWalkMud(nextI, nextJ, cells, cellsInBiome, step + 1);
+				return;
 			}
+
+			return;
 		}
 
     }

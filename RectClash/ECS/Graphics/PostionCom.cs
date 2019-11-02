@@ -32,6 +32,7 @@ namespace RectClash.ECS.Graphics
 			get
 			{
 				if(_isDirty)
+				
 				{
 					if(Owner.Parent == null)
 					{

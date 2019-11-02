@@ -13,6 +13,7 @@ namespace RectClash.Game
 	{
 		public enum CellType
 		{
+			Nothing,
 			Grass,
 			Mud,
 			Water,
@@ -91,6 +92,10 @@ namespace RectClash.Game
 			{
 				CellType.Cactus, 
 				new CellTypeInfo(new Color(91, 111, 85), new Color(0, 0, 0, 0), 5)
+			},
+			{
+				CellType.Nothing,
+				new CellTypeInfo(new Color(0,0,0,0), new Color(0,0,0,0))
 			}
 		};
 
