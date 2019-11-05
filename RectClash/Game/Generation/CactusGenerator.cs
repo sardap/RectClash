@@ -18,20 +18,9 @@ namespace RectClash.Game.Generation
 			set;
 		}
 
-		public void Genrate(int offsetI, int offsetJ, CellInfoCom[,] cells)
+		public void Genrate(Vector2i index, CellInfoCom[,] cells, HashSet<Vector2i> cellsInBiome, long seed)
 		{
-			int maxI = offsetI + GameConstants.CHUNK_SIZE - 1;
-			int maxJ = offsetJ + GameConstants.CHUNK_SIZE - 1;
-
-			int i = Utility.RandomInt(offsetI, maxI);
-			int j = Utility.RandomInt(offsetJ, maxJ);
-
-			cells[i,j].Type = CellInfoCom.CellType.Cactus;
-		}
-
-		public void Genrate(Vector2i index, CellInfoCom[,] cells, HashSet<Vector2i> cellsInBiome)
-		{
-			var randomPostion = Utility.RandomElement(cellsInBiome);
+			var randomPostion = Utility.RandomElement(cellsInBiome, seed);
 
 			cells[randomPostion.X, randomPostion.Y].Type = CellInfoCom.CellType.Cactus;
 		}

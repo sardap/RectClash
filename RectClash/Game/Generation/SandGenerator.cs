@@ -21,18 +21,7 @@ namespace RectClash.Game.Generation
 			set;
 		}
 
-		public void Genrate(int offsetI, int offsetJ, CellInfoCom[,] cells)
-		{
-			for(int i = offsetI; i < offsetI + GameConstants.CHUNK_SIZE; i++)
-			{
-				for(int j = offsetJ; j < offsetJ + GameConstants.CHUNK_SIZE; j++)
-				{
-					cells[i,j].Type = Type;
-				}
-			}
-		}
-
-		public void Genrate(Vector2i index, CellInfoCom[,] cells, HashSet<Vector2i> cellsInBiome)
+		public void Genrate(Vector2i index, CellInfoCom[,] cells, HashSet<Vector2i> cellsInBiome, long genSeed)
 		{
 			foreach(var cellIndex in cellsInBiome)
 			{

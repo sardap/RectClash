@@ -126,8 +126,7 @@ namespace RectClash.Game
 				chunksX, 
 				chunksY,
 				10,
-				10,
-				GameConstants.SEED.GetHashCode()
+				10
 			);
 			worldCom.Grid = gridCom;
 
@@ -233,7 +232,7 @@ namespace RectClash.Game
 				new DrawRectCom()
 				{
 					OutlineColor = hatColour,
-					LineThickness = 0.1,
+					LineThickness = 0.1f,
 					Priority = DrawLayer.UNITS_TOP
 				}
 			);

@@ -20,7 +20,6 @@ namespace RectClash.ECS.Graphics
 
 		private bool _isInverseDirty  = true;
 
-
 		public SFML.System.Vector2f _postion = new SFML.System.Vector2f(0f, 0f);
 
 		public SFML.System.Vector2f _localScale = new SFML.System.Vector2f(1f, 1f);
@@ -32,7 +31,7 @@ namespace RectClash.ECS.Graphics
 			get
 			{
 				if(_isDirty)
-				
+
 				{
 					if(Owner.Parent == null)
 					{
@@ -102,6 +101,10 @@ namespace RectClash.ECS.Graphics
 			{
 				return new FloatRect(LocalPostion.X, LocalPostion.Y, LocalScale.X, LocalScale.Y);
 			}
+		}
+
+		protected override void InternalStart()
+		{
 		}
 
 

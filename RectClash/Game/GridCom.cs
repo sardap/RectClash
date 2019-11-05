@@ -6,6 +6,7 @@ using RectClash.Game.Generation;
 using RectClash.Game.Unit;
 using RectClash.Misc;
 using SFML.System;
+using System.Diagnostics;
 
 namespace RectClash.Game
 {
@@ -520,7 +521,7 @@ namespace RectClash.Game
 			_cells[x,y].Subject.AddObv(ent.GetCom<UnitActionContCom>());
 		}
 
-		public void GenrateGrid(int chunksX, int chunksY, float cellWidth, float cellHeight, long seed)
+		public void GenrateGrid(int chunksX, int chunksY, float cellWidth, float cellHeight)
 		{
 			CellHeight = cellHeight;
 			CellWidth = cellWidth;
@@ -587,7 +588,7 @@ namespace RectClash.Game
 						NumberOfRuns = 40,
 						ProbabilityOfRunning = 0.5f
 					}
-				}					
+				}
 			};
 
 			var lakeBiome = new BiomeGenerator()
@@ -648,12 +649,20 @@ namespace RectClash.Game
 
 			var visited = new HashSet<Vector2i>();
 
+			var chunkSeeds = new HashSet<long>();
+
 			for(int i = 0; i < chunksY; i++)
 			{
 				for(int j = 0; j < chunksX; j++)
 				{
-					Utility.RandomElement(generators).
-						GenrateChunk(i * GameConstants.CHUNK_SIZE, j * GameConstants.CHUNK_SIZE, _cells, visited);
+					var index1D = (chunksX * ((i + 1) * 206331036) + ((j + 1) * -1241462742));
+					var chunkSeed = (Engine.Instance.Seed) + index1D;
+				
+					Debug.Assert(!chunkSeeds.Contains(chunkSeed));
+					chunkSeeds.Add(chunkSeed);
+					
+					Utility.RandomElement(generators, chunkSeed).
+						GenrateChunk(i * GameConstants.CHUNK_SIZE, j * GameConstants.CHUNK_SIZE, _cells, visited, chunkSeed);
 				}
 			}
 
@@ -665,7 +674,9 @@ namespace RectClash.Game
 					var adjacent = Utility.GetAdjacentSquares(cell.Cords.X, cell.Cords.Y, _cells)
 						.Where(i => Get(i).Type != CellInfoCom.CellType.Nothing);
 					
-					cell.Type = adjacent.Count() > 0 ? Get(Utility.RandomElement(adjacent)).Type : CellInfoCom.CellType.Grass;
+					var seed = Engine.Instance.Seed - cell.Cords.X + cell.Cords.Y * 4112019;
+
+					cell.Type = adjacent.Count() > 0 ? Get(Utility.RandomElement(adjacent, seed)).Type : CellInfoCom.CellType.Grass;
 				}
 			}
 		}

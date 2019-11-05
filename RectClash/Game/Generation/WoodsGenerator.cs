@@ -31,13 +31,9 @@ namespace RectClash.Game.Generation
 			TreeMaxSize = 1;
 		}
 
-		public void Genrate(int offsetI, int offsetJ, CellInfoCom[,] cells)
+		public void Genrate(Vector2i index, CellInfoCom[,] cells, HashSet<Vector2i> cellsInBiome, long genSeed)
 		{
-		}
-
-		public void Genrate(Vector2i index, CellInfoCom[,] cells, HashSet<Vector2i> cellsInBiome)
-		{
-			var start = Utility.RandomElement(cellsInBiome);
+			var start = Utility.RandomElement(cellsInBiome, genSeed);
 
 			var adjacent = Utility.GetAdjacentSquares(start.X, start.Y, cells);
 
@@ -45,12 +41,11 @@ namespace RectClash.Game.Generation
 
 			if(adjacent.Count() == 4 && startCellType == CellInfoCom.CellType.Grass)
 			{
-				GenrateTree(start.X, start.Y, cells);
+				GenrateTree(start.X, start.Y, cells, 0, genSeed);
 			}
-
 		}
 
-		private void GenrateTree(int cellI, int cellJ, CellInfoCom[,] cells, int step = 0)
+		private void GenrateTree(int cellI, int cellJ, CellInfoCom[,] cells, int step, long seed)
 		{
 			var adjacent = Utility.GetAdjacentSquaresSixDirections(cellI, cellJ, cells);
 			adjacent = adjacent.Where(i => 
@@ -61,7 +56,7 @@ namespace RectClash.Game.Generation
 
 			for(int counter = 0; counter < numberOfLeafs; counter++)
 			{
-				var leafCell = Utility.RandomElement(adjacent);
+				var leafCell = Utility.RandomElement(adjacent, seed + step * 1553);
 				adjacent.Remove(leafCell);
 
 				cells[leafCell.X, leafCell.Y].Type = CellInfoCom.CellType.Leaf;
@@ -69,13 +64,12 @@ namespace RectClash.Game.Generation
 
 			cells[cellI, cellJ].Type = CellInfoCom.CellType.Wood;
 
-			var next = Utility.RandomElement(Utility.GetAdjacentSquares(cellI, cellJ, cells));
+			var next = Utility.RandomElement(Utility.GetAdjacentSquares(cellI, cellJ, cells), seed + step * 1554);
 
 			if(Utility.RandomInt(0, TreeMaxSize) > step)
 			{
-				GenrateTree(next.X, next.Y, cells, ++step);
+				GenrateTree(next.X, next.Y, cells, step + 1, seed);
 			}
 		}
-
 	}
 }

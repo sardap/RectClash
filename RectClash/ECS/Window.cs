@@ -9,7 +9,7 @@ namespace RectClash.ECS
 {
     public abstract class Window : IWindow
     {
-        private volatile FastPriorityQueue<DrawableNode> _drawQueue = new FastPriorityQueue<DrawableNode>(ECSConsants.MAX_DRAWABLES);
+        private readonly FastPriorityQueue<DrawableNode> _drawQueue = new FastPriorityQueue<DrawableNode>(ECSConsants.MAX_DRAWABLES);
 
         public abstract bool IsOpen 
         { 
@@ -28,9 +28,23 @@ namespace RectClash.ECS
             set;
         }
 
-        public Camera Camera { get; set; }
+        public Camera Camera 
+		{ 
+			get; 
+			set; 
+		}
 
-        public abstract void ProcessEvents();
+		public List<Vertex> VerticesToDraw
+		{
+			get; 
+			set; 
+		}
+
+		public Window()
+		{
+		}
+
+		public abstract void ProcessEvents();
 
         public abstract void Refresh();
 
@@ -49,15 +63,15 @@ namespace RectClash.ECS
 
         public void Draw(IDrawableCom toDraw, int priority)
         {
-            _drawQueue.Enqueue(toDraw.DrawableNode, priority);            
+            _drawQueue.Enqueue(toDraw.DrawableNode, priority);
         }
 
         public void Update()
         {
             ProcessEvents();
-            Clear();
-            DrawDrawQueue(_drawQueue);
-            Refresh();
+			Clear();
+			DrawDrawQueue(_drawQueue);
+			Refresh();
         }
 
         public void Draw(IEnumerable<IDrawableCom> toDraw)

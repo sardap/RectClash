@@ -41,25 +41,13 @@ namespace RectClash.Game.Generation
 			LakeMinSize = 2;
 		}
 
-        public void Genrate(int offsetI, int offsetJ, CellInfoCom[,] cells)
-        {
-            _offsetI = offsetI;
-			_offsetJ = offsetJ;
-
-			_maxI = offsetI + GameConstants.CHUNK_SIZE - 1;
-			_maxJ = offsetJ + GameConstants.CHUNK_SIZE - 1;
-
-
-//            GenrateWalkWater(Utility.RandomInt(offsetI, _maxI), Utility.RandomInt(offsetJ, _maxJ), cells);
-        }
-        
-		public void Genrate(Vector2i index, CellInfoCom[,] cells, HashSet<Vector2i> cellsInBiome)
+		public void Genrate(Vector2i index, CellInfoCom[,] cells, HashSet<Vector2i> cellsInBiome, long genSeed)
 		{
-			var start = Utility.RandomElement(cellsInBiome);
-            GenrateWalkWater(start.X, start.Y, cells, cellsInBiome);
+			var start = Utility.RandomElement(cellsInBiome, genSeed);
+            GenrateWalkWater(start.X, start.Y, cells, cellsInBiome, 0, genSeed);
 		}
 
-        private void GenrateWalkWater(int i, int j, CellInfoCom[,] cells, HashSet<Vector2i> cellsInBiome, int step = 0)
+        private void GenrateWalkWater(int i, int j, CellInfoCom[,] cells, HashSet<Vector2i> cellsInBiome, int step, long genSeed)
 		{
 			cells[i, j].Type = CellInfoCom.CellType.Water;
 
@@ -74,7 +62,7 @@ namespace RectClash.Game.Generation
 				cellsInBiome.Contains(new Vector2i(nextI, nextJ))
 			)
 			{
-				GenrateWalkWater(nextI, nextJ, cells, cellsInBiome, step + 1);
+				GenrateWalkWater(nextI, nextJ, cells, cellsInBiome, step + 1, genSeed);
 
 			}
 			
@@ -86,7 +74,7 @@ namespace RectClash.Game.Generation
 				cellsInBiome.Contains(new Vector2i(nextI, nextJ))
 			)
 			{
-				GenrateWalkWater(nextI, nextJ, cells, cellsInBiome, step + 1);
+				GenrateWalkWater(nextI, nextJ, cells, cellsInBiome, step + 1, genSeed);
 			}
 		}
 	}

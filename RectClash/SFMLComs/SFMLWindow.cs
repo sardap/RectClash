@@ -18,6 +18,16 @@ namespace RectClash.SFMLComs
 
 		private string _workingDIR;
 
+		private CircleShape _sfmlCircle = new CircleShape();
+		
+		private SFML.Graphics.Text _sfmlText = new SFML.Graphics.Text();
+
+		private RectangleShape _sfmlRect = new RectangleShape();
+
+		private RenderStates _states = RenderStates.Default;
+
+		private SFML.Graphics.Drawable _toDraw;
+
 		public override bool IsOpen 
 		{ 
 			get
@@ -70,14 +80,6 @@ namespace RectClash.SFMLComs
 			_window.Clear();
 		}
 
-		private CircleShape _sfmlCircle = new CircleShape();
-		private SFML.Graphics.Text _sfmlText = new SFML.Graphics.Text();
-
-		private RectangleShape _sfmlRect = new RectangleShape();
-
-		private RenderStates _states = RenderStates.Default;
-
-		private SFML.Graphics.Drawable _toDraw;
 
 		public override void DrawDrawQueue(FastPriorityQueue<DrawableNode> drawQueue)
 		{
@@ -113,18 +115,6 @@ namespace RectClash.SFMLComs
 				else
 				{
 					continue;
-				}
-
-				//_states.Transform.Combine(top.Owner.PostionCom.LocalToWorldMatrix);
-
-				if(top.Floating)
-				{
-					//_window.SetView(_window.DefaultView);
-				}
-				else
-				{
-					//_states.Transform.Combine(Camera.LocalToWorldTransform);
-					//_window.SetView(Camera.View);
 				}
 
 				_window.Draw(_toDraw, _states);

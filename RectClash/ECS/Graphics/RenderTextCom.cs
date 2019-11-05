@@ -5,9 +5,18 @@ namespace RectClash.ECS.Graphics
 {
     public class RenderTextCom : DrawableCom
     {
+		private string _text;
+
         public PostionCom Postion { get; set; }
 
-        public string Text { get; set; }
+        public string Text 
+		{ 
+			get => _text;
+			set
+			{
+				_text = value;
+			}
+		}
 
         public Font Font { get; set; }
 

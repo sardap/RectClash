@@ -57,7 +57,6 @@ namespace RectClash.ECS
 			set
 			{
 				_postion = value;
-				Subject.Notify("LocalMouse(" + _postion.X.ToString("0.##") + "," + _postion.Y.ToString("0.##") + ")", PerfEvents.CAMERA_MOVED);
 				SetDirty();
 			}
 		}
@@ -80,36 +79,14 @@ namespace RectClash.ECS
 			set
 			{
 				_zoom = value;
-				Subject.Notify("Zoom:" + _zoom.X.ToString("0.##"), PerfEvents.CAMERA_ZOOMED);
 				SetDirty();
 			}
 		}
-
-		public float ZoomY
-		{
-			get => Zoom.Y;
-			set
-			{
-				Zoom = new Vector2f(ZoomX, value);
-				SetDirty();
-			}
-		}
-
-		public float ZoomX
-		{
-			get => Zoom.X;
-			set
-			{
-				Zoom = new Vector2f(value, ZoomY);
-				SetDirty();
-			}
-		}
-
 
 		public bool Dirty
 		{
 			get;
-			set;
+			private set;
 		}
 
 		private bool _inverseDirty
@@ -129,6 +106,8 @@ namespace RectClash.ECS
 		{
 			Dirty = true;
 			_inverseDirty = true;
+			Subject.Notify("Zoom:" + _zoom.X.ToString("0.##"), PerfEvents.CAMERA_ZOOMED);
+			Subject.Notify("CameraPostion(" + _postion.X.ToString("0.##") + "," + _postion.Y.ToString("0.##") + ")", PerfEvents.CAMERA_MOVED);
 		}
 
 		public Vector2f TransformLocalToWorldPoint(Transform transform, float x, float y)

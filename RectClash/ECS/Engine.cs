@@ -18,7 +18,7 @@ namespace RectClash.ECS
         {
         }
 
-        public static void Initialise(IKeyboardInput keyboardInput, IWindow window, IMouseInput mouseInput, ISoundOutput soundOutput)
+        public static void Initialise(IKeyboardInput keyboardInput, IWindow window, IMouseInput mouseInput, ISoundOutput soundOutput, long seed)
         {
             if(_instance != null)
             {
@@ -33,6 +33,7 @@ namespace RectClash.ECS
             _instance._toBeUpdated = new Stack<IEnt>();
             _instance._mouse = mouseInput;
 			_instance._sound = soundOutput;
+			_instance.Seed = seed;
 
             _instance._window.OnStart();
             _instance._time.Start();
@@ -55,10 +56,9 @@ namespace RectClash.ECS
 
         public Time Time { get { return _time; } }
 
-		public int MaxDrawables 
-		{
-			get; private set;
-		}
+		public long Seed { get; set; }
+
+		public int MaxDrawables  { get; private set; }
 
 		private void BroadcastMessage<S, T>(IEnt ent, S sender, T message)
 		{
@@ -118,8 +118,6 @@ namespace RectClash.ECS
 
             foreach(IEnt current in _toBeUpdated)
             {
-                //var current = _toBeUpdated.Pop();
-
                 current.Update();
                 Window.Draw(current.DrawableComs);
             }

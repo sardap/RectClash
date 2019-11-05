@@ -9,8 +9,6 @@ namespace RectClash.Game.Generation
 
 		float ProbabilityOfRunning { get; }
 
-		void Genrate(int offsetI, int offsetJ, CellInfoCom[,] cells);
-
-		void Genrate(Vector2i index, CellInfoCom[,] cells, HashSet<Vector2i> cellsInBiome);
+		void Genrate(Vector2i index, CellInfoCom[,] cells, HashSet<Vector2i> cellsInBiome, long genSeed);
     }
 }

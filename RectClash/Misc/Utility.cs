@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using RectClash.ECS;
 using SFML.Graphics;
@@ -18,10 +19,35 @@ namespace RectClash.Misc
 			return Random.NextDouble() >= 0.5;
 		}
 
+		private static ulong Rand(ulong seed)
+		{
+			var temp = (seed * 1210057048);
+			temp /= 1064531262;
+			temp += 162069246;
+			temp %= 152890752;
+			temp -= 199921687;
+			var result = ((temp % long.MaxValue) + 1);
+			return result;
+		}
+
+		public static long Randomlong(long minValue, long maxValue, long seed)
+		{	
+			var randomNum = (long)Rand((ulong)seed);
+			var result = minValue + randomNum % (maxValue - minValue);
+			Debug.Assert(result >= minValue && result < maxValue);
+			return result;
+		}
+
+		public static int RandomInt(int minValue, int maxValue, long seed)
+		{
+			return (int)Randomlong(minValue, maxValue, seed);
+		}
+
 		public static int RandomInt(int minValue = int.MinValue, int maxValue = int.MaxValue)
 		{
 			return Random.Next(minValue, maxValue);
 		}
+
 
 		public static double RandomDouble(double minValue = 0.0, double maxValue = 1.0)
 		{
@@ -40,14 +66,16 @@ namespace RectClash.Misc
 			return (float)(random.NextDouble() * (maximum - minimum) + minimum);
 		}
 
+		public static T RandomElement<T>(IEnumerable<T> enumerable, long seed)
+		{
+			var index = RandomInt(0, enumerable.Count(), seed);
+			return enumerable.ElementAt(index);
+		}
+
+
 		public static T RandomElement<T>(IEnumerable<T> enumerable)
 		{
 		    return enumerable.ElementAt(Random.Next(0, enumerable.Count()));
-		}
-
-		public static T RandomElement<T>(IList<T> collection)
-		{
-			return collection[_random.Next(0, collection.Count)];
 		}
 
 		public static T RandomElement<T>(T[,] array)
