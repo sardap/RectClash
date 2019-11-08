@@ -38,6 +38,12 @@ namespace RectClash.Misc
 			return result;
 		}
 
+		public static long Randomlong(long seed)
+		{
+			return Randomlong(0, long.MaxValue, seed);
+		}
+
+
 		public static int RandomInt(int minValue, int maxValue, long seed)
 		{
 			return (int)Randomlong(minValue, maxValue, seed);

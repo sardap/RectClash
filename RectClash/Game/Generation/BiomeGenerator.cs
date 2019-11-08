@@ -25,31 +25,33 @@ namespace RectClash.Game.Generation
 				visited
 			);
 
-			Debug.Assert(!_seeds.Contains(chunkSeed));
-			_seeds.Add(chunkSeed);
+			var edgeSeed = Utility.Randomlong(chunkSeed);
 
-			var edgeCells = ChunkEdge(cellsInBiome, cells, chunkSeed % 100);
+			Debug.Assert(!_seeds.Contains(edgeSeed));
+			_seeds.Add(edgeSeed);
+
+			var edgeCells = ChunkEdge(cellsInBiome, cells, edgeSeed);
 
 			foreach(var edge in edgeCells)
 			{
 				cellsInBiome.Add(edge);
 			}
 
-			var genSeed = chunkSeed;
 			for(int i = 0; i < GenerationComponents.Count(); i++)
 			{
 				var generator = GenerationComponents.ElementAt(i); 
 				for(int j = 0; j < generator.NumberOfRuns; j++)
 				{
-					var nextSeed = ((chunkSeed / ((i + 1) * 1987756522) + ((j + 1) * 1460203567)) * genSeed) % 1362291512;
-					genSeed = nextSeed;
+					var nextSeed = chunkSeed + (((i * 2691452399) + (j * 2097039257)) % 4089441859);
 
 					Debug.Assert(!_seeds.Contains(nextSeed));
 					_seeds.Add(nextSeed);
 
 					var prob = Utility.RandomInt(0, 100, nextSeed) / 100f;
 					if(prob > 1 - generator.ProbabilityOfRunning)
-						generator.Genrate(new Vector2i(chunkY, chunkX), cells, cellsInBiome, nextSeed);
+					{
+						generator.Genrate(new Vector2i(chunkY, chunkX), cells, cellsInBiome, Utility.Randomlong(nextSeed));
+					}
 				}
 			}
 
@@ -70,7 +72,7 @@ namespace RectClash.Game.Generation
 			return result;
 		}
 		
-		private HashSet<Vector2i> ChunkEdge(HashSet<Vector2i> cellsInBiome, CellInfoCom[,] cells, long biomeSeed)
+		private HashSet<Vector2i> ChunkEdge(HashSet<Vector2i> cellsInBiome, CellInfoCom[,] cells, long edgeSeed)
 		{
 			var edges = new HashSet<Vector2i>();
 			
@@ -79,7 +81,7 @@ namespace RectClash.Game.Generation
 				var adjacent = Utility.GetAdjacentSquares(cell.X, cell.Y, cells);
 				if(adjacent.Any(i => !cellsInBiome.Contains(i)))
 				{
-					var nextSeed = biomeSeed - (cell.X - cell.Y) * 512386;
+					var nextSeed = edgeSeed + (((cell.X * 1691275049) + (cell.Y * 76045141)) % 3153608179);
 					Utility.AddAll(edges, GrowEdge(cell, cellsInBiome, adjacent, cells, nextSeed));
 				}
 			}

@@ -14,17 +14,17 @@ namespace RectClash.Game
 
 		public const int MIN_BIOME_SIZE = CHUNK_SIZE;
 
-		public const int CHUNKS_X = 100;
+		public const int CHUNKS_X = 4;
 
-		public const int CHUNKS_Y = 2;
+		public const int CHUNKS_Y = 4;
 
 		public const string KEY_BINDING_FILE = "Keybinds.json";
 
 		public const int MAX_DRAWABLES = 10000;
 
 		public const float ZOOM_MUL = 1.5f;
-
-		public const string SEED = "Only Lose our chain";
+ 
+		public const string SEED = "Karl Marx";
 
 		public static readonly IEnumerable<string> SOUND_DAMAGE_SOUND_ALL = new List<string>()
 		{

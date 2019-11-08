@@ -69,6 +69,11 @@ namespace RectClash.ECS.Graphics
 			}
 		}
 
+		public SFML.System.Vector2f WorldScale
+		{
+			get => TransformPoint(LocalScale);
+		}
+
 		public SFML.System.Vector2f WorldPostion
 		{
 			get => TransformPoint(LocalPostion);

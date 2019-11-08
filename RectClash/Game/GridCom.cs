@@ -546,10 +546,10 @@ namespace RectClash.Game
 					},
 					new MudGenerator()
 					{
-						MaxMudSteps = 100,
-						MinMudSteps = 5,
-						NumberOfRuns = 4,
-						ProbabilityOfRunning = 0.8f
+						MaxMudSteps = 25,
+						MinMudSteps = 1,
+						NumberOfRuns = 16,
+						ProbabilityOfRunning = 0.25f
 					},
 					new LakeGenerator()
 					{
@@ -599,6 +599,13 @@ namespace RectClash.Game
 					{
 						Type = CellInfoCom.CellType.Grass
 					},
+					new MudGenerator()
+					{
+						MaxMudSteps = 10,
+						MinMudSteps = 1,
+						NumberOfRuns = 32,
+						ProbabilityOfRunning = 0.25f
+					},
 					new LakeGenerator()
 					{
 						LakeMaxSize = 8,
@@ -639,6 +646,17 @@ namespace RectClash.Game
 				}
 			};
 
+			var snowBiome = new BiomeGenerator()
+			{
+				GenerationComponents = new List<IGenerationComponent>
+				{
+					new FillWithTypeGenerator()
+					{
+						Type = CellInfoCom.CellType.Snow
+					}
+				}
+			};
+
 			var generators = new List<BiomeGenerator>()
 			{
 				lightWoodsBiome,
@@ -655,12 +673,11 @@ namespace RectClash.Game
 			{
 				for(int j = 0; j < chunksX; j++)
 				{
-					var index1D = (chunksX * ((i + 1) * 206331036) + ((j + 1) * -1241462742));
-					var chunkSeed = (Engine.Instance.Seed) + index1D;
+					var chunkSeed = Engine.Instance.Seed * (((j * 1081377109) + (i * 2149545691)) % 1656974148464943);
 				
 					Debug.Assert(!chunkSeeds.Contains(chunkSeed));
 					chunkSeeds.Add(chunkSeed);
-					
+
 					Utility.RandomElement(generators, chunkSeed).
 						GenrateChunk(i * GameConstants.CHUNK_SIZE, j * GameConstants.CHUNK_SIZE, _cells, visited, chunkSeed);
 				}

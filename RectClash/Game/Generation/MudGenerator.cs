@@ -33,14 +33,14 @@ namespace RectClash.Game.Generation
 		public void Genrate(Vector2i index, CellInfoCom[,] cells, HashSet<Vector2i> cellsInBiome, long genSeed)
 		{
 			var start = Utility.RandomElement(cellsInBiome, genSeed);
-            GenrateWalkMud(start.X, start.Y, cells, cellsInBiome, 0, genSeed);
+            GenrateWalkMud(start.X, start.Y, cells, cellsInBiome, 0, Utility.Randomlong(genSeed));
 		}
 
 		private void GenrateWalkMud(int i, int j, CellInfoCom[,] cells, HashSet<Vector2i> cellsInBiome, int step, long seed)
 		{
-			int number = Utility.RandomInt(1, 102, seed + step % 1550);
+			int number = Utility.RandomInt(1, 101, seed);
 
-			if(number > 25)
+			if(number > 50)
 			{
 				cells[i, j].Type = CellInfoCom.CellType.Mud;
 			} 
@@ -49,15 +49,22 @@ namespace RectClash.Game.Generation
 				cells[i, j].Type = CellInfoCom.CellType.Grass;
 			}
 
-			int nextI = i + Utility.RandomInt(-1, 2, seed * (step + 1) * number >> 4);
-			int nextJ = j + Utility.RandomInt(-1, 2, seed * (step + 1) * number >> 2);
+			var nextSeed = Utility.Randomlong(seed) % 3523058713;
+
+			int nextI = i + Utility.RandomInt(-1, 2, nextSeed);
+
+			nextSeed = Utility.Randomlong(nextSeed) % 2312228717;
+
+			int nextJ = j + Utility.RandomInt(-1, 2, nextSeed);
+
+			nextSeed = Utility.Randomlong(nextSeed) % 2136790213;
 			
 			if(
 				cellsInBiome.Contains(new Vector2i(nextI, nextJ)) && 
-				(step < MinMudSteps || (Utility.RandomInt(0, 101, seed % (step + 1) - nextI + nextJ) > 5 && (step < MaxMudSteps)))
+				(step < MinMudSteps || (Utility.RandomInt(0, MaxMudSteps - step, nextSeed) > 0))
 			)
 			{
-				GenrateWalkMud(nextI, nextJ, cells, cellsInBiome, step + 1, seed);
+				GenrateWalkMud(nextI, nextJ, cells, cellsInBiome, step + 1, Utility.Randomlong(seed));
 				return;
 			}
 

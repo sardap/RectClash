@@ -20,7 +20,8 @@ namespace RectClash.Game
 			Leaf,
 			Wood,
 			Sand,
-			Cactus
+			Cactus,
+			Snow
 		}
 
 		public enum State
@@ -92,6 +93,10 @@ namespace RectClash.Game
 			{
 				CellType.Cactus, 
 				new CellTypeInfo(new Color(91, 111, 85), new Color(0, 0, 0, 0), 5)
+			},
+			{
+				CellType.Snow,
+				new CellTypeInfo(new Color(255, 245, 245), new Color(0,0,0,0))
 			},
 			{
 				CellType.Nothing,
@@ -179,7 +184,14 @@ namespace RectClash.Game
 		{
 			get
 			{
-				return (Type == CellType.Grass || Type == CellType.Mud || Type == CellType.Leaf || Type == CellType.Sand) && CurrentState != State.TurnComplete;
+				return 
+					(
+						Type == CellType.Grass || 
+						Type == CellType.Mud || 
+						Type == CellType.Leaf || 
+						Type == CellType.Sand ||
+						Type == CellType.Snow
+					) && CurrentState != State.TurnComplete;
 			}
 		}
 

@@ -40,6 +40,12 @@ namespace RectClash.ECS
 			set; 
 		}
 
+		protected int MaxDrawCountForType
+		{
+			get;
+			private set;
+		}
+
 		public Window()
 		{
 		}
@@ -64,6 +70,11 @@ namespace RectClash.ECS
         public void Draw(IDrawableCom toDraw, int priority)
         {
             _drawQueue.Enqueue(toDraw.DrawableNode, priority);
+
+			if(toDraw is DrawRectCom)
+			{
+				MaxDrawCountForType++;
+			}
         }
 
         public void Update()
@@ -71,6 +82,7 @@ namespace RectClash.ECS
             ProcessEvents();
 			Clear();
 			DrawDrawQueue(_drawQueue);
+			MaxDrawCountForType = 0;
 			Refresh();
         }
 

@@ -44,7 +44,7 @@ namespace RectClash.Game.Generation
 		public void Genrate(Vector2i index, CellInfoCom[,] cells, HashSet<Vector2i> cellsInBiome, long genSeed)
 		{
 			var start = Utility.RandomElement(cellsInBiome, genSeed);
-            GenrateWalkWater(start.X, start.Y, cells, cellsInBiome, 0, genSeed);
+            GenrateWalkWater(start.X, start.Y, cells, cellsInBiome, 0, Utility.Randomlong(genSeed));
 		}
 
         private void GenrateWalkWater(int i, int j, CellInfoCom[,] cells, HashSet<Vector2i> cellsInBiome, int step, long genSeed)
@@ -54,27 +54,27 @@ namespace RectClash.Game.Generation
 			int nextI;
 			int nextJ;
 
-			nextI = i + Utility.RandomInt(-1, 2);
+			nextI = i + Utility.RandomInt(-1, 2, genSeed);
 			nextJ = j;
 
 			if(
-				(step < LakeMinSize || Utility.RandomInt(0, LakeMaxSize - step) > 0) && 
+				(step < LakeMinSize || Utility.RandomInt(0, LakeMaxSize - step, genSeed) > 0) && 
 				cellsInBiome.Contains(new Vector2i(nextI, nextJ))
 			)
 			{
-				GenrateWalkWater(nextI, nextJ, cells, cellsInBiome, step + 1, genSeed);
+				GenrateWalkWater(nextI, nextJ, cells, cellsInBiome, step + 1, Utility.Randomlong(genSeed));
 
 			}
 			
 			nextI = i;
-			nextJ = j + Utility.RandomInt(-1, 2);
+			nextJ = j + Utility.RandomInt(-1, 2, genSeed * -1);
 
 			if(
-				(step < LakeMinSize || Utility.RandomInt(0, LakeMaxSize - step) > 0) && 
+				(step < LakeMinSize || Utility.RandomInt(0, LakeMaxSize - step, genSeed * -1) > 0) && 
 				cellsInBiome.Contains(new Vector2i(nextI, nextJ))
 			)
 			{
-				GenrateWalkWater(nextI, nextJ, cells, cellsInBiome, step + 1, genSeed);
+				GenrateWalkWater(nextI, nextJ, cells, cellsInBiome, step + 1, Utility.Randomlong(genSeed * -1));
 			}
 		}
 	}

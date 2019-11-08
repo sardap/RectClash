@@ -80,12 +80,14 @@ namespace RectClash.SFMLComs
 			_window.Clear();
 		}
 
-
 		public override void DrawDrawQueue(FastPriorityQueue<DrawableNode> drawQueue)
 		{
+			int layer = int.MinValue;
+			var vertices = new List<Vertex>();
+
 			while(drawQueue.Count > 0)
 			{
-				var top = drawQueue.Dequeue().Drawable;
+				IDrawableCom top = drawQueue.Dequeue().Drawable;
 
 				if(top is DrawCircleCom)
 				{
@@ -110,7 +112,17 @@ namespace RectClash.SFMLComs
 				}
 				else if(top is DrawRectCom)
 				{
-					_toDraw = top as DrawRectCom;
+					// if((int)top.Priority > layer)
+					// {
+					// 	//_states.Transform.Combine(Engine.Instance.Window.Camera.LocalToWorldTransform);
+					// 	//_states.Transform.Combine(PostionCom.LocalToWorldMatrix);
+					// 	_window.Draw(vertices.ToArray(), PrimitiveType.Quads);
+					// 	vertices.Clear();
+					// 	layer = (int)top.Priority;
+					// }
+
+					// vertices.AddRange(((DrawRectCom)top).Vertices);
+					_toDraw = (DrawRectCom)top;
 				}
 				else
 				{

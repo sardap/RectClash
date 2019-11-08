@@ -56,7 +56,7 @@ namespace RectClash.Game.Generation
 
 			for(int counter = 0; counter < numberOfLeafs; counter++)
 			{
-				var leafCell = Utility.RandomElement(adjacent, seed + step * 1553);
+				var leafCell = Utility.RandomElement(adjacent);
 				adjacent.Remove(leafCell);
 
 				cells[leafCell.X, leafCell.Y].Type = CellInfoCom.CellType.Leaf;
@@ -64,7 +64,7 @@ namespace RectClash.Game.Generation
 
 			cells[cellI, cellJ].Type = CellInfoCom.CellType.Wood;
 
-			var next = Utility.RandomElement(Utility.GetAdjacentSquares(cellI, cellJ, cells), seed + step * 1554);
+			var next = Utility.RandomElement(Utility.GetAdjacentSquares(cellI, cellJ, cells));
 
 			if(Utility.RandomInt(0, TreeMaxSize) > step)
 			{
