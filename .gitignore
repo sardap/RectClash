@@ -333,3 +333,7 @@ ASALocalRun/
 *.ogg
 *.wav
 *.flac
+*.ttf
+
+#Vscode folder
+.vscode/
