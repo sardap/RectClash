@@ -77,7 +77,7 @@ namespace RectClash.Game
 				case State.StartCellSelected:
 					var UnitInfoCom = Get(_startCell).Inside.First().GetCom<UnitInfoCom>();
 					var range = !UnitInfoCom.MoveTaken ? UnitInfoCom.MovementRange : 0;
-					var attackRange = !UnitInfoCom.AttackTaken ? UnitInfoCom.attackRange : -1;
+					var attackRange = !UnitInfoCom.AttackTaken ? UnitInfoCom.AttackRange : -1;
 					var faction = UnitInfoCom.Faction;
 
 					var edges = new HashSet<Vector2i>();
@@ -293,7 +293,7 @@ namespace RectClash.Game
 
 						inside = Get(_startCell).Inside.First().GetCom<UnitInfoCom>();
 
-						if(inside.attackRange == GameConstants.MELEE_ATTACK_RANGE && !adjacentSquares.Contains(_startCell))
+						if(inside.AttackRange == GameConstants.MELEE_ATTACK_RANGE && !adjacentSquares.Contains(_startCell))
 						{
 							_pathCells = AStar(_startCell, adjacentSquares.Where(i => Get(i).SpaceAvailable)).ToList();
 							foreach(var i in _pathCells.Select(i => Get(i)))
@@ -349,7 +349,7 @@ namespace RectClash.Game
 			ClearPathSet(_cellsInAttackRange);
 		}    
 
-		private double DistanceBetween(Vector2i aPos, Vector2i bPos)
+		public double DistanceBetween(Vector2i aPos, Vector2i bPos)
 		{
 			var dx = System.Math.Abs(aPos.X - bPos.X);
 			var dy = System.Math.Abs(aPos.Y - bPos.Y);
@@ -444,6 +444,10 @@ namespace RectClash.Game
 				{
 					neighbors =	neighbors.Where(i => Get(i).CurrentState == CellInfoCom.State.InMovementRange);
 				}
+				else
+				{
+					neighbors =	neighbors.Where(i => Get(i).SpaceAvailable || i == goal).ToList();
+				}
 
 				foreach (var neighbor in neighbors)
 				{
@@ -507,7 +511,7 @@ namespace RectClash.Game
 
 			var distance = DistanceBetween(attacker, target);
 
-			if(distance > attackerUnitComInfo.attackRange + 1)
+			if(distance > attackerUnitComInfo.AttackRange + 1)
 			{
 				var current = curCell.Inside.First();
 				Move(current, targetCellIndex.X, targetCellIndex.Y);
@@ -800,6 +804,8 @@ namespace RectClash.Game
 
 		private void OnTurnStart()
 		{
+			var toNotify = new Queue<CellInfoCom>();
+
 			foreach(var cell in _cells)
 			{
 				if(cell.Inside.Count() > 0)
@@ -808,9 +814,14 @@ namespace RectClash.Game
 
 					if(unitCom.Faction == TurnHandler.Faction)
 					{
-						cell.Subject.Notify(Owner, GameEvent.AI_TAKE_TURN);
+						toNotify.Enqueue(cell);
 					}
 				}
+			}
+
+			while(toNotify.Count > 0)
+			{
+				toNotify.Dequeue().Subject.Notify(Owner, GameEvent.AI_TAKE_TURN);
 			}
 		}
 

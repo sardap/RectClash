@@ -45,17 +45,38 @@ namespace RectClash.Game.AI
 			}
 		}
 
-		private class EnemyAdjacent : InnerClass, IDecisionNodeCondition
+		private class EnemyInAttackRange : InnerClass, IDecisionNodeCondition
 		{
-			public EnemyAdjacent(RegularSoliderAICom instance) : base(instance) { }
+			public EnemyInAttackRange(RegularSoliderAICom instance) : base(instance) { }
 
 			public bool Resolve()
 			{
-				return Utility.GetAdjacentSquares(
-					Instance._cellInfoCom.Cords.X, 
-					Instance._cellInfoCom.Cords.Y, 
-					Instance._gridCom.Cells
-				).Any(i => Instance._gridCom.Cells[i.X, i.Y].Inside.Any(j => Instance.IsEnemy(j)));
+				var enemiesInAttackRange = Instance._gridCom
+					.EntsInRange(Instance._cellInfoCom.Cords, Instance._unitInfoCom.VisionRange)
+					.Where(i => Instance.IsEnemy(i.Value.First()))
+					.OrderBy(i => i.Key)
+					.ToList();
+
+				if(enemiesInAttackRange.Count() <= 0)
+				{
+					return false;
+				}
+
+				var closestEnemyCell = enemiesInAttackRange
+					.First().Value
+					.First().Parent
+					.GetCom<CellInfoCom>();
+
+				Instance._closestEnemyCords = closestEnemyCell.Cords;
+
+				var dist = Instance._gridCom.DistanceBetween(closestEnemyCell.Cords, Instance._cellInfoCom.Cords);
+
+				if(dist > Instance._unitInfoCom.AttackRange + 1)
+				{
+					return false;
+				}
+
+				return true;
 			}
 		}
 
@@ -66,30 +87,7 @@ namespace RectClash.Game.AI
 
 			public bool Resolve()
 			{
-				var visibleEnts = Instance._gridCom.EntsInRange(Instance._cellInfoCom.Cords, 5);
-
-				if(visibleEnts.Keys.Count > 0)
-				{
-					var sortedEntsKeys = visibleEnts.Keys.OrderBy(i => i);
-
-					foreach(double key in sortedEntsKeys)
-					{
-						foreach(IEnt ent in visibleEnts[key])
-						{
-							if(ent.Tags.Contains(Tags.UNIT))
-							{
-								var otherUnitCom = ent.GetCom<UnitInfoCom>();
-								if(otherUnitCom.Faction != Instance._unitInfoCom.Faction)
-								{
-									Instance._closestEnemyCords = ent.Parent.GetCom<CellInfoCom>().Cords;
-									return true;
-								}
-							}
-						}
-					}
-				}
-
-				return false;
+				return Instance._closestEnemyCords != null;
 			}
 		}
 
@@ -120,7 +118,7 @@ namespace RectClash.Game.AI
 
 			public void TakeAction()
 			{
-				var closestEnemyCords = Instance.ClosestEnemy().Parent.GetCom<CellInfoCom>().Cords;
+				var closestEnemyCords = (Vector2i)Instance._closestEnemyCords;
 				var enemy = Instance._gridCom.Cells[closestEnemyCords.X, closestEnemyCords.Y].Inside.First();
 				Instance._cellInfoCom.Subject.Notify(enemy, GameEvent.ATTACK_TARGET);
 			}
@@ -150,7 +148,7 @@ namespace RectClash.Game.AI
 					State.Seraching,
 					new DecisionNode()
 					{
-						Condition = new EnemyAdjacent(this),
+						Condition = new EnemyInAttackRange(this),
 						TrueNode = new DecisionTreeEndNode()
 						{
 							Action = new AttackAction(this)
@@ -183,6 +181,7 @@ namespace RectClash.Game.AI
 					var action = _decisionTrees[_currentState].GetAction();
 					action.TakeAction();
 					_gridCom = null;
+					_closestEnemyCords = null;
 					break;
 				}
 			}

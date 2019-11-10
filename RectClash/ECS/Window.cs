@@ -47,6 +47,12 @@ namespace RectClash.ECS
 			private set;
 		}
 
+		public bool InFocus
+		{
+			get;
+			protected set;
+		}
+
 		public Window()
 		{
 		}

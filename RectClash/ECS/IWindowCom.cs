@@ -20,6 +20,8 @@ namespace RectClash.ECS
 
         Camera Camera { get; set; }
 
+		bool InFocus { get; }
+
         void Draw(IDrawableCom toDraw);
 
         void Draw(IDrawableCom toDraw, int priority);

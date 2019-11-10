@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using RectClash.ECS.Input;
 using RectClash.ECS.Sound;
@@ -103,7 +104,13 @@ namespace RectClash.ECS
         {
             return CreateEnt(_root, name);
         }
-      
+
+		public void DestoryEnt(IEnt ent)
+		{
+			_entDirty = true;
+			ent.Destory();
+		}
+
         public void  Step()
         {
             _max_loop_time = _time.ElapsedTime + (MAX_UPDATE_TIME);

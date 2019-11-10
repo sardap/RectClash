@@ -120,7 +120,7 @@ namespace RectClash.Game.Unit
 			get => _staticUnitInfo[Type].movementRange;
 		}
 
-		public int attackRange
+		public int AttackRange
 		{
 			get => _staticUnitInfo[Type].attackRange;
 		}
@@ -138,6 +138,11 @@ namespace RectClash.Game.Unit
 		public double MaxHealth
 		{
 			get => _staticUnitInfo[Type].maxHealth;
+		}
+
+		public int VisionRange
+		{
+			get => 10;
 		}
 
 		public void TurnReset()

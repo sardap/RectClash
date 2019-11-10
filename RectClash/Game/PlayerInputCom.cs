@@ -17,6 +17,11 @@ namespace RectClash.Game
 
         private void MouseWheelScrolled(object sender, SFML.Window.MouseWheelScrollEventArgs e)
         {
+			if(!Engine.Instance.Window.InFocus)
+			{
+				return;
+			}
+
             switch(e.Wheel)
             {
                 case SFML.Window.Mouse.Wheel.VerticalWheel:
@@ -38,6 +43,11 @@ namespace RectClash.Game
 
         private void WindowKeyReleased(object sender, SFML.Window.KeyEventArgs e)
         {
+			if(!Engine.Instance.Window.InFocus)
+			{
+				return;
+			}
+
 			if(e.Code == KeyBindsAccessor.Instance.QuitProgram)
 			{
 				Engine.Instance.Window.Exit();
@@ -54,6 +64,11 @@ namespace RectClash.Game
 
         public override void Update()
         {
+			if(!Engine.Instance.Window.InFocus)
+			{
+				return;
+			}
+
             var deltaTime = Engine.Instance.Time.DeltaTimePercentOfSec;
             
             // Move Camrea

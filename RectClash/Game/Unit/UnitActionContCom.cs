@@ -39,7 +39,7 @@ namespace RectClash.Game.Unit
 
 				case GameEvent.UNIT_DIED:
 					Engine.Instance.Sound.PlayRandomSound(_unitInfoCom.SoundInfo.DeathSound);
-					Owner.Destory();
+					Engine.Instance.DestoryEnt(Owner);
 					break;
 			}
 		} 

@@ -58,6 +58,19 @@ namespace RectClash.SFMLComs
 			{
 				Postion = new Vector2f(Engine.Instance.Window.Size.X / 2, Engine.Instance.Window.Size.Y / 2)
 			};
+
+			_window.GainedFocus += GainedFocus;
+			_window.LostFocus += LostFocus;
+		}
+
+		private void GainedFocus(object sender, EventArgs evt)
+		{
+			InFocus = true;
+		}
+
+		private void LostFocus(object sender, EventArgs evt)
+		{
+			InFocus = false;
 		}
 
 		public override void ProcessEvents()

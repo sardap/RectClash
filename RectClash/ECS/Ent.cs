@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using RectClash.ECS.Exception;
 using RectClash.ECS.Graphics;
@@ -122,6 +123,8 @@ namespace RectClash.ECS
 
 		public void RemoveCom(ICom com)
 		{
+			Debug.Assert(!Destroyed);
+
 			if(!_coms.Contains(com))
 				throw new CannotRemoveNoneOwnedCom();
 
@@ -143,6 +146,8 @@ namespace RectClash.ECS
 
         public T GetCom<T>() where T : ICom
         {
+			Debug.Assert(!Destroyed);
+
             foreach(var i in _coms)
             {
                 if(i is T)
@@ -156,6 +161,8 @@ namespace RectClash.ECS
 
         public void Update()
         {
+			Debug.Assert(!Destroyed);
+			
 			if(!Enabled)
 			{
 				return;
@@ -194,7 +201,6 @@ namespace RectClash.ECS
 			{
 				ent.Destory();
 			}
-			_children.Clear();
 
 			foreach(var com in Coms.ToList())
 			{
@@ -202,11 +208,14 @@ namespace RectClash.ECS
 			}
 			_coms.Clear();
 
+			// Parent = null;
 			Destroyed = true;
         }
 
 		private ICollection<IDrawableCom> GetDrawableComs(List<IDrawableCom> result)
         {
+			Debug.Assert(!Destroyed);
+
             foreach(var child in _children)
             {
                 result.AddRange(((Ent)child).GetDrawableComs(result));
@@ -214,5 +223,10 @@ namespace RectClash.ECS
 
             return _drawables;
         }
+
+		public override string ToString()
+		{
+			return Name;
+		}
     }
 }

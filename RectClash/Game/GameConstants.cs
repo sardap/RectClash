@@ -16,7 +16,7 @@ namespace RectClash.Game
 
 		public const int CHUNKS_X = 4;
 
-		public const int CHUNKS_Y = 4;
+		public const int CHUNKS_Y = 100;
 
 		public const string KEY_BINDING_FILE = "Keybinds.json";
 
