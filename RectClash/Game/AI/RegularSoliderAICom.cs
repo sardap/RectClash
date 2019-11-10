@@ -98,8 +98,19 @@ namespace RectClash.Game.AI
 
 			public void TakeAction()
 			{
-				var path = Instance._gridCom.AStar(Instance._cellInfoCom.Cords, (Vector2i)Instance._closestEnemyCords, false);
-				Instance._gridCom.Move(Instance.Owner, path.First().X, path.First().Y);
+				var path = Instance._gridCom
+					.AStar(Instance._cellInfoCom.Cords, (Vector2i)Instance._closestEnemyCords, false)
+					.ToArray();
+
+				var i = Instance._unitInfoCom.MovementRange - 1;
+
+				if(path.Length <= Instance._unitInfoCom.MovementRange)
+				{
+					i = path.Length - 2;
+				}
+				
+				Instance._gridCom.Move(Instance.Owner, path[i].X, path[i].Y);
+				Instance._cellInfoCom.Subject.Notify(Instance.Owner, GameEvent.UNIT_MOVED);
 			}
 		}
 

@@ -6,9 +6,12 @@ namespace RectClash.ECS
     public class Subject<S, T>
     {
 		private readonly Stack<IObv<S, T>> _newObv = new Stack<IObv<S, T>>();
+
 		private readonly Stack<IObv<S, T>> _removeObv = new Stack<IObv<S, T>>();
 
     	private readonly ICollection<IObv<S, T>> _obv = new List<IObv<S, T>>();
+
+		private bool _inNotify = false;
 
         public Subject()
         {
@@ -34,22 +37,40 @@ namespace RectClash.ECS
 			_removeObv.Push(obv);
         }
 
+		/// <summary>
+		/// This is a big fucked becuase it can be called recusvily inside of 
+		/// the for loop but only the first call should remove and add shit
+		/// </summary>
+		/// <param name="ent"></param>
+		/// <param name="gameEvent"></param>
         public void Notify(S ent, T gameEvent)
         {
-			while(_removeObv.Count > 0)
-			{
-				_obv.Remove(_removeObv.Pop());
-			}
+			bool first = !_inNotify;
 
-			while(_newObv.Count > 0)
+			if(first)
 			{
-				_obv.Add(_newObv.Pop());
+				while(_removeObv.Count > 0)
+				{
+					_obv.Remove(_removeObv.Pop());
+				}
+
+				while(_newObv.Count > 0)
+				{
+					_obv.Add(_newObv.Pop());
+				}
+
+				_inNotify = true;
 			}
 
             foreach(var obv in _obv)
             {
                 obv.OnNotify(ent, gameEvent);
             }
+
+			if(first)
+			{
+				_inNotify = false;
+			}
         }
     }
 }
