@@ -17,6 +17,8 @@ namespace RectClash.ECS
 
         PostionCom PostionCom { get; }
 
+		bool Destroyed { get; }
+
 		bool Enabled { get; set; }
 
         void AddChild(IEnt ent);

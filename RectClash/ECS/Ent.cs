@@ -68,10 +68,17 @@ namespace RectClash.ECS
 			}
 		}
 
+		public bool Destroyed
+		{
+			get;
+			private set;
+		}
+
         public IList<string> Tags => _tags;
         
         public Ent(IEnt parent, string name = "") : this(parent, name, new List<string>())
         {
+			Destroyed = false;
         }
 
         public Ent(IEnt parent, string name, IEnumerable<string> tags)
@@ -144,7 +151,7 @@ namespace RectClash.ECS
                 }
             }
 
-            throw new ComNotFoundException();
+			return default(T);
         }
 
         public void Update()
@@ -194,6 +201,8 @@ namespace RectClash.ECS
 				RemoveCom(com);
 			}
 			_coms.Clear();
+
+			Destroyed = true;
         }
 
 		private ICollection<IDrawableCom> GetDrawableComs(List<IDrawableCom> result)

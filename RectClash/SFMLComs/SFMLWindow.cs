@@ -89,6 +89,11 @@ namespace RectClash.SFMLComs
 			{
 				IDrawableCom top = drawQueue.Dequeue().Drawable;
 
+				if(top.Owner == null)
+				{
+					continue;
+				}
+
 				if(top is DrawCircleCom)
 				{
 					var cirlce = (DrawCircleCom)top;

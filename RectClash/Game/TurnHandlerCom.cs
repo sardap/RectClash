@@ -52,6 +52,8 @@ namespace RectClash.Game
 				_index = 0;
 			}
 
+			Subjects.Notify(Owner, GameEvent.TURN_START);
+
 			DebugSubject.Notify("Current Turn: " + Utility.GetEnumName(Faction), PerfEvents.TURN_CHANGED);
 		}
 

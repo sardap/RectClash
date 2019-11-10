@@ -7,6 +7,7 @@ using RectClash.Game.Unit;
 using RectClash.Misc;
 using SFML.System;
 using System.Diagnostics;
+using RectClash.Game.AI;
 
 namespace RectClash.Game
 {
@@ -51,6 +52,14 @@ namespace RectClash.Game
 		public GameSubject Subject { get; set; }
 
 		public TurnHandlerCom TurnHandler { get; set; }
+
+		public CellInfoCom[,] Cells
+		{
+			get 
+			{
+				return _cells;
+			}
+		}
 
 		public GridCom()
 		{
@@ -400,7 +409,7 @@ namespace RectClash.Game
 		}
 
 		
-		private IEnumerable<Vector2i> AStar(Vector2i start, Vector2i goal)
+		public IEnumerable<Vector2i> AStar(Vector2i start, Vector2i goal, bool clicking = true)
 		{
 			//Holds the qeue of nodes to check which is sorted by there fscore
 			var queue = new SimplePriorityQueue<Vector2i, double>();
@@ -429,8 +438,12 @@ namespace RectClash.Game
 					return ConsturctPath(subTreeRoot, meta);
 				}
 
-				var neighbors = GetAdjacentSquares(subTreeRoot.X, subTreeRoot.Y).
-					Where(i => Get(i).CurrentState == CellInfoCom.State.InMovementRange);
+				var neighbors = GetAdjacentSquares(subTreeRoot.X, subTreeRoot.Y);
+
+				if(clicking)
+				{
+					neighbors =	neighbors.Where(i => Get(i).CurrentState == CellInfoCom.State.InMovementRange);
+				}
 
 				foreach (var neighbor in neighbors)
 				{
@@ -479,15 +492,22 @@ namespace RectClash.Game
 				Get(targetCellIndex).ChangeState(CellInfoCom.State.TurnComplete);
 			}
 		}
-
 		private void ApplyAttack()
 		{
-			var curCell = Get(_startCell);
-			var targetCellIndex = _targetCell;
+			ApplyAttack(_startCell, _targetCell);
+			_attackTarget = null;
+		}
+
+		private void ApplyAttack(Vector2i attacker, Vector2i target)
+		{
+			var curCell = Get(attacker);
+			var targetCellIndex = target;
 
 			var attackerUnitComInfo = curCell.Inside.First().GetCom<UnitInfoCom>();
 
-			if(DistanceBetween(_startCell, _targetCell) > attackerUnitComInfo.attackRange)
+			var distance = DistanceBetween(attacker, target);
+
+			if(distance > attackerUnitComInfo.attackRange + 1)
 			{
 				var current = curCell.Inside.First();
 				Move(current, targetCellIndex.X, targetCellIndex.Y);
@@ -496,8 +516,7 @@ namespace RectClash.Game
 
 			ChangeState(State.ClearSelection);
 
-			Get(targetCellIndex). Subject.Notify(_attackTarget, GameEvent.ATTACK_TARGET);
-			_attackTarget = null;
+			Get(targetCellIndex).Subject.Notify(Get(target).Inside.First(), GameEvent.ATTACK_TARGET);
 
 			if(attackerUnitComInfo.TurnTaken)
 			{
@@ -510,15 +529,70 @@ namespace RectClash.Game
 			Move(ent, x, y);
 		}
 
-		private void Move(IEnt ent, int x, int y)
+		public void Move(IEnt ent, int x, int y)
 		{
 			if(ent.Parent.Tags.Contains(Tags.GRID_CELL))
 			{
-				ent.Parent.GetCom<CellInfoCom>().Subject.RemoveObv(ent.GetCom<UnitActionContCom>());
+				var cellParentInfoCom = ent.Parent.GetCom<CellInfoCom>();
+				cellParentInfoCom.Subject.RemoveObv(ent.GetCom<UnitActionContCom>());
+
+				var parentAiCom = ent.Parent.GetCom<RegularSoliderAICom>();
+
+				if(parentAiCom != null)
+					cellParentInfoCom.Subject.RemoveObv(parentAiCom);
 			}
 
 			ent.ChangeParent(_cells[x,y].Owner);
 			_cells[x,y].Subject.AddObv(ent.GetCom<UnitActionContCom>());
+
+			var aiCom = ent.GetCom<RegularSoliderAICom>();
+
+			if(aiCom != null)
+				_cells[x,y].Subject.AddObv(aiCom);
+		}
+
+		private HashSet<Vector2i> CellsInRange(Vector2i index, int range, HashSet<Vector2i> result)
+		{
+			result.Add(index);
+
+			if(range < 0)
+				return result;
+
+			var adjacentCells = GetAdjacentSquares(index.X, index.Y);
+
+			foreach(Vector2i cellIndex in adjacentCells)
+			{
+				CellsInRange(cellIndex, range - 1, result);
+			}
+
+			return result;
+		}
+
+		public Dictionary<double, List<IEnt>> EntsInRange(Vector2i start, int range)
+		{
+			var cellsInRange = CellsInRange(start, range, new HashSet<Vector2i>());
+			var result = new Dictionary<double, List<IEnt>>();
+
+			foreach(Vector2i cell in cellsInRange)
+			{
+				if(Get(cell).Inside.Count() <= 0)
+				{
+					continue;
+				}
+
+				var dist = DistanceBetween(cell, start);
+				if(!result.ContainsKey(dist))
+				{
+					result.Add(dist, new List<IEnt>());
+				}
+
+				foreach(IEnt inside in Get(cell).Inside)
+				{
+					result[dist].Add(inside);
+				}
+			}
+
+			return result;
 		}
 
 		public void GenrateGrid(int chunksX, int chunksY, float cellWidth, float cellHeight)
@@ -720,8 +794,24 @@ namespace RectClash.Game
 					}
 				}
 			}
-			
+
 			ChangeState(State.ClearSelection);
+		}
+
+		private void OnTurnStart()
+		{
+			foreach(var cell in _cells)
+			{
+				if(cell.Inside.Count() > 0)
+				{
+					var unitCom = cell.Inside.First().GetCom<UnitInfoCom>();
+
+					if(unitCom.Faction == TurnHandler.Faction)
+					{
+						cell.Subject.Notify(Owner, GameEvent.AI_TAKE_TURN);
+					}
+				}
+			}
 		}
 
 		public void OnNotify(IEnt ent, GameEvent evt)
@@ -754,6 +844,9 @@ namespace RectClash.Game
 					break;
 				case GameEvent.TURN_END:
 					OnTurnEnd();
+					break;
+				case GameEvent.TURN_START:
+					OnTurnStart();
 					break;
 				case GameEvent.GRID_CLEAR_SELECTION:
 					ChangeState(State.ClearSelection);

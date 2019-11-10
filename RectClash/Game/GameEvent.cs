@@ -15,6 +15,8 @@ namespace RectClash.Game
 		UNIT_DIED,
         ATTACK_CONF,
 		TRIGGER_TURN_END,
-		TURN_END
+		TURN_START,
+		TURN_END,
+		AI_TAKE_TURN
     }
 }

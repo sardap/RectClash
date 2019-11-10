@@ -6,11 +6,6 @@ namespace RectClash.Game.Generation
 {
     public class LakeGenerator : IGenerationComponent
     {
-		private int _offsetI;
-		private int _offsetJ;
-		private int _maxI;
-		private int _maxJ;
-
         public int NumberOfRuns
 		{
 			get;

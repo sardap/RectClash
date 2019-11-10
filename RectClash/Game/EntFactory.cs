@@ -8,6 +8,7 @@ using RectClash.Misc;
 using SFML.System;
 using System.Collections.Generic;
 using UnitType = RectClash.Game.Unit.UnitType;
+using RectClash.Game.AI;
 
 namespace RectClash.Game
 {
@@ -194,6 +195,14 @@ namespace RectClash.Game
 			(
 				new UnitActionContCom()
 			);
+
+			if(FactionToCreate == Faction.Red)
+			{
+				ent.AddCom
+				(
+					new RegularSoliderAICom()
+				);
+			}
 	
 			var progressBarEnt = CreateProgressBar(ent);
 			progressBarEnt.PostionCom.LocalScale = new Vector2f(0.9f, 0.4f);

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Diagnostics;
 using Priority_Queue;
 using RectClash.ECS.Graphics;
 using RectClash.Misc;
@@ -69,6 +70,8 @@ namespace RectClash.ECS
 
         public void Draw(IDrawableCom toDraw, int priority)
         {
+			Debug.Assert(!toDraw.Owner.Destroyed);
+
             _drawQueue.Enqueue(toDraw.DrawableNode, priority);
 
 			if(toDraw is DrawRectCom)
