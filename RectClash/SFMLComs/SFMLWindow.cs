@@ -140,6 +140,7 @@ namespace RectClash.SFMLComs
 					// }
 
 					// vertices.AddRange(((DrawRectCom)top).Vertices);
+					// continue;
 					_toDraw = (DrawRectCom)top;
 				}
 				else

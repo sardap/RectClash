@@ -751,7 +751,7 @@ namespace RectClash.Game
 			{
 				for(int j = 0; j < chunksX; j++)
 				{
-					var chunkSeed = Engine.Instance.Seed * (((j * 1081377109) + (i * 2149545691)) % 1656974148464943);
+					var chunkSeed = Engine.Instance.Seed - (((j * 1081377109) + (i * 2149545691)) % 1656974148464943);
 				
 					Debug.Assert(!chunkSeeds.Contains(chunkSeed));
 					chunkSeeds.Add(chunkSeed);

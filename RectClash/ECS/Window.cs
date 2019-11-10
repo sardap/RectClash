@@ -55,6 +55,7 @@ namespace RectClash.ECS
 
 		public Window()
 		{
+			InFocus = true;
 		}
 
 		public abstract void ProcessEvents();
