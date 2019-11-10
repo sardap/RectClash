@@ -7,6 +7,8 @@ namespace RectClash.Game.Perf
         FACTION_SELECTION,
         CAMERA_MOVED,
         CAMERA_ZOOMED,
-		TURN_CHANGED
+		TURN_CHANGED,
+		DRAW_TIME_UPDATE,
+		UPDATE_TIME
     }
 }

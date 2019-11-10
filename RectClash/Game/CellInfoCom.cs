@@ -96,11 +96,11 @@ namespace RectClash.Game
 			},
 			{
 				CellType.Snow,
-				new CellTypeInfo(new Color(255, 245, 245), new Color(0,0,0,0))
+				new CellTypeInfo(new Color(255, 245, 245), new Color(0, 0, 0, 0))
 			},
 			{
 				CellType.Nothing,
-				new CellTypeInfo(new Color(0,0,0,0), new Color(0,0,0,0))
+				new CellTypeInfo(new Color(0,0,0,0), new Color(0, 0, 0, 0))
 			}
 		};
 
@@ -220,6 +220,15 @@ namespace RectClash.Game
 
 			CurrentState = newState;
 			_drawRectCom.FillColor = _fillColorMap[newState];
+		}
+
+		public void ClearNotNeededChildren()
+		{
+			if(BackgroundTop.FillColor == new Color(0, 0, 0, 0))
+			{
+				Engine.Instance.DestoryEnt(BackgroundTop.Owner);
+				_backgroundTop = null;
+			}
 		}
 
 		public void OnNotify(IEnt ent, GameEvent evt)

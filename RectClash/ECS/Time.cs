@@ -9,6 +9,10 @@ namespace RectClash.ECS
         private long _oldTimeStart;
         private long _deltaTime;
 
+		private long _drawTimeStart;
+
+		private long _updateTimeStart;
+
         public long DeltaTime
         {
             get
@@ -33,6 +37,18 @@ namespace RectClash.ECS
             }
         }
 
+		public long DrawTime
+		{
+			get;
+			private set;
+		}
+
+		public long UpdateTime
+		{
+			get;
+			private set;
+		}
+
         public void Start()
         {
             _stopWatch.Start();
@@ -43,5 +59,25 @@ namespace RectClash.ECS
             _deltaTime = ElapsedTime - _oldTimeStart;
             _oldTimeStart = ElapsedTime;
         }
+
+		public void StartOfDraw()
+		{
+			_drawTimeStart = ElapsedTime;
+		}
+
+		public void EndOfDraw()
+		{
+			DrawTime = ElapsedTime - _drawTimeStart;
+		}
+
+		public void StartOfUpdate()
+		{
+			_updateTimeStart = ElapsedTime;
+		}
+
+		public void EndOfUpdate()
+		{
+			UpdateTime = ElapsedTime - _updateTimeStart;
+		}
     }
 }

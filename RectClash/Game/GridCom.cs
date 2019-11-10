@@ -773,6 +773,10 @@ namespace RectClash.Game
 
 					cell.Type = adjacent.Count() > 0 ? Get(Utility.RandomElement(adjacent, seed)).Type : CellInfoCom.CellType.Grass;
 				}
+				else
+				{
+					cell.ClearNotNeededChildren();
+				}
 			}
 		}
 

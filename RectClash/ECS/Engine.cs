@@ -111,10 +111,12 @@ namespace RectClash.ECS
 			ent.Destory();
 		}
 
-        public void  Step()
+        public void Step()
         {
             _max_loop_time = _time.ElapsedTime + (MAX_UPDATE_TIME);
 			_time.StartOfLoop();
+
+			_time.StartOfUpdate();
 
             if(_entDirty)
             {
@@ -128,11 +130,15 @@ namespace RectClash.ECS
                 current.Update();
                 Window.Draw(current.DrawableComs);
             }
+
+			_time.EndOfUpdate();
         }
 
         public void UpdateWindow()
         {
+			Time.StartOfDraw();
             _window.Update();
+			Time.EndOfDraw();
         }
 
         private Stack<IEnt> GetEntsToUpdate()

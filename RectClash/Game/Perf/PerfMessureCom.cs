@@ -5,40 +5,65 @@ namespace RectClash.Game.Perf
     public class PerfMessureCom : Com
     {
         private const long MAXSAMPLES = 100;
-		private bool _bufferFilled = false;
-        private long _tickindex = 0;
-        private long _ticksum = 0;
-        private long[] _ticklist = new long[MAXSAMPLES];
 
-        private double _avgTick;
+		private class MessureTime
+		{
+			private bool _bufferFilled = false;
+			private long _tickindex = 0;
+			private long _ticksum = 0;
+			private long[] _ticklist = new long[MAXSAMPLES];
+			private double _avgTick;
 
-        public double AvgTick { get { return _avgTick; } }
+			public double Value
+			{
+				get => _avgTick;
+			}
+
+			private double CalcAverageTick(long newtick)
+        	{
+				_ticksum -= _ticklist[_tickindex];  /* subtract value falling off */
+				_ticksum += newtick;              /* add new value */
+				_ticklist[_tickindex] = newtick;   /* save new value so it can be subtracted later */
+				if(++_tickindex == MAXSAMPLES)    /* inc buffer index */
+				{
+					_tickindex = 0;
+					_bufferFilled = true;
+				}
+
+				/* return average */
+				return _bufferFilled ? ((double)_ticksum / MAXSAMPLES) : 0;
+        	}
+
+			public void Update(long time)
+			{
+	            _avgTick = CalcAverageTick(time);
+			}
+
+			public override string ToString()
+			{
+				return Value.ToString("0.##");
+			}
+
+		}
+
+		private MessureTime _tick = new MessureTime();
+		private MessureTime _drawTime = new MessureTime();
+		private MessureTime _updateTime = new MessureTime();
+
 
         public Subject<string, PerfEvents> Subject { get; set; }
 
         public override void Update()
         {
-            _avgTick = CalcAverageTick(Engine.Instance.Time.DeltaTime);
-            Subject.Notify("Ticks: " + _avgTick.ToString("0.##"), PerfEvents.TICK_UPDATE);
-        }
+			var time = Engine.Instance.Time;
 
-        /* need to zero out the ticklist array before starting */
-        /* average will ramp up until the buffer is full */
-        /* returns average ticks per frame over the MAXSAMPLES last frames */
+			_tick.Update(time.DeltaTime);
+			_drawTime.Update(time.DrawTime);
+			_updateTime.Update(time.UpdateTime);
 
-        private double CalcAverageTick(long newtick)
-        {
-            _ticksum -= _ticklist[_tickindex];  /* subtract value falling off */
-            _ticksum += newtick;              /* add new value */
-            _ticklist[_tickindex] = newtick;   /* save new value so it can be subtracted later */
-            if(++_tickindex == MAXSAMPLES)    /* inc buffer index */
-			{
-                _tickindex = 0;
-				_bufferFilled = true;
-			}
-
-            /* return average */
-            return _bufferFilled ? ((double)_ticksum / MAXSAMPLES) : 0;
+            Subject.Notify("Ticks: " + _tick.ToString(), PerfEvents.TICK_UPDATE);
+            Subject.Notify("Update Time: " + _updateTime.ToString(), PerfEvents.UPDATE_TIME);
+            Subject.Notify("Draw Time: " + _drawTime.ToString(), PerfEvents.DRAW_TIME_UPDATE);
         }
     }
 }
