@@ -110,12 +110,13 @@ namespace RectClash.Game.AI
 				}
 				
 				Instance._gridCom.Move(Instance.Owner, path[i].X, path[i].Y);
+				Instance._cellInfoCom = Instance.Owner.Parent.GetCom<CellInfoCom>();
 				Instance._cellInfoCom.Subject.Notify(Instance.Owner, GameEvent.UNIT_MOVED);
 
 				var dist = Instance._gridCom
 					.DistanceBetween(Instance._cellInfoCom.Cords, (Vector2i)Instance._closestEnemyCords);
 
-				if(Instance._unitInfoCom.AttackRange <= dist)
+				if(dist <= Instance._unitInfoCom.AttackRange + 1)
 				{
 					new AttackAction(Instance).TakeAction();
 				}
@@ -197,10 +198,11 @@ namespace RectClash.Game.AI
 				{
 					_cellInfoCom = Owner.Parent.GetCom<CellInfoCom>();
 					_gridCom = ent.GetCom<GridCom>();
+					
 					var action = _decisionTrees[_currentState].GetAction();
 					action.TakeAction();
-					// Cell may of changed due to movement so need to get again
-					Owner.Parent.GetCom<CellInfoCom>().ChangeState(CellInfoCom.State.TurnComplete);
+					_cellInfoCom.ChangeState(CellInfoCom.State.TurnComplete);
+
 					_gridCom = null;
 					_closestEnemyCords = null;
 					_cellInfoCom = null;

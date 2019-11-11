@@ -9,6 +9,10 @@ using RectClash.Game;
 using RectClash.Game.Sound;
 using SFML.Graphics;
 using RectClash.Misc;
+using System.Threading.Tasks;
+using System.Linq;
+using System.Text.RegularExpressions;
+using System.Collections.Generic;
 
 namespace RectClash
 {
@@ -57,6 +61,15 @@ namespace RectClash
 			int windowWidth = 1920;
 			int windowHeight = 1080;
 
+			string seed = GameConstants.SEED;
+
+			if(seed == "")
+			{
+				var buffer = new byte[500];
+				rand.NextBytes(buffer);
+				seed = System.Text.Encoding.UTF8.GetString(buffer);
+			}
+
 			Engine.Initialise
 			(
 				new SFMLComs.SFMLKeyboardInput(), 
@@ -66,7 +79,7 @@ namespace RectClash
 				},
 				new SFMLComs.SFMLMouseInput(),
 				new SFMLSoundOutput(),
-				StringHash(GameConstants.SEED)
+				StringHash(seed)
 			);
 
 			if(!File.Exists(GameConstants.KEY_BINDING_FILE))

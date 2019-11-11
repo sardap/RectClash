@@ -12,9 +12,18 @@ namespace RectClash.Game.Perf
 
 		protected override void InternalStart()
 		{
+			Subject.Notify("Seed: \"" + Engine.Instance.Seed + "\"", PerfEvents.SEED_SET);
+			
 			Engine.Instance.Window.RenderWindow.KeyReleased += WindowKeyReleased;
-			Subject.Notify("Creating: " + Enum.GetName(EntFactory.Instance.UnitTypeToCreate.GetType(), EntFactory.Instance.UnitTypeToCreate), PerfEvents.UNIT_CREATE_SELECTION);
-			Subject.Notify("Faction: " + Enum.GetName(EntFactory.Instance.FactionToCreate.GetType(), EntFactory.Instance.FactionToCreate), PerfEvents.FACTION_SELECTION);
+			Subject.Notify(
+				"Creating: " + Enum.GetName(EntFactory.Instance.UnitTypeToCreate.GetType(), EntFactory.Instance.UnitTypeToCreate),
+				PerfEvents.UNIT_CREATE_SELECTION
+			);
+
+			Subject.Notify(
+				"Faction: " + Enum.GetName(EntFactory.Instance.FactionToCreate.GetType(), EntFactory.Instance.FactionToCreate),
+				PerfEvents.FACTION_SELECTION
+			);
 		}
 
 		private void WindowKeyReleased(object sender, SFML.Window.KeyEventArgs e)
