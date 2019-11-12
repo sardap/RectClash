@@ -24,7 +24,7 @@ namespace RectClash.Game
 
 		public const float ZOOM_MUL = 1.5f;
  
-		public const string SEED = "";
+		public const string SEED = "Jet Set Radio";
 
 		public static readonly IEnumerable<string> SOUND_DAMAGE_SOUND_ALL = new List<string>()
 		{

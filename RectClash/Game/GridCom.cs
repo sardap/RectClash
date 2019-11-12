@@ -303,10 +303,6 @@ namespace RectClash.Game
 
 							_targetCell = _pathCells.Last();	
 						}
-						else
-						{
-							_targetCell = _startCell;
-						}
 
 						_attackTarget = target;
 
@@ -504,27 +500,32 @@ namespace RectClash.Game
 
 		private void ApplyAttack(Vector2i attacker, Vector2i target)
 		{
-			var curCell = Get(attacker);
-			var targetCellIndex = target;
+			var attackingCell = Get(attacker);
+			var targetCell = Get(target);
 
-			var attackerUnitComInfo = curCell.Inside.First().GetCom<UnitInfoCom>();
+			Debug.Assert(targetCell.Inside.First().Tags.Contains(Tags.UNIT));
+			Debug.Assert(attackingCell.Inside.First().Tags.Contains(Tags.UNIT));
+
+			var attackerUnitComInfo = attackingCell.Inside.First().GetCom<UnitInfoCom>();
 
 			var distance = DistanceBetween(attacker, target);
 
 			if(distance > attackerUnitComInfo.AttackRange + 1)
 			{
-				var current = curCell.Inside.First();
-				Move(current, targetCellIndex.X, targetCellIndex.Y);
-				Get(targetCellIndex).Subject.Notify(Get(targetCellIndex).Owner, GameEvent.UNIT_MOVED);
+				var current = attackingCell.Inside.First();
+				Move(current, target.X, target.Y);
+				attackingCell.Subject.Notify(Owner, GameEvent.UNIT_MOVED);
 			}
 
 			ChangeState(State.ClearSelection);
 
-			Get(targetCellIndex).Subject.Notify(Get(target).Inside.First(), GameEvent.ATTACK_TARGET);
+			var targetEnt = targetCell.Inside.First();
+
+			attackingCell.Subject.Notify(targetEnt, GameEvent.ATTACK_TARGET);
 
 			if(attackerUnitComInfo.TurnTaken)
 			{
-				Get(targetCellIndex).ChangeState(CellInfoCom.State.TurnComplete);
+				targetCell.ChangeState(CellInfoCom.State.TurnComplete);
 			}
 		}
 
