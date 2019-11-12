@@ -14,7 +14,7 @@ namespace RectClash.Game
 
 		public const int MIN_BIOME_SIZE = CHUNK_SIZE;
 
-		public const int CHUNKS_X = 1;
+		public const int CHUNKS_X = 2;
 
 		public const int CHUNKS_Y = 1;
 

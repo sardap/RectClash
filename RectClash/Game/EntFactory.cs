@@ -152,16 +152,22 @@ namespace RectClash.Game
 
 		public IEnt CreateFootSolider(GridCom grid, int i, int j)
 		{
+			return CreateFootSolider(grid, i, j, FactionToCreate, UnitTypeToCreate);
+		}
+
+
+		public IEnt CreateFootSolider(GridCom grid, int i, int j, Faction factionToCreate, UnitType unitTypeToCreate)
+		{
 			var ent = Engine.Instance.CreateEnt
 			(
 				WorldEnt, 
-				"FootSoilder:" + (_footSolider++).ToString() + " " + Utility.GetEnumName(UnitTypeToCreate) + " " + Utility.GetEnumName(FactionToCreate), 
+				"FootSoilder:" + (_footSolider++).ToString() + " " + Utility.GetEnumName(unitTypeToCreate) + " " + Utility.GetEnumName(factionToCreate), 
 				new List<string>(){Tags.UNIT}
 			);
 
 			Color hatColour;
 
-			switch(FactionToCreate)
+			switch(factionToCreate)
 			{
 				case Faction.Red:
 					hatColour = Color.Red;
@@ -186,8 +192,8 @@ namespace RectClash.Game
 			(
 				new UnitInfoCom()
 				{
-					Type = UnitTypeToCreate,
-					Faction = FactionToCreate
+					Type = unitTypeToCreate,
+					Faction = factionToCreate
 				}
 			);
 
@@ -196,7 +202,7 @@ namespace RectClash.Game
 				new UnitActionContCom()
 			);
 
-			if(FactionToCreate == Faction.Red)
+			if(factionToCreate == Faction.Red)
 			{
 				ent.AddCom
 				(

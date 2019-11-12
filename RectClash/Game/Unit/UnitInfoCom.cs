@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using RectClash.ECS.Graphics;
 using SFML.Graphics;
 using RectClash.Game.Combat;
+using System.Linq;
 
 namespace RectClash.Game.Unit
 {
@@ -15,6 +16,7 @@ namespace RectClash.Game.Unit
 			public Color baseColor;
 			public int movementRange;
 			public int attackRange;
+			public DifficultyRating difficultyRating;
 			public UnitSoundInfo SoundInfo;
 
 		}
@@ -30,6 +32,7 @@ namespace RectClash.Game.Unit
 					movementRange = 5,
 					attackRange = GameConstants.MELEE_ATTACK_RANGE,
 					maxHealth = 30d,
+					difficultyRating = DifficultyRating.Low,
 					SoundInfo = new UnitSoundInfo()
 					{
 						DeathSound = GameConstants.SOUND_FOOT_SOLIDER_DIED,
@@ -49,6 +52,7 @@ namespace RectClash.Game.Unit
 					movementRange = 3,
 					attackRange = GameConstants.MELEE_ATTACK_RANGE,
 					maxHealth = 60d,
+					difficultyRating = DifficultyRating.High,
 					SoundInfo = new UnitSoundInfo()
 					{
 						DeathSound = GameConstants.SOUND_HEAVY_SOLIDER_DIED,
@@ -68,6 +72,7 @@ namespace RectClash.Game.Unit
 					movementRange = 4,
 					attackRange = 4,
 					maxHealth = 10d,
+					difficultyRating = DifficultyRating.Low,
 					SoundInfo = new UnitSoundInfo()
 					{
 						DeathSound = GameConstants.SOUND_LIGHT_ARCHER_DIED,
@@ -79,6 +84,26 @@ namespace RectClash.Game.Unit
 				}
 			}
 		};
+
+		public static int DifficultyRatingForType(UnitType unitType)
+		{
+			return (int)_staticUnitInfo[unitType].difficultyRating;
+		}
+
+		public static List<UnitType> UnitsWithDifficulty(DifficultyRating rating)
+		{
+			var result = new List<UnitType>();
+			
+			foreach(UnitType unitType in System.Enum.GetValues(typeof(UnitType)).Cast<UnitType>())
+			{
+				if(_staticUnitInfo[unitType].difficultyRating == rating)
+				{
+					result.Add(unitType);
+				}
+			}
+
+			return result;
+		}
 
 		private bool _moveTaken;
 
@@ -142,7 +167,7 @@ namespace RectClash.Game.Unit
 
 		public int VisionRange
 		{
-			get => 10;
+			get => GameConstants.CHUNK_SIZE * 10;
 		}
 
 		public void TurnReset()

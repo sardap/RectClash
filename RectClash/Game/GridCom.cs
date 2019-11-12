@@ -566,7 +566,10 @@ namespace RectClash.Game
 
 			foreach(Vector2i cellIndex in adjacentCells)
 			{
-				CellsInRange(cellIndex, range - 1, result);
+				if(!result.Contains(cellIndex))
+				{
+					CellsInRange(cellIndex, range - 1, result);
+				}
 			}
 
 			return result;
@@ -778,6 +781,15 @@ namespace RectClash.Game
 					cell.ClearNotNeededChildren();
 				}
 			}
+
+			new PlaceEnemies().GenerateEnemies(
+				1 * GameConstants.CHUNK_SIZE, 0, 
+				chunksX * GameConstants.CHUNK_SIZE, chunksY * GameConstants.CHUNK_SIZE,
+				this, 
+				100,
+				Faction.Red,
+				Engine.Instance.Seed % 4092669828401527543
+			);
 		}
 
 		private void OnTurnEnd()
