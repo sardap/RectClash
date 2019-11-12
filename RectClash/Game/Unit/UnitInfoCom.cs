@@ -87,7 +87,18 @@ namespace RectClash.Game.Unit
 
 		public static int DifficultyRatingForType(UnitType unitType)
 		{
-			return (int)_staticUnitInfo[unitType].difficultyRating;
+			const double HEALTH_MODIFER = 0.5f;
+			const double DAMAGE_MODIFER = 1f;
+			const double MOVE_MODIFER = 0.3f;
+
+			var unitInfo = _staticUnitInfo[unitType];
+
+			double result = 0;
+			result += (unitInfo.damage * System.Math.Max(1, unitInfo.attackRange)) * HEALTH_MODIFER;
+			result += unitInfo.movementRange * DAMAGE_MODIFER;
+			result += unitInfo.maxHealth * MOVE_MODIFER;
+
+			return (int)result;
 		}
 
 		public static List<UnitType> UnitsWithDifficulty(DifficultyRating rating)
@@ -167,7 +178,7 @@ namespace RectClash.Game.Unit
 
 		public int VisionRange
 		{
-			get => GameConstants.CHUNK_SIZE * 10;
+			get => GameConstants.CHUNK_SIZE * 2;
 		}
 
 		public void TurnReset()

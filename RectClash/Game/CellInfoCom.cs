@@ -38,17 +38,22 @@ namespace RectClash.Game
 
 		private class CellTypeInfo
 		{
-			public Color Background { get; private set; }
+			public Color Background { get; set; }
 
-			public Color BackgroundTop { get; private set; }
+			public Color BackgroundTop { get; set; }
 
-			public float DamageAdjacent { get; private set; }
+			public float DamageAdjacent { get; set; }
 
-			public CellTypeInfo(Color background, Color backgroundTop, float damageAdjacent = 0)
+			public bool BlocksVision { get; set; }
+
+			public bool Selectable { get; set; }
+
+			public CellTypeInfo()
 			{
-				Background = background;
-				BackgroundTop = backgroundTop;
-				DamageAdjacent = damageAdjacent;
+				BackgroundTop = ColorConst.NOTHING;
+				Background = ColorConst.NOTHING;
+				BlocksVision = false;
+				Selectable = true;
 			}
 		}
 
@@ -68,39 +73,70 @@ namespace RectClash.Game
 		{
 			{
 				CellType.Grass, 
-				new CellTypeInfo(new Color(109, 168, 74), new Color(0, 0, 0, 0))
+				new CellTypeInfo()
+				{
+					Background = ColorConst.GRASS
+				}
 			},
 			{
 				CellType.Water, 
-				new CellTypeInfo(new Color(0, 0, 255), new Color(0, 0, 0, 0))
+				new CellTypeInfo()
+				{
+					Background = ColorConst.WATER, 
+					Selectable = false
+				}
 			},
 			{
-				CellType.Mud, 
-				new CellTypeInfo(new Color(143, 116, 63), new Color(0, 0, 0, 0))
+				CellType.Mud,
+				new CellTypeInfo()
+				{
+					Background = ColorConst.MUD
+				}
 			},
 			{
 				CellType.Leaf, 
-				new CellTypeInfo(new Color(109, 168, 74), new Color(82, 107, 45, 200))
+				new CellTypeInfo()
+				{
+					Background = ColorConst.LEAF_BASE,
+					BackgroundTop = ColorConst.LEAF_OVERLAY
+				}
 			},
 			{
 				CellType.Wood, 
-				new CellTypeInfo(new Color(193, 154, 107), new Color(82, 107, 45, 200))
+				new CellTypeInfo()
+				{
+					Background = ColorConst.WOOD,
+					BackgroundTop = ColorConst.LEAF_OVERLAY,
+					Selectable = false,
+					BlocksVision = true
+				}
 			},
 			{
 				CellType.Sand, 
-				new CellTypeInfo(new Color(238, 214, 175), new Color(0, 0, 0, 0))
+				new CellTypeInfo()
+				{
+					Background = ColorConst.SAND
+				}
 			},
 			{
-				CellType.Cactus, 
-				new CellTypeInfo(new Color(91, 111, 85), new Color(0, 0, 0, 0), 5)
+				CellType.Cactus,
+				new CellTypeInfo()
+				{
+					Background = ColorConst.CACTUS,
+					DamageAdjacent = 5,
+					Selectable = false
+				}
 			},
 			{
 				CellType.Snow,
-				new CellTypeInfo(new Color(255, 245, 245), new Color(0, 0, 0, 0))
+				new CellTypeInfo()
+				{
+					Background = ColorConst.SNOW
+				}
 			},
 			{
 				CellType.Nothing,
-				new CellTypeInfo(new Color(0,0,0,0), new Color(0, 0, 0, 0))
+				new CellTypeInfo()
 			}
 		};
 
@@ -184,14 +220,7 @@ namespace RectClash.Game
 		{
 			get
 			{
-				return 
-					(
-						Type == CellType.Grass || 
-						Type == CellType.Mud || 
-						Type == CellType.Leaf || 
-						Type == CellType.Sand ||
-						Type == CellType.Snow
-					) && CurrentState != State.TurnComplete;
+				return CurrentState != State.TurnComplete && _staticCellInfo[_type].Selectable;
 			}
 		}
 
@@ -204,6 +233,11 @@ namespace RectClash.Game
 		}
 
 		public double DamageAmount => DamageAdjacent;
+
+		public bool BlocksVision
+		{
+			get => _staticCellInfo[_type].BlocksVision;
+		}
 
 		protected override void InternalStart()
 		{

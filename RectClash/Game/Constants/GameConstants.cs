@@ -22,9 +22,9 @@ namespace RectClash.Game
 
 		public const int MAX_DRAWABLES = 10000;
 
-		public const float ZOOM_MUL = 1.5f;
+		public const float ZOOM_MUL = 1.3f;
  
-		public const string SEED = "Jet Set Radio";
+		public const string SEED = "Karl Marx";
 
 		public static readonly IEnumerable<string> SOUND_DAMAGE_SOUND_ALL = new List<string>()
 		{

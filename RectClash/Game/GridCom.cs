@@ -36,6 +36,8 @@ namespace RectClash.Game
 
 		private ICollection<Vector2i> _cellsInAttackRange;
 
+		private ICollection<Vector2i> _cellsInVisionRange;
+
 		private List<Vector2i> _pathCells = new List<Vector2i>();
 
 		private State _state = State.NothingSelected;
@@ -95,8 +97,7 @@ namespace RectClash.Game
 						}
 						else if (
 							attackRange >= GameConstants.MELEE_ATTACK_RANGE && 
-							cell.Inside.Count() > 0 && 
-							cell.Inside.First().Tags.Contains(Tags.UNIT)
+							cell.Inside.Count() > 0
 						)
 						{
 							var first = cell.Inside.First();
@@ -114,7 +115,7 @@ namespace RectClash.Game
 
 					foreach(var cell in _cellsInAttackRange.Select(i => Get(i)))
 					{
-						if (cell.Inside.Count() > 0 && cell.Inside.First().Tags.Contains(Tags.UNIT))
+						if (cell.Inside.Count() > 0 && cell.Inside.Count() > 0)
 						{
 							var first = cell.Inside.First();
 							var otherUnitCom = first.GetCom<UnitInfoCom>();
@@ -128,7 +129,12 @@ namespace RectClash.Game
 							cell.ChangeState(CellInfoCom.State.Attackable);
 						}
 					}
-					
+
+					foreach(var ents in EntsInRange(_startCell, UnitInfoCom.VisionRange))
+					{
+						ents.Value.ForEach(i => System.Console.WriteLine("Dist {0}\"{1}\"", ents.Key, i));
+					}
+
 					break;
 
 				case State.ClearSelection:
@@ -503,7 +509,7 @@ namespace RectClash.Game
 			var attackingCell = Get(attacker);
 			var targetCell = Get(target);
 
-			Debug.Assert(targetCell.Inside.First().Tags.Contains(Tags.UNIT));
+			// Debug.Assert(targetCell.Inside.First().Tags.Contains(Tags.UNIT));
 			Debug.Assert(attackingCell.Inside.First().Tags.Contains(Tags.UNIT));
 
 			var attackerUnitComInfo = attackingCell.Inside.First().GetCom<UnitInfoCom>();
@@ -556,20 +562,28 @@ namespace RectClash.Game
 				_cells[x,y].Subject.AddObv(aiCom);
 		}
 
-		private HashSet<Vector2i> CellsInRange(Vector2i index, int range, HashSet<Vector2i> result)
+		private HashSet<Vector2i> CellsInVisionRange(Vector2i start, int range)
+		{
+			return CellsInVisionRange(start, start, range, new HashSet<Vector2i>());
+		}
+
+
+		private HashSet<Vector2i> CellsInVisionRange(Vector2i startIndex, Vector2i index, int range, HashSet<Vector2i> result)
 		{
 			result.Add(index);
 
-			if(range < 0)
+			if(DistanceBetween(startIndex, index) > range)
+			{
 				return result;
+			}
 
 			var adjacentCells = GetAdjacentSquares(index.X, index.Y);
 
 			foreach(Vector2i cellIndex in adjacentCells)
 			{
-				if(!result.Contains(cellIndex))
+				if(!Get(cellIndex).BlocksVision && !result.Contains(cellIndex))
 				{
-					CellsInRange(cellIndex, range - 1, result);
+					CellsInVisionRange(startIndex, cellIndex, range, result);
 				}
 			}
 
@@ -578,7 +592,7 @@ namespace RectClash.Game
 
 		public Dictionary<double, List<IEnt>> EntsInRange(Vector2i start, int range)
 		{
-			var cellsInRange = CellsInRange(start, range, new HashSet<Vector2i>());
+			var cellsInRange = CellsInVisionRange(start, range);
 			var result = new Dictionary<double, List<IEnt>>();
 
 			foreach(Vector2i cell in cellsInRange)
