@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using RectClash.ECS;
 using RectClash.Game.Combat;
 using RectClash.Misc;
@@ -13,6 +14,14 @@ namespace RectClash.Game.Unit
 			_unitInfoCom = Owner.GetCom<UnitInfoCom>();
 		}
 
+		private void CheckTurnComplete()
+		{
+			if(_unitInfoCom.TurnTaken)
+			{
+				Owner.Parent.GetCom<CellInfoCom>().ChangeState(CellInfoCom.State.TurnComplete);
+			}
+		}
+
 		public void OnNotify(IEnt ent, GameEvent evt)
 		{
 			switch(evt)
@@ -22,14 +31,18 @@ namespace RectClash.Game.Unit
 					break;
 
 				case GameEvent.UNIT_MOVED:
+					Debug.Assert(!_unitInfoCom.MoveTaken);
 					_unitInfoCom.MoveTaken = true;
 					Engine.Instance.Sound.PlayRandomSound(_unitInfoCom.SoundInfo.MoveSound);
+					CheckTurnComplete();
 					break;
 
 				case GameEvent.ATTACK_TARGET:
+					Debug.Assert(!_unitInfoCom.AttackTaken);
 					_unitInfoCom.AttackTaken = true;
 					if(PerformAttack(ent))
 						Engine.Instance.Sound.PlayRandomSound(_unitInfoCom.SoundInfo.AttackSound);
+					CheckTurnComplete();
 					break;
 
 				case GameEvent.RECEIVE_DAMAGE:

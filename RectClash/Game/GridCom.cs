@@ -130,11 +130,6 @@ namespace RectClash.Game
 						}
 					}
 
-					foreach(var ents in EntsInRange(_startCell, UnitInfoCom.VisionRange))
-					{
-						ents.Value.ForEach(i => System.Console.WriteLine("Dist {0}\"{1}\"", ents.Key, i));
-					}
-
 					break;
 
 				case State.ClearSelection:
@@ -271,6 +266,7 @@ namespace RectClash.Game
 				case State.MoveTargetCellSelected:
 					ClearPath();
 					goto case State.StartCellSelected;
+
 				case State.StartCellSelected:
 					if(
 						cell.CurrentState != CellInfoCom.State.InMovementRange && 
@@ -306,8 +302,6 @@ namespace RectClash.Game
 							{
 								i.ChangeState(CellInfoCom.State.OnPath);
 							}
-
-							_targetCell = _pathCells.Last();	
 						}
 
 						_attackTarget = target;
@@ -492,11 +486,6 @@ namespace RectClash.Game
 			ChangeState(State.ClearSelection);
 
 			Get(targetCellIndex).Subject.Notify(Get(targetCellIndex).Owner, GameEvent.UNIT_MOVED);
-
-			if(Get(targetCellIndex).Inside.First().GetCom<UnitInfoCom>().TurnTaken)
-			{
-				Get(targetCellIndex).ChangeState(CellInfoCom.State.TurnComplete);
-			}
 		}
 		private void ApplyAttack()
 		{
@@ -509,7 +498,7 @@ namespace RectClash.Game
 			var attackingCell = Get(attacker);
 			var targetCell = Get(target);
 
-			// Debug.Assert(targetCell.Inside.First().Tags.Contains(Tags.UNIT));
+			Debug.Assert(targetCell.Inside.First().Tags.Contains(Tags.UNIT));
 			Debug.Assert(attackingCell.Inside.First().Tags.Contains(Tags.UNIT));
 
 			var attackerUnitComInfo = attackingCell.Inside.First().GetCom<UnitInfoCom>();
@@ -518,21 +507,24 @@ namespace RectClash.Game
 
 			if(distance > attackerUnitComInfo.AttackRange + 1)
 			{
-				var current = attackingCell.Inside.First();
-				Move(current, target.X, target.Y);
+				var current = attackerUnitComInfo.Owner;
+				var path = new Stack<Vector2i>(AStar(attacker, target, false).Reverse());
+				
+				while(DistanceBetween(path.Peek(), target) > attackerUnitComInfo.AttackRange + 1)
+				{
+					path.Pop();
+				}
+
+				var moveTarget = path.First();
+				Move(current, moveTarget.X, moveTarget.Y);
+				attackingCell = Get(moveTarget);
 				attackingCell.Subject.Notify(Owner, GameEvent.UNIT_MOVED);
 			}
 
-			ChangeState(State.ClearSelection);
-
 			var targetEnt = targetCell.Inside.First();
-
 			attackingCell.Subject.Notify(targetEnt, GameEvent.ATTACK_TARGET);
 
-			if(attackerUnitComInfo.TurnTaken)
-			{
-				targetCell.ChangeState(CellInfoCom.State.TurnComplete);
-			}
+			ChangeState(State.ClearSelection);
 		}
 
 		public void AddEnt(IEnt ent, int x, int y)
@@ -631,171 +623,8 @@ namespace RectClash.Game
 					_cells[i, j] = EntFactory.Instance.CreateCell(this, i, j, CellWidth, CellHeight).GetCom<CellInfoCom>();
 				}
 			}
-
-			var lightWoodsBiome = new BiomeGenerator()
-			{
-				GenerationComponents = new List<IGenerationComponent>
-				{
-					new FillWithTypeGenerator()
-					{
-						Type = CellInfoCom.CellType.Grass
-					},
-					new MudGenerator()
-					{
-						MaxMudSteps = 25,
-						MinMudSteps = 1,
-						NumberOfRuns = 16,
-						ProbabilityOfRunning = 0.25f
-					},
-					new LakeGenerator()
-					{
-						LakeMaxSize = 5,
-						LakeMinSize = 1,
-						NumberOfRuns = 5,
-						ProbabilityOfRunning = 0.2f
-					},
-					new WoodsGenerator()
-					{
-						TreeMaxSize = 4,
-						NumberOfRuns = 6,
-						ProbabilityOfRunning = 0.5f
-					}
-				}					
-			};
-
-			var denseWoodsBiome = new BiomeGenerator()
-			{
-				GenerationComponents = new List<IGenerationComponent>
-				{
-					new FillWithTypeGenerator()
-					{
-						Type = CellInfoCom.CellType.Grass
-					},
-					new LakeGenerator()
-					{
-						LakeMaxSize = 5,
-						LakeMinSize = 1,
-						NumberOfRuns = 2,
-						ProbabilityOfRunning = 0.2f
-					},
-					new WoodsGenerator()
-					{
-						TreeMaxSize = 8,
-						NumberOfRuns = 40,
-						ProbabilityOfRunning = 0.5f
-					}
-				}
-			};
-
-			var lakeBiome = new BiomeGenerator()
-			{
-				GenerationComponents = new List<IGenerationComponent>
-				{
-					new FillWithTypeGenerator()
-					{
-						Type = CellInfoCom.CellType.Grass
-					},
-					new MudGenerator()
-					{
-						MaxMudSteps = 10,
-						MinMudSteps = 1,
-						NumberOfRuns = 32,
-						ProbabilityOfRunning = 0.25f
-					},
-					new LakeGenerator()
-					{
-						LakeMaxSize = 8,
-						LakeMinSize = 3,
-						NumberOfRuns = 2,
-						ProbabilityOfRunning = 0.8f
-					},
-					new LakeGenerator()
-					{
-						LakeMaxSize = 2,
-						LakeMinSize = 1,
-						NumberOfRuns = 10,
-						ProbabilityOfRunning = 0.5f
-					}
-				}
-			};
-
-			var dessertBiome = new BiomeGenerator()
-			{
-				GenerationComponents = new List<IGenerationComponent>
-				{
-					new FillWithTypeGenerator()
-					{
-						Type = CellInfoCom.CellType.Sand
-					},
-					new CactusGenerator()
-					{
-						NumberOfRuns = 40,
-						ProbabilityOfRunning = 0.25f
-					},
-					new LakeGenerator()
-					{
-						LakeMaxSize = 3,
-						LakeMinSize = 1,
-						NumberOfRuns = 1,
-						ProbabilityOfRunning = 0.2f
-					}
-				}
-			};
-
-			var snowBiome = new BiomeGenerator()
-			{
-				GenerationComponents = new List<IGenerationComponent>
-				{
-					new FillWithTypeGenerator()
-					{
-						Type = CellInfoCom.CellType.Snow
-					}
-				}
-			};
-
-			var generators = new List<BiomeGenerator>()
-			{
-				lightWoodsBiome,
-				lakeBiome,
-				dessertBiome,
-				denseWoodsBiome
-			};
-
-			var visited = new HashSet<Vector2i>();
-
-			var chunkSeeds = new HashSet<long>();
-
-			for(int i = 0; i < chunksY; i++)
-			{
-				for(int j = 0; j < chunksX; j++)
-				{
-					var chunkSeed = Engine.Instance.Seed - (((j * 1081377109) + (i * 2149545691)) % 1656974148464943);
-				
-					Debug.Assert(!chunkSeeds.Contains(chunkSeed));
-					chunkSeeds.Add(chunkSeed);
-
-					Utility.RandomElement(generators, chunkSeed).
-						GenrateChunk(i * GameConstants.CHUNK_SIZE, j * GameConstants.CHUNK_SIZE, _cells, visited, chunkSeed);
-				}
-			}
-
-			// Clean unassignedCells
-			foreach(var cell in _cells)
-			{
-				if(cell.Type == CellInfoCom.CellType.Nothing)
-				{
-					var adjacent = Utility.GetAdjacentSquares(cell.Cords.X, cell.Cords.Y, _cells)
-						.Where(i => Get(i).Type != CellInfoCom.CellType.Nothing);
-					
-					var seed = Engine.Instance.Seed - cell.Cords.X + cell.Cords.Y * 4112019;
-
-					cell.Type = adjacent.Count() > 0 ? Get(Utility.RandomElement(adjacent, seed)).Type : CellInfoCom.CellType.Grass;
-				}
-				else
-				{
-					cell.ClearNotNeededChildren();
-				}
-			}
+			
+			new GridTerrainGenerator().Genrate(chunksX, chunksY, this, Engine.Instance.Seed);
 
 			new PlaceEnemies().GenerateEnemies(
 				1 * GameConstants.CHUNK_SIZE, 0, 

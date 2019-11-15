@@ -57,7 +57,7 @@ namespace RectClash
 		}
 
 		static void Main(string[] args)
-		{		
+		{
 			int windowWidth = 1920;
 			int windowHeight = 1080;
 

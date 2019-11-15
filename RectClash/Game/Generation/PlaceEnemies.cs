@@ -19,6 +19,9 @@ namespace RectClash.Game.Generation
 
 		public void GenerateEnemies(int startX, int startY, int endX, int endY, GridCom grid, int difficulty, List<UnitType> accessibleUnits, Faction faction, long seed)
 		{
+			Debug.Assert(startX < endX);
+			Debug.Assert(startY < endY);
+
 			var cells = grid.Cells;
 
 			var unitsToCreate = new Stack<UnitType>();

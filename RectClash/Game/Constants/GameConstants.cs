@@ -24,7 +24,7 @@ namespace RectClash.Game
 
 		public const float ZOOM_MUL = 1.3f;
  
-		public const string SEED = "Karl Marx";
+		public const string SEED = "";
 
 		public static readonly IEnumerable<string> SOUND_DAMAGE_SOUND_ALL = new List<string>()
 		{
@@ -81,25 +81,27 @@ namespace RectClash.Game
 
 		public static readonly IEnumerable<string> SOUND_LIGHT_ARCHER_ATTACK = new List<string>()
 		{
-			"Sounds/HeavySolider/attack_01.wav"
+			"Sounds/LightArcher/attack_01.wav",
+			"Sounds/LightArcher/attack_02.wav"
 		};
 
 		public static readonly IEnumerable<string> SOUND_LIGHT_ARCHER_MOVE = new List<string>()
 		{
-			"Sounds/HeavySolider/move_01.wav"
+			"Sounds/LightArcher/move_01.wav",
+			"Sounds/LightArcher/move_02.wav",
 		};
 
 		public static readonly IEnumerable<string> SOUND_LIGHT_ARCHER_SELECTED = new List<string>()
 		{
-			"Sounds/HeavySolider/select_01.wav",
-			"Sounds/HeavySolider/select_02.wav"
+			"Sounds/LightArcher/select_01.wav",
+			"Sounds/LightArcher/select_02.wav",
+			"Sounds/LightArcher/select_03.wav"
 		};
 
 		public static readonly IEnumerable<string> SOUND_LIGHT_ARCHER_DIED = new List<string>()
 		{
-			"Sounds/HeavySolider/death_01.wav",
-			"Sounds/HeavySolider/death_02.wav",
-			"Sounds/HeavySolider/death_03.wav"
+			"Sounds/LightArcher/death_01.wav",
+			"Sounds/LightArcher/death_02.wav"
 		};
     }
 }

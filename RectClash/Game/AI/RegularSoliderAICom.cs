@@ -150,6 +150,7 @@ namespace RectClash.Game.AI
 
 		private CellInfoCom _cellInfoCom;
 
+
 		private UnitInfoCom _unitInfoCom;
 
 		private GridCom _gridCom;
@@ -201,7 +202,6 @@ namespace RectClash.Game.AI
 					
 					var action = _decisionTrees[_currentState].GetAction();
 					action.TakeAction();
-					_cellInfoCom.ChangeState(CellInfoCom.State.TurnComplete);
 
 					_gridCom = null;
 					_closestEnemyCords = null;
@@ -209,13 +209,6 @@ namespace RectClash.Game.AI
 					break;
 				}
 			}
-		}
-
-		private IEnt ClosestEnemy()
-		{
-			var adjacentCells = Utility.GetAdjacentSquares(_cellInfoCom.Cords.X, _cellInfoCom.Cords.Y, _gridCom.Cells);
-			var adjacentEnemy = adjacentCells.Where(i => _gridCom.Cells[i.X, i.Y].Inside.Any(j => j.Tags.Contains(Tags.UNIT)));
-			return _gridCom.Cells[adjacentEnemy.First().X, adjacentEnemy.First().Y].Inside.First();
 		}
 
 		private bool IsEnemy(IEnt other)
