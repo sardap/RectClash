@@ -611,7 +611,7 @@ namespace RectClash.Game
 				1 * GameConstants.CHUNK_SIZE, 0, 
 				chunksX * GameConstants.CHUNK_SIZE, chunksY * GameConstants.CHUNK_SIZE,
 				this, 
-				100,
+				GameConstants.DIFFICULTY,
 				Faction.Red,
 				Engine.Instance.Seed % 4092669828401527543
 			);
@@ -620,7 +620,7 @@ namespace RectClash.Game
 				0, 0, 
 				1 * GameConstants.CHUNK_SIZE, chunksY * GameConstants.CHUNK_SIZE,
 				this, 
-				100,
+				GameConstants.DIFFICULTY,
 				Faction.Green,
 				Engine.Instance.Seed % 2629718633766487981
 			);
@@ -672,7 +672,9 @@ namespace RectClash.Game
 
 			while(toNotify.Count > 0)
 			{
-				toNotify.Dequeue().Owner.NotifyChildren(Owner, GameEvent.AI_TAKE_TURN);
+				var next = toNotify.Dequeue();
+				if(!next.Owner.Destroyed)
+					next.Owner.NotifyChildren(Owner, GameEvent.AI_TAKE_TURN);
 			}
 		}
 

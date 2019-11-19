@@ -1,4 +1,6 @@
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using RectClash.ECS;
 using RectClash.Game.Unit;
@@ -51,25 +53,46 @@ namespace RectClash.Game.AI
 
 			public bool Resolve()
 			{
-				var enemiesInAttackRange = Instance._gridCom
+				var enemiesInAttackRange = new Queue<KeyValuePair<double, List<IEnt>>>(Instance._gridCom
 					.EntsInRange(Instance._cellInfoCom.Cords, Instance._unitInfoCom.VisionRange)
 					.Where(i => Instance.IsEnemy(i.Value.First()))
 					.OrderBy(i => i.Key)
-					.ToList();
+				);
 
-				if(enemiesInAttackRange.Count() <= 0)
+				if(enemiesInAttackRange.Count <= 0)
 				{
 					return false;
 				}
 
-				var closestEnemyCell = enemiesInAttackRange
-					.First().Value
-					.First().Parent
-					.GetCom<CellInfoCom>();
+				Vector2i? closestEnemyCords = null;
 
-				Instance._closestEnemyCords = closestEnemyCell.Cords;
+				while(enemiesInAttackRange.Count > 0 && closestEnemyCords == null)
+				{
+					var enemiesInDistance = new Queue<IEnt>(enemiesInAttackRange.Dequeue().Value);
 
-				var dist = Instance._gridCom.DistanceBetween(closestEnemyCell.Cords, Instance._cellInfoCom.Cords);
+					while(enemiesInDistance.Count() > 0)
+					{
+						var cords = enemiesInDistance.Dequeue().Parent.GetCom<CellInfoCom>().Cords;
+
+						var astarResult = Instance._gridCom
+							.AStar(Instance._cellInfoCom.Cords, cords, false);
+
+						if(astarResult != null)
+						{
+							closestEnemyCords = cords;
+							break;
+						}
+					}
+				}
+
+				if(closestEnemyCords == null)
+				{
+					return false;
+				}
+
+				Instance._closestEnemyCords = closestEnemyCords;
+
+				var dist = Instance._gridCom.DistanceBetween((Vector2i)closestEnemyCords, Instance._cellInfoCom.Cords);
 
 				if(dist > Instance._unitInfoCom.AttackRange + 1)
 				{
@@ -98,9 +121,15 @@ namespace RectClash.Game.AI
 
 			public void TakeAction()
 			{
-				var path = Instance._gridCom
-					.AStar(Instance._cellInfoCom.Cords, (Vector2i)Instance._closestEnemyCords, false)
-					.ToArray();
+				var astarResult = Instance._gridCom
+					.AStar(Instance._cellInfoCom.Cords, (Vector2i)Instance._closestEnemyCords, false);
+
+				if(astarResult == null)
+				{
+					return;
+				}
+
+				var path = astarResult.ToArray();
 
 				var i = Instance._unitInfoCom.MovementRange - 1;
 
@@ -108,6 +137,8 @@ namespace RectClash.Game.AI
 				{
 					i = path.Length - 2;
 				}
+
+				Debug.Assert(i >= 0);
 				
 				Instance._gridCom.Move(Instance.Owner, path[i].X, path[i].Y);
 				Instance._cellInfoCom = Instance.Owner.Parent.GetCom<CellInfoCom>();

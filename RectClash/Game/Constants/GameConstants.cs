@@ -23,6 +23,8 @@ namespace RectClash.Game
 		public const int MAX_DRAWABLES = 10000;
 
 		public const float ZOOM_MUL = 1.3f;
+
+		public const int DIFFICULTY = 1000;
  
 		public const string SEED = "";
 
