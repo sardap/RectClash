@@ -8,19 +8,17 @@ namespace RectClash.Game.Perf
 {
 	public class DebugInputCom : Com
 	{
-		public Subject<string, PerfEvents> Subject { get; set; }
-
 		protected override void InternalStart()
 		{
-			Subject.Notify("Seed: \"" + Engine.Instance.Seed + "\"", PerfEvents.SEED_SET);
+			Owner.Notify("Seed: \"" + Engine.Instance.Seed + "\"", PerfEvents.SEED_SET);
 			
 			Engine.Instance.Window.RenderWindow.KeyReleased += WindowKeyReleased;
-			Subject.Notify(
+			Owner.Notify(
 				"Creating: " + Enum.GetName(EntFactory.Instance.UnitTypeToCreate.GetType(), EntFactory.Instance.UnitTypeToCreate),
 				PerfEvents.UNIT_CREATE_SELECTION
 			);
 
-			Subject.Notify(
+			Owner.Notify(
 				"Faction: " + Enum.GetName(EntFactory.Instance.FactionToCreate.GetType(), EntFactory.Instance.FactionToCreate),
 				PerfEvents.FACTION_SELECTION
 			);
@@ -42,21 +40,24 @@ namespace RectClash.Game.Perf
 
 				var unitToCreate = unitTypes[i];
 				EntFactory.Instance.UnitTypeToCreate = unitToCreate;
-				Subject.Notify("Creating: " + Enum.GetName(unitToCreate.GetType(), unitToCreate), PerfEvents.UNIT_CREATE_SELECTION);
+				Owner.Notify("Creating: " + Enum.GetName(unitToCreate.GetType(), unitToCreate), PerfEvents.UNIT_CREATE_SELECTION);
 			}
 			else if(e.Code == KeyBindsAccessor.Instance.CycleUnitType)
 			{
-				Faction faction;
-				if(EntFactory.Instance.FactionToCreate == Faction.Red)
+				var factionTypes = Enum.GetValues(typeof(Faction)).Cast<Faction>().ToList();
+				var i = factionTypes.IndexOf(EntFactory.Instance.FactionToCreate);
+
+				i++;
+				
+				if(i >= factionTypes.Count)
 				{
-					faction = Faction.Blue;
+					i = 0;
 				}
-				else
-				{
-					faction = Faction.Red;
-				}
-				EntFactory.Instance.FactionToCreate = faction;
-				Subject.Notify("Faction: " + Enum.GetName(faction.GetType(), faction), PerfEvents.FACTION_SELECTION);
+
+				var factionToCreate = factionTypes[i];
+
+				EntFactory.Instance.FactionToCreate = factionToCreate;
+				Owner.Notify("Faction: " + Enum.GetName(factionToCreate.GetType(), factionToCreate), PerfEvents.FACTION_SELECTION);
 			}
 		}
 	}

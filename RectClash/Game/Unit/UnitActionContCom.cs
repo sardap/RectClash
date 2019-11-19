@@ -46,6 +46,7 @@ namespace RectClash.Game.Unit
 					break;
 
 				case GameEvent.RECEIVE_DAMAGE:
+					Debug.Assert(ent.Tags.Contains(Tags.UNIT));
 					Owner.GetCom<HealthCom>().ReceiveDamage(ent.GetCom<IDamageInfoCom>());
 					Engine.Instance.Sound.PlayRandomSound(_unitInfoCom.SoundInfo.DamageSound);
 					break;

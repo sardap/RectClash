@@ -3,7 +3,7 @@ using System.Linq;
 
 namespace RectClash.ECS
 {
-    public class Subject<S, T>
+    public class Subject<S, T> : ISubject
     {
 		private readonly Stack<IObv<S, T>> _newObv = new Stack<IObv<S, T>>();
 

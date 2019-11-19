@@ -10,11 +10,8 @@ namespace RectClash.Game
 {
 	public class CellInputCom: Com
 	{
-		private GameSubject _subject = new GameSubject();
-
 		protected override void InternalStart()
 		{
-			_subject.AddObv(Owner.GetCom<CellInfoCom>());
 			Engine.Instance.Window.RenderWindow.MouseButtonPressed += MouseButtonPressed;
 		}
 
@@ -45,10 +42,10 @@ namespace RectClash.Game
 				switch(mouse.Button)
 				{
 					case SFML.Window.Mouse.Button.Left:
-						_subject.Notify(Owner, GameEvent.GRID_CELL_SELECTED);
+						Owner.Notify(Owner, GameEvent.GRID_CELL_SELECTED);
 						break;
 					case SFML.Window.Mouse.Button.Right:
-						_subject.Notify(Owner, GameEvent.GRID_CLEAR_SELECTION);
+						Owner.Notify(Owner, GameEvent.GRID_CLEAR_SELECTION);
 						break;
 				}
 			}

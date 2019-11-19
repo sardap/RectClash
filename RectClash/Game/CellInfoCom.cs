@@ -162,8 +162,6 @@ namespace RectClash.Game
 			}
 		}
 
-		public GameSubject Subject { get; set; }
-
 		public Vector2i Cords { get; set; }
 
 		public State CurrentState { get; set; }
@@ -270,10 +268,10 @@ namespace RectClash.Game
 			switch(evt)
 			{
 				case GameEvent.GRID_CELL_SELECTED:
-					Subject.Notify(Owner, GameEvent.GRID_CELL_SELECTED);
+					Owner.Parent.Notify(Owner, GameEvent.GRID_CELL_SELECTED);
 					break;
 				case GameEvent.GRID_CLEAR_SELECTION:
-					Subject.Notify(Owner, GameEvent.GRID_CLEAR_SELECTION);
+					Owner.Parent.Notify(Owner, GameEvent.GRID_CLEAR_SELECTION);
 					break;
 			}
 		}

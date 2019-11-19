@@ -12,9 +12,9 @@ namespace RectClash.Game
 
 		private readonly List<Faction> _turnOrder = new List<Faction>();
 
-		public GameSubject Subjects { get; set; }
+		public IEnt GridEnt { get; set; }
 		
-		public Subject<string, PerfEvents> DebugSubject { get; set; }
+		public DebugSubject DebugSubject { get; set; }
 
 		public Faction Faction
 		{
@@ -38,12 +38,11 @@ namespace RectClash.Game
 			}
 
 			EndTurn();
-			EndTurn();
 		}
 
 		private void EndTurn()
 		{
-			Subjects.Notify(Owner, GameEvent.TURN_END);
+			GridEnt.Notify(Owner, GameEvent.TURN_END);
 
 			_index++;
 
@@ -52,7 +51,7 @@ namespace RectClash.Game
 				_index = 0;
 			}
 
-			Subjects.Notify(Owner, GameEvent.TURN_START);
+			GridEnt.Notify(Owner, GameEvent.TURN_START);
 
 			DebugSubject.Notify("Current Turn: " + Utility.GetEnumName(Faction), PerfEvents.TURN_CHANGED);
 		}

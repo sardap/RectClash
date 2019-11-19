@@ -7,7 +7,9 @@ namespace RectClash.Game
     {
         private const float CAM_SPEED = 500.0f;
 
-        public GameSubject Subject { get; set; }
+		public IEnt TurnHandlerEnt { get; set; }
+
+		public IEnt GridEnt { get; set; }
 
         protected override void InternalStart()
         {
@@ -54,11 +56,11 @@ namespace RectClash.Game
 			}
 			else if(e.Code == KeyBindsAccessor.Instance.EndTurn)
 			{
-				Subject.Notify(Owner, GameEvent.TRIGGER_TURN_END);
+				TurnHandlerEnt.Notify(Owner, GameEvent.TRIGGER_TURN_END);
 			}
 			else if(e.Code == KeyBindsAccessor.Instance.ConfMove)
 			{
-				Subject.Notify(Owner, GameEvent.GRID_MOVE_CONF);
+				GridEnt.Notify(Owner, GameEvent.GRID_MOVE_CONF);
 			}
         }
 

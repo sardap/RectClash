@@ -41,33 +41,22 @@ namespace RectClash.Game
 			};
 
 			var debugEnt = Engine.Instance.CreateEnt();
+			debugEnt.Subject = new DebugSubject();
 			debugEnt.PostionCom.LocalX = 10;
 			debugEnt.PostionCom.LocalY = 10;
 
 
-			var debugInfo = debugEnt.AddCom
-			(
-				new UpdateDebugInfoCom()
-			);
+			var debugCom = debugEnt.AddCom(new UpdateDebugInfoCom());
+			((DebugSubject)debugEnt.Subject).AddObv(debugCom);
 
-			var subject = new Subject<string, PerfEvents>(debugInfo);
-			
 			debugEnt.AddCom
 			(
 				new PerfMessureCom()
-				{
-					Subject = subject
-				}
-				
 			);
 
 			debugEnt.AddCom
 			(
 				new DebugInputCom()
-				{
-					Subject = subject
-				}
-				
 			);
 
 			debugEnt.AddCom
@@ -81,8 +70,8 @@ namespace RectClash.Game
 				}
 			);
 
-			Engine.Instance.Window.Camera.Subject.AddObv(debugInfo);
-			WorldEnt.GetCom<TurnHandlerCom>().DebugSubject = subject;
+			Engine.Instance.Window.Camera.Subject.AddObv(debugCom);
+			WorldEnt.GetCom<TurnHandlerCom>().DebugSubject = (DebugSubject)debugEnt.Subject;
 
 			return debugEnt;
 		}
@@ -90,6 +79,7 @@ namespace RectClash.Game
 		public IEnt CreateWorld()
 		{
 			var worldEnt = Engine.Instance.CreateEnt();
+			worldEnt.Subject = new GameSubject();
 			var worldCom = worldEnt.AddCom
 			(
 				new WorldCom()
@@ -101,21 +91,21 @@ namespace RectClash.Game
 			WorldEnt =  worldEnt;
 
 			var gridEnt = Engine.Instance.CreateEnt(worldEnt, "Grid");
+			gridEnt.Subject = new GameSubject();
 			var gridCom = gridEnt.AddCom
 			(
-				new GridCom()
-				{
-					Subject = new GameSubject()
-				}
+				new GridCom(){}
 			);
+			((GameSubject)gridEnt.Subject).AddObv(gridCom);
 
 			var turnHandlerCom = worldEnt.AddCom
 			(
 				new TurnHandlerCom()
 				{
-					Subjects = new GameSubject(gridCom)
+					GridEnt = gridEnt
 				}
 			);
+			((GameSubject)worldEnt.Subject).AddObv(turnHandlerCom);
 
 			gridCom.TurnHandler = turnHandlerCom;
 
@@ -141,7 +131,8 @@ namespace RectClash.Game
 			(
 				new PlayerInputCom()
 				{
-					Subject = new GameSubject(WorldEnt.GetCom<WorldCom>().Grid, WorldEnt.GetCom<TurnHandlerCom>())
+					TurnHandlerEnt = WorldEnt,
+					GridEnt = WorldEnt.GetCom<WorldCom>().Grid.Owner
 				}
 			);
 
@@ -175,11 +166,16 @@ namespace RectClash.Game
 				case Faction.Blue:
 					hatColour = Color.Blue;
 					break;
+				case Faction.Green:
+					hatColour = Color.Green;
+					break;
 				default:
 					throw new System.NotImplementedException();
 			}
 
 			var statusShowEnt = Engine.Instance.CreateEnt(ent);
+			ent.Subject = new GameSubject();
+
 			statusShowEnt.AddCom
 			(
 				new DrawRectCom()
@@ -201,13 +197,12 @@ namespace RectClash.Game
 			(
 				new UnitActionContCom()
 			);
+			((GameSubject)ent.Subject).AddObv(unitActionCom);
 
-			if(factionToCreate == Faction.Red)
+			if(factionToCreate != WorldEnt.GetCom<WorldCom>().PlayerFaction)
 			{
-				ent.AddCom
-				(
-					new RegularSoliderAICom()
-				);
+				var regAiCom = ent.AddCom(new RegularSoliderAICom());
+				((GameSubject)ent.Subject).AddObv(regAiCom);
 			}
 	
 			var progressBarEnt = CreateProgressBar(ent);
@@ -225,8 +220,7 @@ namespace RectClash.Game
 				new HealthCom()
 				{
 					MaxHealth = unitCom.MaxHealth,
-					HealthBarCom = progressBarCom,
-					Subject = new GameSubject(unitActionCom)
+					HealthBarCom = progressBarCom
 				}
 			);
 
@@ -293,16 +287,18 @@ namespace RectClash.Game
 		{
 			var cellName = "Cell:" + i + "," + j;
 			var newCell = Engine.Instance.CreateEnt(gridCom.Owner, cellName, Tags.GRID_CELL);
+			newCell.Subject = new GameSubject();
 
 			var infoCom = newCell.AddCom
 			(
 				new CellInfoCom()
 				{
 					Cords = new Vector2i(i, j),
-					Subject = new GameSubject(gridCom),
 					Type = CellInfoCom.CellType.Nothing
 				}
 			);
+			
+			((GameSubject)newCell.Subject).AddObv(infoCom);
 
 			newCell.PostionCom.LocalPostion =  new Vector2f(j, i);
 

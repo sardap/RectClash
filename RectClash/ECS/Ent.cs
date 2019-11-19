@@ -75,6 +75,12 @@ namespace RectClash.ECS
 			private set;
 		}
 
+		public ISubject Subject
+		{
+			get;
+			set;
+		}
+
         public IList<string> Tags => _tags;
         
         public Ent(IEnt parent, string name = "") : this(parent, name, new List<string>())
@@ -228,5 +234,23 @@ namespace RectClash.ECS
 		{
 			return Name;
 		}
-    }
+
+		public void Notify<S, T>(S sender, T message)
+		{
+			if(Subject is Subject<S, T>)
+			{
+				((Subject<S, T>)Subject).Notify(sender, message);
+			}
+		}
+
+		public void NotifyChildren<S, T>(S sender, T message)
+		{
+			Notify(sender, message);
+
+			foreach(IEnt i in Children.ToList())
+			{
+				i.NotifyChildren(sender, message);
+			}
+		}
+	}
 }

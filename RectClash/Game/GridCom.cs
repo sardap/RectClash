@@ -51,8 +51,6 @@ namespace RectClash.Game
 
 		public float CellHeight { get; set; }
 
-		public GameSubject Subject { get; set; }
-
 		public TurnHandlerCom TurnHandler { get; set; }
 
 		public CellInfoCom[,] Cells
@@ -87,7 +85,7 @@ namespace RectClash.Game
 					_cellsInMoveRange.Remove(_startCell);
 					
 					Get(_startCell).ChangeState(CellInfoCom.State.Selected);
-					Get(_startCell).Subject.Notify(Owner, GameEvent.UNIT_SELECTED);
+					Get(_startCell).Owner.Notify(Owner, GameEvent.UNIT_SELECTED);
 
 					foreach(var cell in _cellsInMoveRange.Select(i => Get(i)))
 					{
@@ -485,7 +483,7 @@ namespace RectClash.Game
 			Move(current, targetCellIndex.X, targetCellIndex.Y);
 			ChangeState(State.ClearSelection);
 
-			Get(targetCellIndex).Subject.Notify(Get(targetCellIndex).Owner, GameEvent.UNIT_MOVED);
+			Get(targetCellIndex).Owner.Notify(Get(targetCellIndex).Owner, GameEvent.UNIT_MOVED);
 		}
 		private void ApplyAttack()
 		{
@@ -518,11 +516,11 @@ namespace RectClash.Game
 				var moveTarget = path.First();
 				Move(current, moveTarget.X, moveTarget.Y);
 				attackingCell = Get(moveTarget);
-				attackingCell.Subject.Notify(Owner, GameEvent.UNIT_MOVED);
+				attackingCell.Owner.Notify(Owner, GameEvent.UNIT_MOVED);
 			}
 
 			var targetEnt = targetCell.Inside.First();
-			attackingCell.Subject.Notify(targetEnt, GameEvent.ATTACK_TARGET);
+			attackingCell.Owner.NotifyChildren(targetEnt, GameEvent.ATTACK_TARGET);
 
 			ChangeState(State.ClearSelection);
 		}
@@ -534,24 +532,7 @@ namespace RectClash.Game
 
 		public void Move(IEnt ent, int x, int y)
 		{
-			if(ent.Parent.Tags.Contains(Tags.GRID_CELL))
-			{
-				var cellParentInfoCom = ent.Parent.GetCom<CellInfoCom>();
-				cellParentInfoCom.Subject.RemoveObv(ent.GetCom<UnitActionContCom>());
-
-				var parentAiCom = ent.Parent.GetCom<RegularSoliderAICom>();
-
-				if(parentAiCom != null)
-					cellParentInfoCom.Subject.RemoveObv(parentAiCom);
-			}
-
 			ent.ChangeParent(_cells[x,y].Owner);
-			_cells[x,y].Subject.AddObv(ent.GetCom<UnitActionContCom>());
-
-			var aiCom = ent.GetCom<RegularSoliderAICom>();
-
-			if(aiCom != null)
-				_cells[x,y].Subject.AddObv(aiCom);
 		}
 
 		private HashSet<Vector2i> CellsInVisionRange(Vector2i start, int range)
@@ -634,6 +615,16 @@ namespace RectClash.Game
 				Faction.Red,
 				Engine.Instance.Seed % 4092669828401527543
 			);
+
+			new PlaceEnemies().GenerateEnemies(
+				0, 0, 
+				1 * GameConstants.CHUNK_SIZE, chunksY * GameConstants.CHUNK_SIZE,
+				this, 
+				100,
+				Faction.Green,
+				Engine.Instance.Seed % 2629718633766487981
+			);
+
 		}
 
 		private void OnTurnEnd()
@@ -652,7 +643,7 @@ namespace RectClash.Game
 						{
 							if(Get(adjacentCell).DamageAmount > 0)
 							{
-								cell.Subject.Notify(Get(adjacentCell).Owner, GameEvent.RECEIVE_DAMAGE);
+								cell.Owner.Notify(Get(adjacentCell).Owner, GameEvent.RECEIVE_DAMAGE);
 							}
 						}
 					}
@@ -681,7 +672,7 @@ namespace RectClash.Game
 
 			while(toNotify.Count > 0)
 			{
-				toNotify.Dequeue().Subject.Notify(Owner, GameEvent.AI_TAKE_TURN);
+				toNotify.Dequeue().Owner.NotifyChildren(Owner, GameEvent.AI_TAKE_TURN);
 			}
 		}
 

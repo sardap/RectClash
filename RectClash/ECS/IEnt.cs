@@ -21,6 +21,8 @@ namespace RectClash.ECS
 
 		bool Enabled { get; set; }
 
+		ISubject Subject { get; set; }
+
         void AddChild(IEnt ent);
 
         void ChangeParent(IEnt ent);
@@ -36,5 +38,9 @@ namespace RectClash.ECS
         void Update();
 
 		void Destory();
+
+		void Notify<S, M>(S sender, M message);
+
+		void NotifyChildren<S, M>(S sender, M message);
     } 
 }

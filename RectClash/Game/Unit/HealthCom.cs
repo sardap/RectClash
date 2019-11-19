@@ -17,8 +17,6 @@ namespace RectClash.Game.Unit
 
 		public ProgressBarCom HealthBarCom { get; set; }
 
-		public GameSubject Subject { get; set; }
-
 		public void ReceiveDamage(IDamageInfoCom damageMessage)
 		{
 			var damageVariation = damageMessage.DamageAmount * GameConstants.UNIT_DAMAGE_VARIATION;
@@ -31,7 +29,7 @@ namespace RectClash.Game.Unit
 
 			if(_currentHealth < 0)
 			{
-				Subject.Notify(Owner, GameEvent.UNIT_DIED);
+				Owner.Notify(Owner, GameEvent.UNIT_DIED);
 			}
 		}
 

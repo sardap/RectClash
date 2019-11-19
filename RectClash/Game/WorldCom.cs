@@ -17,6 +17,8 @@ namespace RectClash.Game
 
         public List<UnitInfoCom> Units { get; set; }
 
+		public Faction PlayerFaction { get; set; }
+
         public WorldCom() : base()
         {
             Units = new List<UnitInfoCom>();
@@ -26,6 +28,7 @@ namespace RectClash.Game
         {
             Units = new List<UnitInfoCom>();
             Instance = this;
+			PlayerFaction = Faction.Blue;
         }
 
         public override void Update()

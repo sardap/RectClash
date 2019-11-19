@@ -50,9 +50,6 @@ namespace RectClash.Game.Perf
 		private MessureTime _drawTime = new MessureTime();
 		private MessureTime _updateTime = new MessureTime();
 
-
-        public Subject<string, PerfEvents> Subject { get; set; }
-
         public override void Update()
         {
 			var time = Engine.Instance.Time;
@@ -61,9 +58,9 @@ namespace RectClash.Game.Perf
 			_drawTime.Update(time.DrawTime);
 			_updateTime.Update(time.UpdateTime);
 
-            Subject.Notify("Ticks: " + _tick.ToString(), PerfEvents.TICK_UPDATE);
-            Subject.Notify("Update Time: " + _updateTime.ToString(), PerfEvents.UPDATE_TIME);
-            Subject.Notify("Draw Time: " + _drawTime.ToString(), PerfEvents.DRAW_TIME_UPDATE);
+            Owner.Notify("Ticks: " + _tick.ToString(), PerfEvents.TICK_UPDATE);
+            Owner.Notify("Update Time: " + _updateTime.ToString(), PerfEvents.UPDATE_TIME);
+            Owner.Notify("Draw Time: " + _drawTime.ToString(), PerfEvents.DRAW_TIME_UPDATE);
         }
     }
 }

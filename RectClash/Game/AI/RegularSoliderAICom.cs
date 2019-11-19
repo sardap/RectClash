@@ -111,7 +111,7 @@ namespace RectClash.Game.AI
 				
 				Instance._gridCom.Move(Instance.Owner, path[i].X, path[i].Y);
 				Instance._cellInfoCom = Instance.Owner.Parent.GetCom<CellInfoCom>();
-				Instance._cellInfoCom.Subject.Notify(Instance.Owner, GameEvent.UNIT_MOVED);
+				Instance.Owner.Notify(Instance.Owner, GameEvent.UNIT_MOVED);
 
 				var dist = Instance._gridCom
 					.DistanceBetween(Instance._cellInfoCom.Cords, (Vector2i)Instance._closestEnemyCords);
@@ -140,7 +140,7 @@ namespace RectClash.Game.AI
 			{
 				var closestEnemyCords = (Vector2i)Instance._closestEnemyCords;
 				var enemy = Instance._gridCom.Cells[closestEnemyCords.X, closestEnemyCords.Y].Inside.First();
-				Instance._cellInfoCom.Subject.Notify(enemy, GameEvent.ATTACK_TARGET);
+				Instance.Owner.Notify(enemy, GameEvent.ATTACK_TARGET);
 			}
 		}		
 
