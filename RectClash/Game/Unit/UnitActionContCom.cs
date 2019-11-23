@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Linq;
 using RectClash.ECS;
 using RectClash.Game.Combat;
 using RectClash.Misc;
@@ -30,9 +31,11 @@ namespace RectClash.Game.Unit
 					Engine.Instance.Sound.PlayRandomSound(_unitInfoCom.SoundInfo.SelectSound);
 					break;
 
-				case GameEvent.UNIT_MOVED:
+				case GameEvent.MOVE_TO_CELL:
 					Debug.Assert(!_unitInfoCom.MoveTaken);
+					Debug.Assert(ent.GetCom<CellInfoCom>().Inside.Count() == 0);
 					_unitInfoCom.MoveTaken = true;
+					MoveToEnt(ent);
 					Engine.Instance.Sound.PlayRandomSound(_unitInfoCom.SoundInfo.MoveSound);
 					CheckTurnComplete();
 					break;
@@ -55,8 +58,22 @@ namespace RectClash.Game.Unit
 					Engine.Instance.Sound.PlayRandomSound(_unitInfoCom.SoundInfo.DeathSound);
 					Engine.Instance.DestoryEnt(Owner);
 					break;
+
+				case GameEvent.TURN_START:
+					TurnEnd();
+					break;
 			}
-		} 
+		}
+
+		private void TurnEnd()
+		{
+			_unitInfoCom.TurnReset();
+		}
+
+		private void MoveToEnt(IEnt target)
+		{
+			Owner.ChangeParent(target);
+		}
 
 		private bool PerformAttack(IEnt target)
 		{

@@ -4,10 +4,11 @@ using RectClash.ECS.Graphics;
 using SFML.Graphics;
 using RectClash.Game.Combat;
 using System.Linq;
+using RectClash.Misc;
 
 namespace RectClash.Game.Unit
 {
-	public class UnitInfoCom : Com, IDamageInfoCom
+	public class UnitInfoCom : Com, IDamageInfoCom, IGameObv
 	{
 		private class CommonUnitInfo
 		{
@@ -191,5 +192,24 @@ namespace RectClash.Game.Unit
 		{
 			TurnReset();
 		}
-    }
+
+		public void OnNotify(IEnt ent, GameEvent evt)
+		{
+			switch(evt)
+			{
+				case GameEvent.TURN_END:
+					// Cell -> Grid
+					var cellCom = Owner.Parent.GetCom<CellInfoCom>();
+					var gridCom = Owner.Parent.Parent.GetCom<GridCom>();
+					foreach(var i in Utility.GetAdjacentSquares(cellCom.Cords.X, cellCom.Cords.Y, gridCom.Cells))
+					{
+						if(gridCom.Cells[i.X, i.Y].DamageAmount > 0)
+						{
+							Owner.Notify(cellCom.Owner, GameEvent.RECEIVE_DAMAGE);
+						}
+					}
+					break;
+			}
+		}
+	}
 }

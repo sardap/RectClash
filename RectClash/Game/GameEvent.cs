@@ -8,6 +8,7 @@ namespace RectClash.Game
         GRID_MOVE_CONF,
         GRID_CLEAR_SELECTION,
 		UNIT_MOVED,
+		MOVE_TO_CELL,
         ATTACK_TARGET,
 		RECEIVE_DAMAGE,
         ATTACK_ATTACKER,

@@ -477,13 +477,8 @@ namespace RectClash.Game
 
 		private void ApplyMove()
 		{
-			var curCell = Get(_startCell);
-			var current = curCell.Inside.First();
-			var targetCellIndex = _targetCell;
-			Move(current, targetCellIndex.X, targetCellIndex.Y);
+			Get(_startCell).Owner.NotifyChildren(Get(_targetCell).Owner, GameEvent.MOVE_TO_CELL);
 			ChangeState(State.ClearSelection);
-
-			Get(targetCellIndex).Owner.Notify(Get(targetCellIndex).Owner, GameEvent.UNIT_MOVED);
 		}
 		private void ApplyAttack()
 		{
@@ -514,9 +509,8 @@ namespace RectClash.Game
 				}
 
 				var moveTarget = path.First();
-				Move(current, moveTarget.X, moveTarget.Y);
+				attackingCell.Owner.NotifyChildren(Get(moveTarget).Owner, GameEvent.MOVE_TO_CELL);
 				attackingCell = Get(moveTarget);
-				attackingCell.Owner.Notify(Owner, GameEvent.UNIT_MOVED);
 			}
 
 			var targetEnt = targetCell.Inside.First();
@@ -527,7 +521,7 @@ namespace RectClash.Game
 
 		public void AddEnt(IEnt ent, int x, int y)
 		{
-			Move(ent, x, y);
+			ent.ChangeParent(_cells[x,y].Owner);
 		}
 
 		public void Move(IEnt ent, int x, int y)
@@ -707,7 +701,7 @@ namespace RectClash.Game
 						ApplyAttack();
 					break;
 				case GameEvent.TURN_END:
-					OnTurnEnd();
+					// OnTurnEnd();
 					break;
 				case GameEvent.TURN_START:
 					OnTurnStart();

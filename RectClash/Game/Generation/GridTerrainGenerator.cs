@@ -22,7 +22,7 @@ namespace RectClash.Game.Generation
 			{
 				{ 10, BiomeLibrary.LightWoods},
 				{ 10, BiomeLibrary.LakeBiome},
-				{ 100, BiomeLibrary.DessertBiome},
+				{ 20, BiomeLibrary.DessertBiome},
 				{ 10, BiomeLibrary.DenseWoodsBiome},
 			};
 		}

@@ -80,6 +80,8 @@ namespace RectClash.Game.AI
 						if(astarResult != null)
 						{
 							closestEnemyCords = cords;
+							Debug.Assert(astarResult.Count() > 0);
+							Instance._path = astarResult.ToList();
 							break;
 						}
 					}
@@ -121,28 +123,19 @@ namespace RectClash.Game.AI
 
 			public void TakeAction()
 			{
-				var astarResult = Instance._gridCom
-					.AStar(Instance._cellInfoCom.Cords, (Vector2i)Instance._closestEnemyCords, false);
-
-				if(astarResult == null)
-				{
-					return;
-				}
-
-				var path = astarResult.ToArray();
+				var path = Instance._path;
 
 				var i = Instance._unitInfoCom.MovementRange - 1;
 
-				if(path.Length <= Instance._unitInfoCom.MovementRange)
+				if(i >= path.Count)
 				{
-					i = path.Length - 2;
+					i = path.Count - 2;
 				}
 
 				Debug.Assert(i >= 0);
-				
-				Instance._gridCom.Move(Instance.Owner, path[i].X, path[i].Y);
-				Instance._cellInfoCom = Instance.Owner.Parent.GetCom<CellInfoCom>();
-				Instance.Owner.Notify(Instance.Owner, GameEvent.UNIT_MOVED);
+
+				var newDad = Instance._gridCom.Cells[path[i].X, path[i].Y].Owner;
+				Instance.Owner.Notify(newDad, GameEvent.MOVE_TO_CELL);
 
 				var dist = Instance._gridCom
 					.DistanceBetween(Instance._cellInfoCom.Cords, (Vector2i)Instance._closestEnemyCords);
@@ -153,7 +146,7 @@ namespace RectClash.Game.AI
 				}
 			}
 		}
-
+ 
 		private class DoNothingAction : InnerClass, IAIAction
 		{
 			public DoNothingAction(RegularSoliderAICom instance) : base(instance) { }
@@ -181,6 +174,7 @@ namespace RectClash.Game.AI
 
 		private CellInfoCom _cellInfoCom;
 
+		private List<Vector2i> _path;
 
 		private UnitInfoCom _unitInfoCom;
 

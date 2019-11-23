@@ -262,6 +262,13 @@ namespace RectClash.Game
 				_backgroundTop = null;
 			}
 		}
+		private void RefreshBackground()
+		{
+			if(Background != null)
+				Background.FillColor = _staticCellInfo[Type].Background;
+			if(BackgroundTop != null)
+				BackgroundTop.FillColor = _staticCellInfo[Type].BackgroundTop;
+		}
 
 		public void OnNotify(IEnt ent, GameEvent evt)
 		{
@@ -273,15 +280,13 @@ namespace RectClash.Game
 				case GameEvent.GRID_CLEAR_SELECTION:
 					Owner.Parent.Notify(Owner, GameEvent.GRID_CLEAR_SELECTION);
 					break;
+				case GameEvent.TURN_END:
+					ChangeState(CellInfoCom.State.UnSelected);
+					break;
+				case GameEvent.TURN_START:
+					break;
 			}
 		}
 
-		private void RefreshBackground()
-		{
-			if(Background != null)
-				Background.FillColor = _staticCellInfo[Type].Background;
-			if(BackgroundTop != null)
-				BackgroundTop.FillColor = _staticCellInfo[Type].BackgroundTop;
-		}
 	}
 }

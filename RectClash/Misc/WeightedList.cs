@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace RectClash.Misc
 {
@@ -62,13 +63,13 @@ namespace RectClash.Misc
 		{
 			var randomVal = Utility.RandomInt(0, WeightSum, seed);
 
-			var current = 0;
+			var sum = _list.Sum(i => i.Weight);
 
 			for(int i = 0; i < _list.Count - 1; i++)
 			{
-				current += _list[i].Weight;
+				sum -= _list[i].Weight;
 
-				if(randomVal > current)
+				if(randomVal > sum)
 				{
 					return _list[i].Value;
 				}

@@ -14,9 +14,9 @@ namespace RectClash.Game
 
 		public const int MIN_BIOME_SIZE = CHUNK_SIZE;
 
-		public const int CHUNKS_X = 2;
+		public const int CHUNKS_X = 5;
 
-		public const int CHUNKS_Y = 1;
+		public const int CHUNKS_Y = 2;
 
 		public const string KEY_BINDING_FILE = "Keybinds.json";
 
@@ -24,7 +24,7 @@ namespace RectClash.Game
 
 		public const float ZOOM_MUL = 1.3f;
 
-		public const int DIFFICULTY = 1000;
+		public const int DIFFICULTY = 0;
  
 		public const string SEED = "";
 

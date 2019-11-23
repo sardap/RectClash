@@ -192,6 +192,7 @@ namespace RectClash.Game
 					Faction = factionToCreate
 				}
 			);
+			((GameSubject)ent.Subject).AddObv(unitCom);
 
 			var unitActionCom = ent.AddCom
 			(
