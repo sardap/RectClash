@@ -1,0 +1,16 @@
+[package]
+name = "rectclash"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+legion = { version = "0.4.0", features = ["parallel", "serialize", "crossbeam-events", "extended-tuple-impls"] }
+nannou = "0.18.1"
+rltk = { version = "0.8.0", features = ["serde"] }
+measurements = "^0.9.0"
+rand = "0.8.4"
+rapier2d = "0.11.1"
+euclid = "0.22.6"
+num = "0.4.0"
