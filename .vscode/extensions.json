@@ -1,7 +1,7 @@
 {
     "recommendations": [
         "rust-lang.rust",
-        "vadimcn.vscode-lldb"
+        "vadimcn.vscode-lldb",
+        "yinfei.luahelper"
     ]
 }
-  

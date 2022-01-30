@@ -11,10 +11,21 @@ use crate::{
     misc::length_to_unit,
 };
 
+enum Layers {
+    Background = 0,
+    Units = 1,
+    _Overlay = 2,
+}
+
+impl Layers {
+    fn value(self) -> f32 {
+        self as i32 as f32
+    }
+}
+
 pub fn render(world: &World, app: &App, frame: &Frame) {
     let draw = app.draw();
 
-    // Figure out how to do Z ordering
     // type DrawCmd = fn(draw: &mut Draw);
     // let draw_commands = Vec::<DrawCmd>::new();
 
@@ -33,14 +44,19 @@ pub fn render(world: &World, app: &App, frame: &Frame) {
     for (position, body, render, _direction) in query.iter(world) {
         let mut point = Point2D::new(position.x, position.y);
         let width = length_to_unit(body.width);
-        let height = length_to_unit(body.height);
 
         point = viewport.transform_point(point);
 
         draw.rect()
             .x_y(point.x, point.y)
             .rgb(render.bg.r, render.bg.g, render.bg.b)
-            .w_h(width, height);
+            .w_h(width, width)
+            .z(Layers::Units.value());
+        draw.rect()
+            .x_y(point.x, point.y)
+            .rgb(render.fg.r, render.fg.g, render.fg.b)
+            .w_h(width / 2.0, width / 2.0)
+            .z(Layers::Units.value());
     }
 
     // Overlay
@@ -59,7 +75,8 @@ pub fn render(world: &World, app: &App, frame: &Frame) {
                     point.x + -(direction.x * 5.0),
                     point.y + -(direction.y * 5.0),
                 ),
-            );
+            )
+            .z(Layers::Background.value());
     }
 
     // Write to the window frame.

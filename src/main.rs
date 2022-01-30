@@ -5,11 +5,13 @@ mod collision;
 mod common;
 mod components;
 mod decision;
+mod factory;
 mod input;
 mod misc;
 mod movement;
 mod perception;
 mod render;
+mod scripting;
 
 use std::collections::VecDeque;
 use std::time::Duration;
@@ -30,10 +32,11 @@ use crate::collision::{update_collision_system, CollisionData};
 use crate::common::*;
 use crate::components::*;
 use crate::decision::update_decision_system;
+use crate::factory::run_create_scene;
 use crate::input::*;
-use crate::misc::length_to_unit;
 use crate::movement::*;
 use crate::perception::update_perception_system;
+use crate::scripting::Scripting;
 
 pub struct UnitCreator {
     reading_distance_min: Length,
@@ -138,7 +141,7 @@ impl Model {
     fn new() -> Self {
         let mut world = World::default();
 
-        let unit_creator = UnitCreator {
+        let _unit_creator = UnitCreator {
             reading_distance_min: measurements::Length::from_meters(4.0),
             reading_distance_max: measurements::Length::from_meters(8.0),
             weight_min: measurements::Mass::from_kilograms(50.0),
@@ -152,45 +155,46 @@ impl Model {
         resources.insert(CollisionData::default());
         resources.insert(StdRng::seed_from_u64(10));
         resources.insert(Inputs::default());
+        resources.insert(Scripting::new());
 
         world.push(create_camera());
 
-        let mut create = |rank_size: i32, x_start: f32, y_start: f32| {
+        // let mut _create = |rank_size: i32, x_start: f32, y_start: f32| {
+        //     let mut col = resources.get_mut::<CollisionData>().unwrap();
+        //     let mut rng = resources.get_mut::<StdRng>().unwrap();
+
+        //     let mut leader = None;
+
+        //     let mut x_off = x_start;
+        //     for i in 0..rank_size {
+        //         let mut unit = unit_creator.create_unit(&mut col, &mut rng);
+
+        //         let y = (i / rank_size) as f32;
+        //         unit.0.x = x_off;
+        //         unit.0.y = y_start + (y * length_to_unit(unit.3.height));
+
+        //         x_off += length_to_unit(unit.3.width + Length::from_meters(1.0)).ceil();
+
+        //         let entity = world.push(unit);
+        //         if let Ok(mut entry) = world.entry_mut(entity) {
+        //             // access the entity's components, returns `None` if the entity does not have the component
+        //             let col_com = entry.get_component::<Collision>().unwrap();
+
+        //             let mut collider = col.colliders.get_mut(col_com.col_handler).unwrap();
+        //             let id: u64 = unsafe { std::mem::transmute(entity) };
+        //             collider.user_data = id as u128;
+        //         }
+        //     }
+        // };
+        // create(5, 10.0, 10.0);
+        // create(5, 10.0, 40.0);
+
+        {
+            let scripting = resources.get::<Scripting>().unwrap();
             let mut col = resources.get_mut::<CollisionData>().unwrap();
-            let mut rng = resources.get_mut::<StdRng>().unwrap();
 
-            let mut leader = None;
-
-            let mut x_off = x_start;
-            for i in 0..rank_size {
-                let mut unit = unit_creator.create_unit(&mut col, &mut rng);
-
-                let y = (i / rank_size) as f32;
-                unit.0.x = x_off;
-                unit.0.y = y_start + (y * length_to_unit(unit.3.height));
-
-                x_off += length_to_unit(unit.3.width + Length::from_meters(1.0)).ceil();
-
-                let entity = world.push(unit);
-                if let Ok(mut entry) = world.entry_mut(entity) {
-                    // access the entity's components, returns `None` if the entity does not have the component
-                    let col_com = entry.get_component::<Collision>().unwrap();
-
-                    let mut collider = col.colliders.get_mut(col_com.col_handler).unwrap();
-                    let id: u64 = unsafe { std::mem::transmute(entity) };
-                    collider.user_data = id as u128;
-
-                    if let Some(leader_object) = &leader {
-                        let knowledge = entry.get_component_mut::<Knowledge>().unwrap();
-                        knowledge.leaders.push(*leader_object);
-                    } else {
-                        leader = Some(IdentityObject::new(&world, entity));
-                    }
-                }
-            }
-        };
-        create(5, 10.0, 10.0);
-        create(5, 10.0, 40.0);
+            run_create_scene(&scripting, &mut world, &mut col);
+        }
 
         // construct a schedule (you should do this on init)
         let schedule = Schedule::builder()
@@ -223,7 +227,6 @@ impl Model {
             self.last_time = SystemTime::now();
             let mut time = self.resources.get_mut::<DeltaTime>().unwrap();
             time.0 = delta;
-            println!("{:?}", delta);
         }
 
         // run our schedule (you should do this each update)

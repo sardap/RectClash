@@ -6,7 +6,6 @@ use std::{
     time::Duration,
 };
 
-use legion::{Entity, EntityStore, World};
 use measurements::{Length, Mass};
 use rapier2d::prelude::{ColliderHandle, RigidBodyHandle};
 use rltk::prelude::*;
@@ -95,12 +94,6 @@ pub struct Velocity {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
-pub struct Rectangle {
-    pub width: Length,
-    pub height: Length,
-}
-
-#[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Render {
     pub fg: RGBA,
     pub bg: RGBA,
@@ -169,26 +162,11 @@ pub struct IdentityObject {
 }
 
 impl IdentityObject {
-    pub fn new(world: &World, entity: Entity) -> Self {
-        let mut weight = Mass::from_kilograms(0.0);
-        let mut height = Length::from_centimeters(0.0);
-        let mut appearance = Appearance::default();
-
-        if let Ok(entry) = world.entry_ref(entity) {
-            if let Ok(body) = entry.get_component::<Body>() {
-                weight = body.weight;
-                height = body.height;
-            }
-
-            if let Ok(render) = entry.get_component::<Render>() {
-                appearance = Appearance::new(render.fg.to_rgb(), render.bg.to_rgb());
-            }
-        }
-
+    pub fn new(body: &Body, render: &Render) -> Self {
         return IdentityObject {
-            weight: weight,
-            height: height,
-            appearance: appearance,
+            weight: body.weight,
+            height: body.height,
+            appearance: Appearance::new(render.fg.to_rgb(), render.bg.to_rgb()),
         };
     }
 
@@ -281,4 +259,9 @@ impl InputCom {
             released: HashMap::new(),
         };
     }
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub struct Identity {
+    pub name: String,
 }
