@@ -1,12 +1,22 @@
 #![deny(warnings)]
 #![forbid(unsafe_code)]
 
-use std::{fs, path::Path};
+use std::{collections::HashMap, fs, path::Path};
 
 use rlua::Lua;
 
-pub struct Scripting {
-    pub lua: Lua,
+#[derive(Default)]
+pub struct Scripts {
+    pub loaded_scripts: HashMap<String, String>,
+}
+
+impl Scripts {
+    pub fn load_script(&mut self, script: &Path) -> String {
+        let key = script.to_str().unwrap().to_string();
+        let script = load_script(script);
+        self.loaded_scripts.insert(key.clone(), script);
+        return key;
+    }
 }
 
 pub fn load_script(script: &Path) -> String {
@@ -14,17 +24,8 @@ pub fn load_script(script: &Path) -> String {
     return fs::read_to_string(path).expect("Something went wrong reading the file");
 }
 
-impl Scripting {
-    pub fn new() -> Self {
-        let lua = Lua::new();
-
-        lua.context(|lua_ctx| {
-            lua_ctx
-                .load(&load_script(Path::new("test.lua")))
-                .eval::<bool>()
-                .expect("lua failure");
-        });
-
-        return Scripting { lua };
-    }
+pub fn create_lua() -> Lua {
+    let lua = Lua::new();
+    lua.context(|_lua_ctx| {});
+    lua
 }

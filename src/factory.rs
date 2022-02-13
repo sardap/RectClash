@@ -1,9 +1,8 @@
 #![deny(warnings)]
 
-use std::{collections::VecDeque, path::Path, time::Duration};
+use std::{path::Path, time::Duration};
 
 use legion::{Entity, EntityStore, World};
-use measurements::Length;
 use rapier2d::prelude::*;
 use rltk::RGBA;
 use rlua::{Table, UserData};
@@ -11,7 +10,8 @@ use rlua::{Table, UserData};
 use crate::{
     collision::CollisionData,
     components::*,
-    scripting::{load_script, Scripting},
+    measurements::{Length, Mass},
+    scripting::{create_lua, load_script, Scripts},
 };
 
 fn entity_as_u128(entity: Entity) -> u128 {
@@ -33,6 +33,7 @@ impl UserData for RGB {}
 #[derive(Clone)]
 struct CreateFootSoliderArgs {
     pub name: String,
+    pub decision_script_name: String,
     pub x: f32,
     pub y: f32,
     pub reading_distance_meters: f32,
@@ -48,8 +49,11 @@ struct CreateFootSoliderArgs {
 impl UserData for CreateFootSoliderArgs {}
 
 impl CreateFootSoliderArgs {
-    fn populate_table(table: &mut Table, name: String) {
+    fn populate_table(table: &mut Table, name: String, decision_script_name: String) {
         table.set("name", name.clone()).unwrap();
+        table
+            .set("decision_script_name", decision_script_name.clone())
+            .unwrap();
         table.set("x", 0.0).unwrap();
         table.set("y", 0.0).unwrap();
         table.set("reading_distance_meters", 4.0).unwrap();
@@ -64,6 +68,7 @@ impl CreateFootSoliderArgs {
     fn from(table: Table) -> Self {
         let mut result = CreateFootSoliderArgs {
             name: table.get("name").unwrap(),
+            decision_script_name: table.get("decision_script_name").unwrap(),
             x: table.get("x").unwrap(),
             y: table.get("y").unwrap(),
             reading_distance_meters: table.get("reading_distance_meters").unwrap(),
@@ -87,6 +92,7 @@ impl CreateFootSoliderArgs {
 fn create_foot_solider(
     col: &mut CollisionData,
     args: &CreateFootSoliderArgs,
+    decision_script_key: String,
 ) -> (
     Position,
     Velocity,
@@ -114,12 +120,10 @@ fn create_foot_solider(
         Position { x: 0.0, y: 0.0 },
         Velocity { dx: 0.0, dy: 0.0 },
         Eyes {
-            reading_distance: measurements::Length::from_meters(
-                args.reading_distance_meters as f64,
-            ),
+            reading_distance: Length::from_meters(args.reading_distance_meters as f64),
         },
         Body {
-            weight: measurements::Mass::from_kilograms(args.weight_kg as f64),
+            weight: Mass::from_kilograms(args.weight_kg as f64),
             width: Length::from_meters(args.width_meters as f64),
             height: Length::from_meters(args.height_meters as f64),
         },
@@ -139,8 +143,8 @@ fn create_foot_solider(
             dirty: false,
         },
         UnitDecision {
-            current_state: UnitDecisionState::Starting,
-            last_states: VecDeque::new(),
+            script_key: decision_script_key,
+            internal_table: InternalTable::default(),
         },
         Knowledge::default(),
         Identity {
@@ -149,8 +153,9 @@ fn create_foot_solider(
     );
 }
 
-pub fn run_create_scene(scripting: &Scripting, world: &mut World, col: &mut CollisionData) {
-    scripting.lua.context(|lua_ctx| {
+pub fn run_create_scene(world: &mut World, col: &mut CollisionData, scripts: &mut Scripts) {
+    let lua = create_lua();
+    lua.context(|lua_ctx| {
         let globals = lua_ctx.globals();
 
         let _ = globals.set(
@@ -161,21 +166,17 @@ pub fn run_create_scene(scripting: &Scripting, world: &mut World, col: &mut Coll
         );
 
         let _ = globals.set(
-            "createFootSoliderArgs",
+            "create_foot_solider_args",
             lua_ctx
-                .create_function(|lua_ctx, name: String| {
+                .create_function(|lua_ctx, (name, decision_script_name): (String, String)| {
                     let mut table = lua_ctx.create_table()?;
-                    CreateFootSoliderArgs::populate_table(&mut table, name);
+                    CreateFootSoliderArgs::populate_table(&mut table, name, decision_script_name);
                     Ok(table)
                 })
                 .unwrap(),
         );
 
         let _ = lua_ctx.scope(|scope| {
-            // We create a 'sketchy' Lua callback that holds a mutable reference to the variable
-            // `rust_val`.  Outside of a `Context::scope` call, this would not be allowed
-            // because it could be unsafe.
-
             let _ = lua_ctx
                 .globals()
                 .set(
@@ -184,7 +185,12 @@ pub fn run_create_scene(scripting: &Scripting, world: &mut World, col: &mut Coll
                         .create_function_mut(|_, table: Table| {
                             let args = CreateFootSoliderArgs::from(table);
 
-                            let mut set = create_foot_solider(col, &args);
+                            let decision_script_key = scripts.load_script(&Path::join(
+                                Path::new("decisions"),
+                                Path::new(&args.decision_script_name),
+                            ));
+
+                            let mut set = create_foot_solider(col, &args, decision_script_key);
                             set.0.x = args.x;
                             set.0.y = args.y;
                             let entity = world.push(set);

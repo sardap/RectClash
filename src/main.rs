@@ -1,4 +1,5 @@
 #![deny(warnings)]
+#![feature(in_band_lifetimes)]
 
 mod camera;
 mod collision;
@@ -7,25 +8,19 @@ mod components;
 mod decision;
 mod factory;
 mod input;
+mod measurements;
 mod misc;
 mod movement;
 mod perception;
 mod render;
 mod scripting;
 
-use std::collections::VecDeque;
-use std::time::Duration;
 use std::time::SystemTime;
 
 use legion::*;
-use measurements::Length;
-use measurements::Mass;
 use nannou::prelude::*;
-use rand::{prelude::StdRng, Rng, SeedableRng};
-use rapier2d::prelude::*;
-
-use rltk::RED;
-use rltk::RGBA;
+use rand::{prelude::StdRng, SeedableRng};
+use scripting::Scripts;
 
 use crate::camera::update_camera_system;
 use crate::collision::{update_collision_system, CollisionData};
@@ -34,90 +29,10 @@ use crate::components::*;
 use crate::decision::update_decision_system;
 use crate::factory::run_create_scene;
 use crate::input::*;
+use crate::measurements::Length;
 use crate::movement::*;
 use crate::perception::update_perception_system;
-use crate::scripting::Scripting;
-
-pub struct UnitCreator {
-    reading_distance_min: Length,
-    reading_distance_max: Length,
-    weight_min: Mass,
-    weight_max: Mass,
-    perception_min: Duration,
-    perception_max: Duration,
-}
-
-impl UnitCreator {
-    pub fn create_unit(
-        &self,
-        col: &mut CollisionData,
-        rng: &mut StdRng,
-    ) -> (
-        Position,
-        Velocity,
-        Eyes,
-        Body,
-        Render,
-        Collision,
-        Direction,
-        UnitPerception,
-        UnitDecision,
-        Knowledge,
-    ) {
-        let mut rand = rand::thread_rng();
-
-        // make handler
-        let rigid_body = RigidBodyBuilder::new_dynamic()
-            .translation(vector![0.0, 0.0])
-            .build();
-        let body_handler = col.bodies.insert(rigid_body);
-        let collider = ColliderBuilder::cuboid(0.0, 0.0).build();
-        let col_handler = col
-            .colliders
-            .insert_with_parent(collider, body_handler, &mut col.bodies);
-
-        return (
-            Position { x: 10.0, y: 20.0 },
-            Velocity { dx: 0.0, dy: 0.0 },
-            Eyes {
-                reading_distance: measurements::Length::from_centimeters(rng.gen_range(
-                    self.reading_distance_min.as_centimeters()
-                        ..self.reading_distance_max.as_centimeters(),
-                )),
-            },
-            Body {
-                weight: measurements::Mass::from_grams(
-                    rand.gen_range(self.weight_min.as_grams()..self.weight_max.as_grams()),
-                ),
-                width: Length::from_millimeters(460.0),
-                height: Length::from_millimeters(1765.0),
-            },
-            Render {
-                fg: RGBA::named(RED),
-                bg: RGBA::named(RED),
-            },
-            Collision {
-                body_handler,
-                col_handler,
-            },
-            Direction { x: 0.0, y: -1.0 },
-            UnitPerception {
-                update_interval: Duration::from_millis(
-                    rand.gen_range(self.perception_min.as_millis()..self.perception_max.as_millis())
-                        as u64,
-                ),
-                time_to_update: Duration::from_nanos(0),
-                can_see: Vec::new(),
-                dirty: false,
-            },
-            UnitDecision {
-                current_state: UnitDecisionState::Starting,
-                last_states: VecDeque::new(),
-            },
-            Knowledge::default(),
-        );
-    }
-}
+extern crate derive_more;
 
 pub fn create_camera() -> (Camera, Position, InputCom) {
     return (
@@ -141,59 +56,20 @@ impl Model {
     fn new() -> Self {
         let mut world = World::default();
 
-        let _unit_creator = UnitCreator {
-            reading_distance_min: measurements::Length::from_meters(4.0),
-            reading_distance_max: measurements::Length::from_meters(8.0),
-            weight_min: measurements::Mass::from_kilograms(50.0),
-            weight_max: measurements::Mass::from_kilograms(90.0),
-            perception_min: Duration::from_millis(40),
-            perception_max: Duration::from_millis(70),
-        };
-
         let mut resources = Resources::default();
         resources.insert(DeltaTime::default());
         resources.insert(CollisionData::default());
         resources.insert(StdRng::seed_from_u64(10));
         resources.insert(Inputs::default());
-        resources.insert(Scripting::new());
+        resources.insert(Scripts::default());
 
         world.push(create_camera());
 
-        // let mut _create = |rank_size: i32, x_start: f32, y_start: f32| {
-        //     let mut col = resources.get_mut::<CollisionData>().unwrap();
-        //     let mut rng = resources.get_mut::<StdRng>().unwrap();
-
-        //     let mut leader = None;
-
-        //     let mut x_off = x_start;
-        //     for i in 0..rank_size {
-        //         let mut unit = unit_creator.create_unit(&mut col, &mut rng);
-
-        //         let y = (i / rank_size) as f32;
-        //         unit.0.x = x_off;
-        //         unit.0.y = y_start + (y * length_to_unit(unit.3.height));
-
-        //         x_off += length_to_unit(unit.3.width + Length::from_meters(1.0)).ceil();
-
-        //         let entity = world.push(unit);
-        //         if let Ok(mut entry) = world.entry_mut(entity) {
-        //             // access the entity's components, returns `None` if the entity does not have the component
-        //             let col_com = entry.get_component::<Collision>().unwrap();
-
-        //             let mut collider = col.colliders.get_mut(col_com.col_handler).unwrap();
-        //             let id: u64 = unsafe { std::mem::transmute(entity) };
-        //             collider.user_data = id as u128;
-        //         }
-        //     }
-        // };
-        // create(5, 10.0, 10.0);
-        // create(5, 10.0, 40.0);
-
         {
-            let scripting = resources.get::<Scripting>().unwrap();
             let mut col = resources.get_mut::<CollisionData>().unwrap();
+            let mut scripts = resources.get_mut::<Scripts>().unwrap();
 
-            run_create_scene(&scripting, &mut world, &mut col);
+            run_create_scene(&mut world, &mut col, &mut scripts);
         }
 
         // construct a schedule (you should do this on init)

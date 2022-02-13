@@ -4,18 +4,18 @@
 use std::collections::HashMap;
 use std::time::Duration;
 
-use crate::common::DeltaTime;
-use crate::world::SubWorld;
 use crate::{
     collision::{user_data_to_entity, CollisionData},
+    common::DeltaTime,
+    components::RGB,
     components::*,
+    measurements::{Length, Mass},
+    world::SubWorld,
 };
 
 use legion::*;
-use measurements::{Length, Mass};
 use rand::{prelude::StdRng, Rng};
 use rapier2d::prelude::*;
-use rltk::RGB;
 
 fn modify_mass(view_dist: Length, dist: Length, val: Mass, rng: &mut StdRng) -> Mass {
     if dist < view_dist {
@@ -23,7 +23,7 @@ fn modify_mass(view_dist: Length, dist: Length, val: Mass, rng: &mut StdRng) -> 
     }
 
     let mut modifier: Mass;
-    let max = Mass::as_grams(&val) * (1.0 - view_dist / dist);
+    let max = Mass::as_grams(&val) * (1.0 - (view_dist / dist).as_millimeters());
     modifier = Mass::from_grams(rng.gen_range(0.0..max));
     if rng.gen() {
         modifier = Mass::from_grams(-Mass::as_grams(&modifier));
@@ -37,7 +37,7 @@ fn modify_length(view_dist: Length, dist: Length, val: Length, rng: &mut StdRng)
     }
 
     let mut modifier: Length;
-    let max = Length::as_millimeters(&val) * (1.0 - view_dist / dist);
+    let max = Length::as_millimeters(&val) * (1.0 - (view_dist / dist).as_millimeters());
     modifier = Length::from_millimeters(rng.gen_range(0.0..max));
     if rng.gen() {
         modifier = Length::from_millimeters(-Length::as_millimeters(&modifier));
@@ -157,7 +157,7 @@ pub fn update_perception(
                 if let Ok(render) = object.get_component::<Render>() {
                     let modifier: f32;
                     if color_perception_dist < dist {
-                        modifier = 1.0 - (color_perception_dist / dist) as f32;
+                        modifier = 1.0 - (color_perception_dist / dist).as_millimeters() as f32;
                     } else {
                         modifier = 0.0;
                     }
@@ -169,12 +169,12 @@ pub fn update_perception(
                         return current - (1.0 * modifier);
                     };
 
-                    let hat = RGB::from_f32(
+                    let hat = RGB::new(
                         modify(render.fg.r, modifier, rng.gen()),
                         modify(render.fg.g, modifier, rng.gen()),
                         modify(render.fg.b, modifier, rng.gen()),
                     );
-                    let body = RGB::from_f32(
+                    let body = RGB::new(
                         modify(render.bg.r, modifier, rng.gen()),
                         modify(render.bg.g, modifier, rng.gen()),
                         modify(render.bg.b, modifier, rng.gen()),

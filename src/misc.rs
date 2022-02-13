@@ -1,8 +1,7 @@
 #![deny(warnings)]
 #![forbid(unsafe_code)]
 
-use measurements::Length;
-use rltk::RGB;
+use crate::{components::RGB, measurements::Length};
 
 pub fn unit_to_length(val: f32) -> Length {
     Length::from_meters(val as f64)

@@ -9,12 +9,17 @@ edition = "2021"
 legion = { version = "0.4.0", features = ["parallel", "serialize", "crossbeam-events", "extended-tuple-impls"] }
 nannou = "0.18.1"
 rltk = { version = "0.8.0", features = ["serde"] }
-measurements = "^0.9.0"
 rand = "0.8.4"
 rapier2d = "0.11.1"
 euclid = "0.22.6"
 num = "0.4.0"
 rlua = "0.19.0"
+syn = { version = "1.0", features = ["full"] }
+quote = "1.0"
+proc-macro2 = "1.0"
+my_derive = { path = "my_derive" }
+derive_more = "0.99.0"
 
 [build-dependencies]
 fs_extra = "1.2.0"
+
